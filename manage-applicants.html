@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Manage Applicants</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+        <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="forum.html">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html" class="active">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="listing-picker">
+      <label for="activeListing">Active Listing</label>
+      <select id="activeListing">
+        <option>AI Career Intelligence Platform</option>
+        <option>TCE Parking Portal</option>
+      </select>
+      <p class="sub">3 pending applications</p>
+    </section>
+
+    <section class="applicant-list" id="applicantList">
+      <article class="applicant-row">
+        <div class="applicant-avatar">DS</div>
+        <div class="applicant-info">
+          <h4>Divya Shree <span class="reg-id">2023IT041</span></h4>
+          <p>IT Dept · Year 3 · Skills: Python, NLP</p>
+        </div>
+        <div class="applicant-actions">
+          <button class="btn-accept">Accept</button>
+          <button class="btn-reject">Reject</button>
+        </div>
+      </article>
+
+      <article class="applicant-row">
+        <div class="applicant-avatar">KR</div>
+        <div class="applicant-info">
+          <h4>Keerthana R <span class="reg-id">2023IT018</span></h4>
+          <p>IT Dept · Year 3 · Skills: React, UI Design</p>
+        </div>
+        <div class="applicant-actions">
+          <button class="btn-accept">Accept</button>
+          <button class="btn-reject">Reject</button>
+        </div>
+      </article>
+
+      <article class="applicant-row">
+        <div class="applicant-avatar">RM</div>
+        <div class="applicant-info">
+          <h4>Ram Mohan <span class="reg-id">2023IT027</span></h4>
+          <p>IT Dept · Year 3 · Skills: SQL, Data Analysis</p>
+        </div>
+        <div class="applicant-actions">
+          <button class="btn-accept">Accept</button>
+          <button class="btn-reject">Reject</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="team-section">
+      <h3>My Team</h3>
+      <div class="team-avatars">
+        <div class="team-member"><span class="avatar-circle small">JD</span><span>John Doe (Lead)</span></div>
+        <div class="team-member"><span class="avatar-circle small">AK</span><span>Aravind K</span></div>
+        <div class="team-member empty-slot">+</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

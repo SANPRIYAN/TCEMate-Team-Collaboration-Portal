@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | My Profile</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+        <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="forum.html">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="profile-header">
+      <div class="avatar-circle">JD</div>
+      <div>
+        <h2>John Doe</h2>
+        <p class="sub">Information Technology · Third Year · Section A</p>
+        <p class="bio">Part of the AI Consortium Internship team, building a semantic career-matching platform. Also worked on the TCE Parking Portal as a campus mini-project.</p>
+      </div>
+    </section>
+
+    <section class="skills">
+      <h3>Core Skills</h3>
+      <ul class="skill-tags">
+        <li>Python</li>
+        <li>Machine Learning</li>
+        <li>Web Development</li>
+        <li>SQL</li>
+      </ul>
+    </section>
+
+    <section class="project-demos">
+      <h3>Project Demos</h3>
+      <figure class="demo-figure">
+        <video controls width="480" poster="">
+          <source src="career-platform-demo.mp4" type="video/mp4">
+          Your browser does not support embedded videos.
+        </video>
+        <figcaption>AI Career Intelligence Platform — walkthrough demo</figcaption>
+      </figure>
+
+      <figure class="demo-figure">
+        <video controls width="480" poster="">
+          <source src="parking-portal-demo.mp4" type="video/mp4">
+          Your browser does not support embedded videos.
+        </video>
+        <figcaption>TCE Parking Portal — booking flow demo</figcaption>
+      </figure>
+    </section>
+
+    <aside class="edit-form-section">
+      <h3>Update Profile Details</h3>
+      <form id="profileForm" novalidate>
+        <fieldset style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;">
+          <legend style="padding: 0 0.5rem; font-weight: 700; color: var(--primary);">Basic Info</legend>
+          <label for="pName">Full Name</label>
+          <input type="text" id="pName" placeholder="Letters and spaces only" required>
+          <span class="error-msg" id="pNameError"></span>
+
+          <label for="pBio">Short Bio</label>
+          <textarea id="pBio" rows="3" placeholder="Tell others about your interests"></textarea>
+        </fieldset>
+        
+        <fieldset style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;">
+          <legend style="padding: 0 0.5rem; font-weight: 700; color: var(--primary);">Academic Details</legend>
+          
+          <label for="pDept">Department</label>
+          <input type="text" id="pDept" list="deptList" placeholder="Select or type department" required>
+          <datalist id="deptList">
+            <option value="Information Technology">
+            <option value="Computer Science">
+            <option value="ECE">
+            <option value="Mechanical">
+          </datalist>
+
+          <label style="margin-top:1rem;">Year of Study</label>
+          <div class="radio-group" style="display:flex; gap:1rem; margin-top:0.3rem;">
+            <label style="font-weight:normal;"><input type="radio" name="pYear" value="1" required> 1st Year</label>
+            <label style="font-weight:normal;"><input type="radio" name="pYear" value="2"> 2nd Year</label>
+            <label style="font-weight:normal;"><input type="radio" name="pYear" value="3"> 3rd Year</label>
+            <label style="font-weight:normal;"><input type="radio" name="pYear" value="4"> 4th Year</label>
+          </div>
+        </fieldset>
+
+        <fieldset style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;">
+          <legend style="padding: 0 0.5rem; font-weight: 700; color: var(--primary);">Preferences</legend>
+          <div class="check-group" style="display:flex; flex-direction:column; gap:0.5rem;">
+            <label style="font-weight:normal;"><input type="checkbox" name="pPref" value="hackathon"> Available for Hackathons</label>
+            <label style="font-weight:normal;"><input type="checkbox" name="pPref" value="internship"> Looking for Internships</label>
+          </div>
+          <p style="margin-top:0.8rem; font-size:0.8rem; color:var(--text-muted);">Note: Selecting <mark>Internships</mark> makes your profile visible to faculty.</p>
+        </fieldset>
+
+        <button type="submit" class="btn-primary">Save Changes</button>
+      </form>
+    </aside>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

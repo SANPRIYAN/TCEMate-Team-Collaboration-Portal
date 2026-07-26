@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Login</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body">
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+    <nav class="main-nav">
+    </nav>
+  </header>
+
+  <main class="auth-wrap">
+    <!-- LOGIN FORM -->
+    <form class="auth-card" id="loginForm" novalidate>
+      <h2>Log in to TCEMate</h2>
+      <p class="sub">Enter your college email and password</p>
+
+      <label for="loginEmail">Email</label>
+      <input type="email" id="loginEmail" name="loginEmail" placeholder="you@student.tce.edu" required>
+      <span class="error-msg" id="loginEmailError"></span>
+
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" name="loginPassword" placeholder="••••••••" minlength="8" required>
+      <span class="error-msg" id="loginPasswordError"></span>
+
+      <button type="submit" class="btn-primary">Log In</button>
+      <p class="switch-link">New here? <a href="#" id="showSignup">Create an account</a></p>
+    </form>
+
+    <!-- SIGNUP FORM -->
+    <form class="auth-card hidden" id="signupForm" novalidate>
+      <h2>Create your account</h2>
+      <p class="sub">Join the IT Dept collaboration network</p>
+
+      <label for="fullName">Full Name</label>
+      <input type="text" id="fullName" name="fullName" placeholder="Only letters and spaces" required>
+      <span class="error-msg" id="fullNameError"></span>
+
+      <label for="signupEmail">Email</label>
+      <input type="email" id="signupEmail" name="signupEmail" placeholder="you@student.tce.edu" required>
+      <span class="error-msg" id="signupEmailError"></span>
+
+      <label for="regNo">Register Number</label>
+      <input type="text" id="regNo" name="regNo" placeholder="Digits only, e.g. 2023IT045" required>
+      <span class="error-msg" id="regNoError"></span>
+
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" name="phone" placeholder="10 digits only" required>
+      <span class="error-msg" id="phoneError"></span>
+
+      <label for="signupPassword">Password</label>
+      <input type="password" id="signupPassword" name="signupPassword" placeholder="Min 8 characters" minlength="8" required>
+      <span class="error-msg" id="signupPasswordError"></span>
+
+      <button type="submit" class="btn-primary">Sign Up</button>
+      <p class="switch-link">Already have an account? <a href="#" id="showLogin">Log in</a></p>
+    </form>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | My Interests</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+        <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="forum.html">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html" class="active">Interests</a>
+
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="tabs">
+      <button class="tab-btn active" data-filter="all">All</button>
+      <button class="tab-btn" data-filter="pending">Pending</button>
+      <button class="tab-btn" data-filter="accepted">Accepted</button>
+      <button class="tab-btn" data-filter="rejected">Rejected</button>
+    </section>
+
+    <section class="interest-list" id="interestList">
+      <article class="interest-row" data-status="pending">
+        <div class="interest-info">
+          <h4>Neural Network Research Assistant</h4>
+          <p>Computer Science Dept · Year 4</p>
+        </div>
+        <span class="status-pill pending">Pending</span>
+      </article>
+
+      <article class="interest-row" data-status="accepted">
+        <div class="interest-info">
+          <h4>TCE Parking Portal</h4>
+          <p>IT Dept · Year 3, Sec A</p>
+        </div>
+        <span class="status-pill accepted">Accepted</span>
+      </article>
+
+      <article class="interest-row" data-status="rejected">
+        <div class="interest-info">
+          <h4>Modernist Poetry Critique Group</h4>
+          <p>English Dept · Graduate</p>
+        </div>
+        <span class="status-pill rejected">Rejected</span>
+      </article>
+
+      <article class="interest-row" data-status="pending">
+        <div class="interest-info">
+          <h4>Open Source Kernel Contribution</h4>
+          <p>Software Engineering · Year 2</p>
+        </div>
+        <span class="status-pill pending">Pending</span>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

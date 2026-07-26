@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Full Profile</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+        <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="forum.html">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+
+      <a href="profile-view.html" class="active">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="profile-header">
+      <figure style="margin: 0;">
+        <div class="avatar-circle">JD</div>
+        <figcaption style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">Profile Photo</figcaption>
+      </figure>
+      <div>
+        <h2>John Doe</h2>
+        <p class="sub">Information Technology · Third Year, Section A</p>
+        <p class="bio">Passionate about semantic search and applied ML. Currently part of the AI Consortium Internship, building a career-matching platform with a four-person team.</p>
+        
+        <details style="margin-top: 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.8rem;">
+          <summary style="font-weight: 600; cursor: pointer; color: var(--primary);">Listen to Introduction</summary>
+          <div style="margin-top: 0.8rem;">
+            <audio controls style="width: 100%; max-width: 300px; outline: none;">
+              <source src="self-intro.mp3" type="audio/mpeg">
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+        </details>
+        <a href="profile.html" class="btn-primary" style="display:inline-block; width:auto; padding:0.5rem 1.5rem; margin-top:1.5rem; text-decoration:none;">Edit Profile</a>
+      </div>
+    </section>
+
+    <section class="history-section">
+      <h3>Academic History</h3>
+      <ol class="timeline">
+        <li>
+          <span class="timeline-date">2025 – Present</span>
+          <h4>AI Consortium Internship</h4>
+          <p>Working on the AI Career Intelligence Platform as part of a four-person team.</p>
+        </li>
+        <li>
+          <span class="timeline-date">2025</span>
+          <h4>TCE Parking Portal — Team Project</h4>
+          <p>Built a smart parking booking system as a department mini-project.</p>
+        </li>
+        <li>
+          <span class="timeline-date">2023</span>
+          <h4>Joined IT Department, Section A</h4>
+          <p>Started undergraduate studies at Thiagarajar College of Engineering.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="portfolio-section">
+      <h3>Portfolio Projects</h3>
+      <div class="portfolio-grid">
+        <article class="portfolio-card">
+          <h4>AI Career Intelligence Platform</h4>
+          <p>Role: NLP & Matching Logic</p>
+          <span class="status open">Active</span>
+        </article>
+        <article class="portfolio-card">
+          <h4>TCE Parking Portal</h4>
+          <p>Role: Backend Developer</p>
+          <span class="status closed">Completed</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="stats-row">
+      <article class="stat-card">
+        <span class="stat-num">2</span>
+        <span class="stat-label">Collaborations</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-num">14</span>
+        <span class="stat-label">Connections</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Profile Completion</span>
+        <progress value="85" max="100" style="width:100%; height:8px;"></progress>
+        <span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-top:0.3rem;">85% Complete</span>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

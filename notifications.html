@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Notifications</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+        <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="forum.html">Forum</a>
+      <a href="notifications.html" class="active">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="notif-header">
+      <h2>Notifications</h2>
+      <button class="btn-secondary" id="markAllRead">Mark all as read</button>
+    </section>
+
+    <section class="notif-list" id="notifList">
+      <article class="notif-item unread">
+        <div class="notif-icon">🔔</div>
+        <div class="notif-body">
+          <h4>New application received</h4>
+          <p>Divya Shree applied to join <strong>AI Career Intelligence Platform</strong>.</p>
+          <span class="notif-time">10 minutes ago</span>
+        </div>
+      </article>
+
+      <article class="notif-item unread">
+        <div class="notif-icon">💬</div>
+        <div class="notif-body">
+          <h4>New forum reply</h4>
+          <p>Prof. Meenakshi replied to your thread about the AI Consortium documentation.</p>
+          <span class="notif-time">1 hour ago</span>
+        </div>
+      </article>
+
+      <article class="notif-item">
+        <div class="notif-icon">✅</div>
+        <div class="notif-body">
+          <h4>Application accepted</h4>
+          <p>You've been added to the <strong>TCE Parking Portal</strong> team.</p>
+          <span class="notif-time">Yesterday</span>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

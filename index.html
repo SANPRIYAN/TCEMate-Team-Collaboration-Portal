@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+        <nav class="main-nav">
+      <a href="index.html" class="active">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="forum.html">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="welcome-card">
+      <h2>Welcome back, John Doe!</h2>
+      <p>IT Department · Third Year · Section A · Thiagarajar College of Engineering</p>
+      <p class="sub">You're part of the AI Consortium Internship team — your Career Intelligence Platform project has <mark>3 new updates</mark>.</p>
+      
+      <div style="margin-top: 1rem;">
+        <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Storage Used:</label>
+        <meter value="45" min="0" max="100" low="30" high="80" optimum="10" style="width: 100%; height: 1.5rem;">45%</meter>
+      </div>
+
+      <details style="margin-top: 1rem;">
+        <summary style="font-weight: 600; cursor: pointer; color: var(--primary);">Watch Orientation Video</summary>
+        <div style="margin-top: 0.8rem;">
+          <video controls width="100%" style="max-width: 500px; border-radius: var(--radius);">
+            <source src="orientation.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </details>
+    </section>
+
+    <section class="stats-row">
+      <article class="stat-card">
+        <span class="stat-num">2</span>
+        <span class="stat-label">Active Projects</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-num">5</span>
+        <span class="stat-label">Pending Requests</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-num">14</span>
+        <span class="stat-label">Connections</span>
+      </article>
+    </section>
+
+    <section class="listings">
+      <h3>Recent Listings</h3>
+      <article class="listing-card">
+        <div class="listing-head">
+          <span class="tag">Internship Project</span>
+          <span class="status open">Open</span>
+        </div>
+        <h4>AI Career Intelligence Platform</h4>
+        <p>Semantic job-matching engine built during the AI Consortium Internship. Looking for a teammate skilled in NLP preprocessing.</p>
+        <div class="meta-row">
+          <span>IT Dept · Year 3</span>
+          <span>2h ago</span>
+        </div>
+      </article>
+
+      <article class="listing-card">
+        <div class="listing-head">
+          <span class="tag">Campus Project</span>
+          <span class="status closed">Closed</span>
+        </div>
+        <h4>TCE Parking Portal</h4>
+        <p>Smart parking slot booking web app for campus — built as a team mini-project for Section A.</p>
+        <div class="meta-row">
+          <span>IT Dept · Year 3</span>
+          <span>Yesterday</span>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

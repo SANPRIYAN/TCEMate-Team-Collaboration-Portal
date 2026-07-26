@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Browse Listings</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+        <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html" class="active">Browse</a>
+      <a href="forum.html">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="filter-bar">
+      <label for="deptFilter">Department</label>
+      <select id="deptFilter">
+        <option>All Departments</option>
+        <option selected>Information Technology</option>
+        <option>Computer Science</option>
+        <option>ECE</option>
+        <option>Mechanical</option>
+      </select>
+
+      <label for="yearFilter">Year</label>
+      <select id="yearFilter">
+        <option>Any Year</option>
+        <option>1st Year</option>
+        <option>2nd Year</option>
+        <option selected>3rd Year</option>
+        <option>4th Year</option>
+      </select>
+
+      <div class="search-box" style="display: flex; gap: 0.5rem; flex: 1;">
+        <input type="text" id="searchInput" placeholder="Search by project or skill...">
+        <button id="searchBtn" class="btn-primary" style="margin-top: 0; width: auto; padding: 0.5rem 1rem;">Search</button>
+      </div>
+    </section>
+
+    <section class="listings">
+      <article class="listing-card">
+        <div class="listing-head">
+          <span class="tag">Internship Project</span>
+          <span class="status open">Open</span>
+        </div>
+        <h4>AI Career Intelligence Platform</h4>
+        <p>Semantic job-matching engine from the AI Consortium Internship. Need a teammate skilled in embeddings and vector search.</p>
+        <div class="meta-row">
+          <span class="dept-label">IT Dept</span>
+          <span>2h ago</span>
+        </div>
+      </article>
+
+      <article class="listing-card">
+        <div class="listing-head">
+          <span class="tag">Campus Project</span>
+          <span class="status closed">Closed</span>
+        </div>
+        <h4>TCE Parking Portal</h4>
+        <p>Smart campus parking booking web app built by a four-person team for our IT mini-project.</p>
+        <div class="meta-row">
+          <span class="dept-label">IT Dept</span>
+          <span>Yesterday</span>
+        </div>
+      </article>
+
+      <article class="listing-card">
+        <div class="listing-head">
+          <span class="tag">Hackathon</span>
+          <span class="status open">Open</span>
+        </div>
+        <h4>Campus Energy Monitor Dashboard</h4>
+        <p>IoT-based dashboard tracking energy usage across the library block. Looking for a frontend teammate.</p>
+        <div class="meta-row">
+          <span class="dept-label">IT Dept</span>
+          <span>1d ago</span>
+        </div>
+      </article>
+
+      <article class="listing-card">
+        <div class="listing-head">
+          <span class="tag">Academic Mini-Project</span>
+          <span class="status open">Open</span>
+        </div>
+        <h4>Automated Gear Assembly Design</h4>
+        <p>Looking for a solidworks designer to collaborate on a gear assembly simulation project.</p>
+        <div class="meta-row">
+          <span class="dept-label">Mechanical Dept</span>
+          <span>3h ago</span>
+        </div>
+      </article>
+
+      <article class="listing-card">
+        <div class="listing-head">
+          <span class="tag">Research</span>
+          <span class="status closed">Closed</span>
+        </div>
+        <h4>5G Antenna Design Optimization</h4>
+        <p>Research project under Prof. Kumar. Needed someone with HFSS software experience.</p>
+        <div class="meta-row">
+          <span class="dept-label">ECE Dept</span>
+          <span>1w ago</span>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

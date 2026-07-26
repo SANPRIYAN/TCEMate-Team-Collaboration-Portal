@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Forum</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+        <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="forum.html" class="active">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="forum-intro">
+      <h2>Discussion Threads</h2>
+      <p class="sub">Ask questions, share resources, and find collaborators from the IT Department and beyond.</p>
+      <a href="create-post.html" class="btn-primary" style="display:inline-block; width:auto; padding:0.5rem 1.5rem; margin-top:1rem; text-decoration:none;">+ New Post</a>
+    </section>
+
+    <section class="thread-list">
+      <article class="thread-card">
+        <div class="thread-meta">
+          <span class="tag">Project Advice</span>
+          <span class="posted-by">Posted by Keerthana R · Year 3</span>
+        </div>
+        <h4>Best way to structure a Flask backend for a college mini-project?</h4>
+        <p>Working on our IT department mini-project and want a clean folder structure before we scale it up. Any templates you'd recommend?</p>
+        <div class="thread-footer">
+          <span>8 replies</span>
+          <span>3h ago</span>
+        </div>
+      </article>
+
+      <article class="thread-card">
+        <div class="thread-meta">
+          <span class="tag">Opportunity</span>
+          <span class="posted-by">Posted by Prof. Meenakshi · Faculty</span>
+        </div>
+        <h4>Looking for 2 students to help with AI Consortium documentation</h4>
+        <p>Need help preparing the internal report for the semantic matching platform. Great for anyone who wants writing + technical experience.</p>
+        <div class="thread-footer">
+          <span>15 replies</span>
+          <span>1d ago</span>
+        </div>
+      </article>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
