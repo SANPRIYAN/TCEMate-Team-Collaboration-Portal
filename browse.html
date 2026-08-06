@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Browse Listings</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+</head>
+<body ng-controller="ProjectsController as vm">
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+    <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html" class="active">Browse</a>
+      <a href="forum.html">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout" ng-click="vm.logout()">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="filter-bar">
+      <label for="deptFilter">Department</label>
+      <select id="deptFilter" ng-model="vm.department">
+        <option value="All Departments">All Departments</option>
+        <option value="Information Technology">Information Technology</option>
+        <option value="Computer Science">Computer Science</option>
+        <option value="ECE">ECE</option>
+        <option value="Mechanical">Mechanical</option>
+      </select>
+
+      <label for="yearFilter">Year</label>
+      <select id="yearFilter" ng-model="vm.year">
+        <option value="Any Year">Any Year</option>
+        <option value="1st Year">1st Year</option>
+        <option value="2nd Year">2nd Year</option>
+        <option value="3rd Year">3rd Year</option>
+        <option value="4th Year">4th Year</option>
+      </select>
+
+      <div class="search-box" style="display: flex; gap: 0.5rem; flex: 1;">
+        <input type="text" id="searchInput" placeholder="Search by project or skill..." ng-model="vm.searchText">
+        <button id="searchBtn" class="btn-primary" style="margin-top: 0; width: auto; padding: 0.5rem 1rem;" type="button">Search</button>
+      </div>
+    </section>
+
+    <section class="listings">
+      <article class="listing-card" ng-repeat="project in vm.projects | filter:vm.filterProjects">
+        <div class="listing-head">
+          <span class="tag">{{project.type}}</span>
+          <span class="status" ng-class="{'open': project.status === 'open', 'closed': project.status === 'closed'}">{{project.status | uppercase}}</span>
+        </div>
+        <h4>{{project.title}}</h4>
+        <p>{{project.description}}</p>
+        <div class="meta-row">
+          <span class="dept-label">{{project.department}} Dept</span>
+          <span>{{project.timeLabel}}</span>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

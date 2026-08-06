@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Create Post</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+</head>
+<body ng-controller="CreatePostController as vm">
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+    <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="forum.html" class="active">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout" ng-click="vm.logout()">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="form-card">
+      <h2>Start a New Discussion</h2>
+      <p class="sub">Ask questions, share resources, and find collaborators.</p>
+
+      <form id="forumPostForm" novalidate style="margin-top: 1.5rem;" ng-submit="vm.submitPost()">
+        <label for="postTitle">Title</label>
+        <input type="text" id="postTitle" placeholder="Letters, numbers and basic punctuation only" required ng-model="vm.post.title">
+        <span class="error-msg" id="postTitleError">{{ vm.errors.title }}</span>
+
+        <label for="postBody">Details</label>
+        <textarea id="postBody" rows="4" placeholder="Describe your question or opportunity" required ng-model="vm.post.body"></textarea>
+        <span class="error-msg" id="postBodyError">{{ vm.errors.body }}</span>
+
+        <button type="submit" class="btn-primary">Post to Forum</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

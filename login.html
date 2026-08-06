@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Login</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+</head>
+<body class="auth-body" ng-controller="LoginController as vm">
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+    <nav class="main-nav"></nav>
+  </header>
+
+  <main class="auth-wrap">
+    <form class="auth-card" id="loginForm" novalidate ng-submit="vm.login()" ng-hide="vm.mode !== 'login'">
+      <h2>Log in to TCEMate</h2>
+      <p class="sub">Enter your college email and password</p>
+
+      <label for="loginEmail">Email</label>
+      <input type="email" id="loginEmail" name="loginEmail" placeholder="you@student.tce.edu" required ng-model="vm.loginData.email">
+      <span class="error-msg" id="loginEmailError">{{ vm.loginErrors.email }}</span>
+
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" name="loginPassword" placeholder="••••••••" minlength="8" required ng-model="vm.loginData.password">
+      <span class="error-msg" id="loginPasswordError">{{ vm.loginErrors.password }}</span>
+
+      <button type="submit" class="btn-primary">Log In</button>
+      <p class="switch-link">New here? <a href="#" id="showSignup" ng-click="vm.toggleSignup()">Create an account</a></p>
+    </form>
+
+    <form class="auth-card hidden" id="signupForm" novalidate ng-submit="vm.register()" ng-hide="vm.mode !== 'signup'">
+      <h2>Create your account</h2>
+      <p class="sub">Join the IT Dept collaboration network</p>
+
+      <label for="fullName">Full Name</label>
+      <input type="text" id="fullName" name="fullName" placeholder="Only letters and spaces" required ng-model="vm.signupData.fullName">
+      <span class="error-msg" id="fullNameError">{{ vm.signupErrors.fullName }}</span>
+
+      <label for="signupEmail">Email</label>
+      <input type="email" id="signupEmail" name="signupEmail" placeholder="you@student.tce.edu" required ng-model="vm.signupData.email">
+      <span class="error-msg" id="signupEmailError">{{ vm.signupErrors.email }}</span>
+
+      <label for="regNo">Register Number</label>
+      <input type="text" id="regNo" name="regNo" placeholder="Digits only, e.g. 2023IT045" required ng-model="vm.signupData.regNo">
+      <span class="error-msg" id="regNoError">{{ vm.signupErrors.regNo }}</span>
+
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" name="phone" placeholder="10 digits only" required ng-model="vm.signupData.phone">
+      <span class="error-msg" id="phoneError">{{ vm.signupErrors.phone }}</span>
+
+      <label for="signupPassword">Password</label>
+      <input type="password" id="signupPassword" name="signupPassword" placeholder="Min 8 characters" minlength="8" required ng-model="vm.signupData.password">
+      <span class="error-msg" id="signupPasswordError">{{ vm.signupErrors.password }}</span>
+
+      <button type="submit" class="btn-primary">Sign Up</button>
+      <p class="switch-link">Already have an account? <a href="#" id="showLogin" ng-click="vm.toggleLogin()">Log in</a></p>
+    </form>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

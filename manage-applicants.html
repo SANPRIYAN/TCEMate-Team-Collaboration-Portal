@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Manage Applicants</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+</head>
+<body ng-controller="ApplicantsController as vm">
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+    <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="forum.html">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html" class="active">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout" ng-click="vm.logout()">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="listing-picker">
+      <label for="activeListing">Active Listing</label>
+      <select id="activeListing">
+        <option>AI Career Intelligence Platform</option>
+        <option>TCE Parking Portal</option>
+      </select>
+      <p class="sub">{{ vm.applicants.length }} pending applications</p>
+    </section>
+
+    <section class="applicant-list" id="applicantList">
+      <article class="applicant-row" ng-repeat="applicant in vm.applicants | orderBy:'-matchScore'">
+        <div class="applicant-avatar">{{ vm.getInitials(applicant.name) }}</div>
+        <div class="applicant-info">
+          <h4>{{ applicant.name }} <span class="reg-id">{{ applicant.regNo }}</span></h4>
+          <p>{{ applicant.department }} · {{ applicant.year }} · Skills: {{ applicant.skills.join(', ') }}</p>
+          <p class="sub">{{ applicant.matchScore | matchLabel }}</p>
+        </div>
+        <div class="applicant-actions">
+          <button class="btn-accept" ng-click="vm.handleApplicant(applicant)">Accept</button>
+          <button class="btn-reject" ng-click="vm.handleApplicant(applicant)">Reject</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="team-section">
+      <h3>My Team</h3>
+      <div class="team-avatars">
+        <div class="team-member" ng-repeat="member in vm.teamMembers"><span class="avatar-circle small">{{ vm.getInitials(member.name) }}</span><span>{{ member.name }} ({{ member.role }})</span></div>
+        <div class="team-member empty-slot">+</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

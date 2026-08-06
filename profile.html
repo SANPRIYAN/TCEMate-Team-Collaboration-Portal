@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | My Profile</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+</head>
+<body ng-controller="ProfileController as vm">
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+    <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="forum.html">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout" ng-click="vm.logout()">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="profile-header">
+      <div class="avatar-circle">{{ vm.getInitials(vm.profile.name) }}</div>
+      <div>
+        <h2>{{vm.profile.name}}</h2>
+        <p class="sub">{{vm.profile.department}} · {{vm.profile.year}} · {{vm.profile.section}}</p>
+        <p class="bio">{{vm.profile.bio}}</p>
+      </div>
+    </section>
+
+    <section class="skills">
+      <h3>Core Skills</h3>
+      <ul class="skill-tags">
+        <li ng-repeat="skill in vm.profile.skills">{{skill}}</li>
+      </ul>
+    </section>
+
+    <aside class="edit-form-section">
+      <h3>Update Profile Details</h3>
+      <form id="profileForm" novalidate ng-submit="vm.saveProfile()">
+        <fieldset style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;">
+          <legend style="padding: 0 0.5rem; font-weight: 700; color: var(--primary);">Basic Info</legend>
+          <label for="pName">Full Name</label>
+          <input type="text" id="pName" placeholder="Letters and spaces only" required ng-model="vm.profile.name">
+          <span class="error-msg" id="pNameError">{{ vm.errors.name }}</span>
+
+          <label for="pBio">Short Bio</label>
+          <textarea id="pBio" rows="3" placeholder="Tell others about your interests" ng-model="vm.profile.bio"></textarea>
+        </fieldset>
+
+        <fieldset style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;">
+          <legend style="padding: 0 0.5rem; font-weight: 700; color: var(--primary);">Academic Details</legend>
+
+          <label for="pDept">Department</label>
+          <input type="text" id="pDept" list="deptList" placeholder="Select or type department" required ng-model="vm.profile.department">
+          <datalist id="deptList">
+            <option value="Information Technology"></option>
+            <option value="Computer Science"></option>
+            <option value="ECE"></option>
+            <option value="Mechanical"></option>
+          </datalist>
+
+          <label style="margin-top:1rem;">Year of Study</label>
+          <div class="radio-group" style="display:flex; gap:1rem; margin-top:0.3rem;">
+            <label style="font-weight:normal;"><input type="radio" name="pYear" value="1st Year" ng-model="vm.profile.year" required> 1st Year</label>
+            <label style="font-weight:normal;"><input type="radio" name="pYear" value="2nd Year" ng-model="vm.profile.year"> 2nd Year</label>
+            <label style="font-weight:normal;"><input type="radio" name="pYear" value="3rd Year" ng-model="vm.profile.year"> 3rd Year</label>
+            <label style="font-weight:normal;"><input type="radio" name="pYear" value="4th Year" ng-model="vm.profile.year"> 4th Year</label>
+          </div>
+        </fieldset>
+
+        <fieldset style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;">
+          <legend style="padding: 0 0.5rem; font-weight: 700; color: var(--primary);">Preferences</legend>
+          <div class="check-group" style="display:flex; flex-direction:column; gap:0.5rem;">
+            <label style="font-weight:normal;"><input type="checkbox" ng-model="vm.profile.preferences.hackathon"> Available for Hackathons</label>
+            <label style="font-weight:normal;"><input type="checkbox" ng-model="vm.profile.preferences.internship"> Looking for Internships</label>
+          </div>
+          <p style="margin-top:0.8rem; font-size:0.8rem; color:var(--text-muted);">Note: Selecting <mark>Internships</mark> makes your profile visible to faculty.</p>
+        </fieldset>
+
+        <button type="submit" class="btn-primary">Save Changes</button>
+      </form>
+    </aside>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Create Listing</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+</head>
+<body ng-controller="CreateListingController as vm">
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+    <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="forum.html">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html" class="active">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout" ng-click="vm.logout()">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="form-card">
+      <h2>Create a New Listing</h2>
+      <p class="sub">Post a project, hackathon team, or mini-project request.</p>
+
+      <form id="listingForm" novalidate ng-submit="vm.submitListing()">
+        <fieldset style="border: none; padding: 0; margin: 0;">
+          <legend style="display: none;">Listing Details</legend>
+
+          <label for="listingTitle">Project Title</label>
+          <input type="text" id="listingTitle" placeholder="e.g. Smart Attendance System" required ng-model="vm.listing.title">
+          <span class="error-msg" id="listingTitleError">{{ vm.errors.title }}</span>
+
+          <label for="listingType">Project Type</label>
+          <input list="projectTypes" id="listingType" placeholder="Type to search..." required ng-model="vm.listing.type">
+          <datalist id="projectTypes">
+            <option value="Academic Mini-Project"></option>
+            <option value="Internship Project"></option>
+            <option value="Hackathon Team"></option>
+            <option value="Research"></option>
+          </datalist>
+
+          <label for="listingDesc">Description</label>
+          <textarea id="listingDesc" rows="4" placeholder="What are you building and what help do you need?" required ng-model="vm.listing.description"></textarea>
+          <span class="error-msg" id="listingDescError">{{ vm.errors.description }}</span>
+
+          <div class="two-col">
+            <div>
+              <label for="listingDept">Target Department</label>
+              <select id="listingDept" ng-model="vm.listing.department">
+                <optgroup label="General">
+                  <option value="">Any Department</option>
+                </optgroup>
+                <optgroup label="Engineering">
+                  <option value="Information Technology">Information Technology</option>
+                  <option value="Computer Science">Computer Science</option>
+                  <option value="ECE">ECE</option>
+                  <option value="Mechanical">Mechanical</option>
+                </optgroup>
+              </select>
+            </div>
+            <div>
+              <label for="listingYear">Target Year</label>
+              <select id="listingYear" ng-model="vm.listing.year">
+                <option value="">Any Year</option>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+              </select>
+            </div>
+          </div>
+
+          <label>Team Size</label>
+          <div class="stepper">
+            <button type="button" id="decreaseTeam" ng-click="vm.decreaseTeam()">−</button>
+            <span id="teamCount">{{ vm.teamSize }}</span>
+            <button type="button" id="increaseTeam" ng-click="vm.increaseTeam()">+</button>
+          </div>
+
+          <label for="listingDeadline">Application Deadline</label>
+          <input type="date" id="listingDeadline" required ng-model="vm.listing.deadline">
+          <span class="error-msg" id="listingDeadlineError">{{ vm.errors.deadline }}</span>
+
+          <button type="submit" class="btn-primary">Publish Listing</button>
+        </fieldset>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

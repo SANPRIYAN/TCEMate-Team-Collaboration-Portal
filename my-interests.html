@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | My Interests</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+</head>
+<body ng-controller="InterestsController as vm">
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+    <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="forum.html">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html" class="active">Interests</a>
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout" ng-click="vm.logout()">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="tabs">
+      <button class="tab-btn" ng-class="{active: vm.activeFilter === 'all'}" ng-click="vm.setFilter('all')">All</button>
+      <button class="tab-btn" ng-class="{active: vm.activeFilter === 'pending'}" ng-click="vm.setFilter('pending')">Pending</button>
+      <button class="tab-btn" ng-class="{active: vm.activeFilter === 'accepted'}" ng-click="vm.setFilter('accepted')">Accepted</button>
+      <button class="tab-btn" ng-class="{active: vm.activeFilter === 'rejected'}" ng-click="vm.setFilter('rejected')">Rejected</button>
+    </section>
+
+    <section class="interest-list" id="interestList">
+      <article class="interest-row" ng-repeat="item in vm.interests | filter:vm.filterByStatus" data-status="{{item.status}}">
+        <div class="interest-info">
+          <h4>{{item.title}}</h4>
+          <p>{{item.details}}</p>
+        </div>
+        <span class="status-pill" ng-class="{'pending': item.status === 'pending', 'accepted': item.status === 'accepted', 'rejected': item.status === 'rejected'}">{{item.status | uppercase}}</span>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

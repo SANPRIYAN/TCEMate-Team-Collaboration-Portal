@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Forum</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+</head>
+<body ng-controller="ForumController as vm">
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+    <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="forum.html" class="active">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+      <a href="profile-view.html">Profile</a>
+      <a href="#" id="logoutBtn" class="nav-logout" ng-click="vm.logout()">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-wrap">
+    <section class="forum-intro">
+      <h2>Discussion Threads</h2>
+      <p class="sub">Ask questions, share resources, and find collaborators from the IT Department and beyond.</p>
+      <a href="create-post.html" class="btn-primary" style="display:inline-block; width:auto; padding:0.5rem 1.5rem; margin-top:1rem; text-decoration:none;">+ New Post</a>
+    </section>
+
+    <section class="thread-list">
+      <article class="thread-card" ng-repeat="post in vm.posts">
+        <div class="thread-meta">
+          <span class="tag">{{post.tag}}</span>
+          <span class="posted-by">Posted by {{post.author}}</span>
+        </div>
+        <h4>{{post.title}}</h4>
+        <p>{{post.body}}</p>
+        <div class="thread-footer">
+          <span>{{post.replies}} replies</span>
+          <span>{{post.timeLabel}}</span>
+        </div>
+      </article>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
