@@ -1,6 +1,13 @@
 (function () {
   'use strict';
 
+  /* 
+   * REFACTOR NOTE (Service -> Factory):
+   * Converted DataService from AngularJS .service() to AngularJS .factory().
+   * In AngularJS Factory, we create internal data structures and return an object exposing 
+   * core data manipulation functions (getItems, addItem, deleteItem, updateItem) rather than 
+   * binding methods to 'this' (as done in services).
+   */
   angular.module('tcemate').factory('DataService', function () {
     var storageKey = 'tcemateData';
     var defaults = {
@@ -139,40 +146,92 @@
       }) || state.students[0];
     }
 
+    // ----------------------------------------------------
+    // Core Logic Functions (Factory Pattern)
+    // ----------------------------------------------------
+    function getItems(category) {
+      ensureState();
+      return state[category] || [];
+    }
+
+    function addItem(category, item) {
+      ensureState();
+      var newItem = Object.assign({ id: Date.now() }, item);
+      if (!state[category]) {
+        state[category] = [];
+      }
+      state[category].unshift(newItem);
+      saveState(state);
+      return newItem;
+    }
+
+    function deleteItem(category, id) {
+      ensureState();
+      if (state[category]) {
+        state[category] = state[category].filter(function (item) {
+          return item.id !== id;
+        });
+        saveState(state);
+      }
+      return state[category] || [];
+    }
+
+    function updateItem(category, id, data) {
+      ensureState();
+      if (state[category]) {
+        state[category] = state[category].map(function (item) {
+          if (item.id === id) {
+            return Object.assign({}, item, data);
+          }
+          return item;
+        });
+        saveState(state);
+      }
+      return getItems(category);
+    }
+
+    // Return single factory object exposing public methods (No 'this' syntax used)
     return {
+      // Standard CRUD Factory Methods
+      getItems: getItems,
+      addItem: addItem,
+      deleteItem: deleteItem,
+      updateItem: updateItem,
+
+      // Specific Domain Functions
       getProjects: function () {
-        return state.projects;
+        return getItems('projects');
       },
       getApplicants: function () {
-        return state.applicants;
+        return getItems('applicants');
       },
       getTeams: function () {
-        return state.teams;
+        return getItems('teams');
       },
       getNotifications: function () {
-        return state.notifications;
+        return getItems('notifications');
       },
       getInterests: function () {
-        return state.interests;
+        return getItems('interests');
       },
       getDiscussions: function () {
-        return state.discussions;
+        return getItems('discussions');
       },
       getCurrentUser: function () {
         return getCurrentUser();
       },
+      getLandingStats: function () {
+        return [
+          { value: getItems('projects').filter(function (project) { return project.status === 'open'; }).length, label: 'Active Projects' },
+          { value: getItems('applicants').length, label: 'Pending Requests' },
+          { value: getItems('teams').length + 11, label: 'Connections' }
+        ];
+      },
       updateProfile: function (profile) {
-        state.students = state.students.map(function (student) {
-          if (student.id === state.currentUserId) {
-            return Object.assign({}, student, profile);
-          }
-          return student;
-        });
-        saveState(state);
+        return updateItem('students', state.currentUserId, profile);
       },
       createListing: function (listing, teamSize) {
-        state.projects.unshift(Object.assign({
-          id: Date.now(),
+        return addItem('projects', Object.assign({
           title: listing.title,
           description: listing.description,
           type: listing.type,
@@ -182,17 +241,12 @@
           timeLabel: 'Just now',
           matchScore: 0
         }, listing));
-        saveState(state);
       },
       removeApplicant: function (applicantId) {
-        state.applicants = state.applicants.filter(function (applicant) {
-          return applicant.id !== applicantId;
-        });
-        saveState(state);
+        return deleteItem('applicants', applicantId);
       },
       addDiscussion: function (post) {
-        state.discussions.unshift({
-          id: Date.now(),
+        return addItem('discussions', {
           tag: 'Discussion',
           author: 'You',
           title: post.title,
@@ -200,7 +254,6 @@
           replies: 0,
           timeLabel: 'Just now'
         });
-        saveState(state);
       },
       markAllNotificationsRead: function () {
         state.notifications = state.notifications.map(function (notification) {
@@ -208,6 +261,7 @@
           return notification;
         });
         saveState(state);
+        return state.notifications;
       },
       getMatchScore: function (requiredSkills, candidateSkills) {
         var matched = requiredSkills.filter(function (skill) {

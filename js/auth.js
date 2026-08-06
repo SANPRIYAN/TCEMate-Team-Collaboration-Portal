@@ -1,6 +1,12 @@
 (function () {
   'use strict';
 
+  /* 
+   * REFACTOR NOTE (Service -> Factory):
+   * Converted AuthService from AngularJS .service() to AngularJS .factory().
+   * The factory pattern returns a custom object literal with public functions,
+   * avoiding 'this' bindings and encapsulating logic internally.
+   */
   angular.module('tcemate').factory('AuthService', function () {
     var emailPattern = /^[^\s@]+@(student\.)?tce\.edu$/;
     var passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;

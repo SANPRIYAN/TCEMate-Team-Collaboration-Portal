@@ -1,6 +1,6 @@
 /**
- * TCEMate - AngularJS Methods & Types Reference File
- * Explicitly specifies the AngularJS TYPE for each method/snippet.
+ * TCEMate - AngularJS Factory & Controllers Reference File
+ * Explicitly specifies the AngularJS Factory pattern and controller bindings.
  */
 
 (function () {
@@ -23,9 +23,11 @@
     };
   });
 
-  // ----------------------------------------------------
-  // TYPE: Custom Service / Factory (AuthService)
-  // ----------------------------------------------------
+  /*
+   * REFACTOR NOTE (Service -> Factory):
+   * AuthService converted from AngularJS .service() to AngularJS .factory().
+   * In a Factory, we return a plain JS object exposing public methods.
+   */
   app.factory('AuthService', function () {
     var loginKey = 'loggedIn';
     return {
@@ -35,21 +37,56 @@
     };
   });
 
-  // ----------------------------------------------------
-  // TYPE: Custom Service / Factory (DataService)
-  // ----------------------------------------------------
+  /*
+   * REFACTOR NOTE (Service -> Factory with Core Logic Functions):
+   * DataService converted from AngularJS .service() to AngularJS .factory().
+   * Exposes core data manipulation functions: getItems(), addItem(), deleteItem(), updateItem().
+   */
   app.factory('DataService', function () {
+    var items = [];
+
+    function getItems() {
+      return items;
+    }
+
+    function addItem(newItem) {
+      newItem.id = Date.now();
+      items.push(newItem);
+      return newItem;
+    }
+
+    function deleteItem(id) {
+      items = items.filter(function (item) { return item.id !== id; });
+      return items;
+    }
+
+    function updateItem(id, updatedData) {
+      items = items.map(function (item) {
+        if (item.id === id) {
+          return Object.assign({}, item, updatedData);
+        }
+        return item;
+      });
+      return items;
+    }
+
+    // Factory pattern returns object with exposed API (No 'this' syntax used)
     return {
-      getProjects: function () { return []; },
-      getApplicants: function () { return []; },
+      getItems: getItems,
+      addItem: addItem,
+      deleteItem: deleteItem,
+      updateItem: updateItem,
+      getProjects: function () { return getItems(); },
+      getApplicants: function () { return getItems(); },
       getCurrentUser: function () { return {}; }
     };
   });
 
-  // ----------------------------------------------------
-  // TYPE: Controller & Dependency Injection (LandingController)
-  // Injected: DataService (Custom Service), AuthService (Custom Service), $window (Built-in Service)
-  // ----------------------------------------------------
+  /*
+   * REFACTOR NOTE (Controller using Factory):
+   * Controller injects DataService and AuthService factories.
+   * Calls factory methods (addItem, deleteItem, updateItem, getItems) for all business logic.
+   */
   app.controller('LandingController', ['DataService', 'AuthService', '$window', function (DataService, AuthService, $window) {
     var vm = this;
     vm.user = DataService.getCurrentUser();
@@ -57,9 +94,6 @@
     vm.logout = function () { AuthService.logout(); $window.location.href = 'login.html'; };
   }]);
 
-  // ----------------------------------------------------
-  // TYPE: Controller & Two-Way Data Binding (LoginController)
-  // ----------------------------------------------------
   app.controller('LoginController', ['AuthService', '$window', function (AuthService, $window) {
     var vm = this;
     vm.mode = 'login';
@@ -71,59 +105,41 @@
     };
   }]);
 
-  // ----------------------------------------------------
-  // TYPE: Controller & Built-in Filter Function (ProjectsController)
-  // ----------------------------------------------------
   app.controller('ProjectsController', ['DataService', function (DataService) {
     var vm = this;
-    vm.projects = DataService.getProjects();
+    vm.projects = DataService.getItems();
     vm.filterProjects = function (project) { return true; };
   }]);
 
-  // ----------------------------------------------------
-  // TYPE: Controller & Form Submission (CreateListingController)
-  // ----------------------------------------------------
   app.controller('CreateListingController', ['DataService', '$window', function (DataService, $window) {
     var vm = this;
     vm.teamSize = 2;
     vm.listing = { title: '', description: '' };
-    vm.submitListing = function () { DataService.createListing(vm.listing, vm.teamSize); };
+    vm.submitListing = function () { DataService.addItem(vm.listing); };
   }]);
 
-  // ----------------------------------------------------
-  // TYPE: Controller (ApplicantsController)
-  // ----------------------------------------------------
   app.controller('ApplicantsController', ['DataService', function (DataService) {
     var vm = this;
-    vm.applicants = DataService.getApplicants();
-    vm.handleApplicant = function (applicant) { DataService.removeApplicant(applicant.id); };
+    vm.applicants = DataService.getItems();
+    vm.handleApplicant = function (applicant) { vm.applicants = DataService.deleteItem(applicant.id); };
   }]);
 
-  // ----------------------------------------------------
-  // TYPE: Controller & Tab Filter (InterestsController)
-  // ----------------------------------------------------
   app.controller('InterestsController', ['DataService', function (DataService) {
     var vm = this;
     vm.activeFilter = 'all';
     vm.setFilter = function (filter) { vm.activeFilter = filter; };
   }]);
 
-  // ----------------------------------------------------
-  // TYPE: Controller & Form Model Binding (ProfileController)
-  // ----------------------------------------------------
   app.controller('ProfileController', ['DataService', '$window', function (DataService, $window) {
     var vm = this;
     vm.profile = DataService.getCurrentUser();
-    vm.saveProfile = function () { DataService.updateProfile(vm.profile); };
+    vm.saveProfile = function () { DataService.updateItem(vm.profile.id, vm.profile); };
   }]);
 
-  // ----------------------------------------------------
-  // TYPE: Controller (NotificationsController)
-  // ----------------------------------------------------
   app.controller('NotificationsController', ['DataService', function (DataService) {
     var vm = this;
-    vm.notifications = DataService.getNotifications();
-    vm.markAllRead = function () { DataService.markAllNotificationsRead(); };
+    vm.notifications = DataService.getItems();
+    vm.markAllRead = function () { DataService.updateItem(1, { unread: false }); };
   }]);
 
 })();

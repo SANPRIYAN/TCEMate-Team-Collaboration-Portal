@@ -16,6 +16,11 @@
     };
   });
 
+  /* 
+   * REFACTOR NOTE (Controller using Factory):
+   * LandingController injects DataService and AuthService factories (converted from services).
+   * Data computation (stats) is delegated to DataService factory (getLandingStats / getItems).
+   */
   app.controller('LandingController', ['DataService', 'AuthService', '$window', function (DataService, AuthService, $window) {
     var vm = this;
 
@@ -26,11 +31,7 @@
 
     vm.user = DataService.getCurrentUser();
     vm.storageUsed = 45;
-    vm.stats = [
-      { value: DataService.getProjects().filter(function (project) { return project.status === 'open'; }).length, label: 'Active Projects' },
-      { value: DataService.getApplicants().length, label: 'Pending Requests' },
-      { value: DataService.getTeams().length + 11, label: 'Connections' }
-    ];
+    vm.stats = DataService.getLandingStats();
     vm.projects = DataService.getProjects().slice(0, 2);
 
     vm.logout = function () {
@@ -39,6 +40,11 @@
     };
   }]);
 
+  /* 
+   * REFACTOR NOTE (Controller using Factory):
+   * LoginController injects AuthService factory instead of service.
+   * Authentication logic (login & register verification) lives inside AuthService factory.
+   */
   app.controller('LoginController', ['AuthService', '$window', function (AuthService, $window) {
     var vm = this;
 
@@ -82,6 +88,10 @@
     };
   }]);
 
+  /* 
+   * REFACTOR NOTE (Controller using Factory):
+   * ProjectsController injects DataService factory and retrieves projects via DataService.getProjects() / DataService.getItems('projects').
+   */
   app.controller('ProjectsController', ['DataService', 'AuthService', '$window', function (DataService, AuthService, $window) {
     var vm = this;
 
@@ -109,6 +119,10 @@
     };
   }]);
 
+  /* 
+   * REFACTOR NOTE (Controller using Factory):
+   * CreateListingController injects DataService factory and delegates creation (addItem) to DataService.createListing().
+   */
   app.controller('CreateListingController', ['DataService', 'AuthService', '$window', function (DataService, AuthService, $window) {
     var vm = this;
 
@@ -154,6 +168,7 @@
       if (Object.keys(vm.errors).length) {
         return;
       }
+      // Delegate record insertion (addItem) to DataService factory
       DataService.createListing(vm.listing, vm.teamSize);
       $window.alert('Listing published! (demo)');
     };
@@ -164,6 +179,11 @@
     };
   }]);
 
+  /* 
+   * REFACTOR NOTE (Controller using Factory):
+   * ApplicantsController injects DataService factory. Removes local array filtering logic
+   * from controller and delegates applicant deletion (deleteItem) directly to DataService.removeApplicant().
+   */
   app.controller('ApplicantsController', ['DataService', 'AuthService', '$window', function (DataService, AuthService, $window) {
     var vm = this;
 
@@ -182,10 +202,8 @@
     };
 
     vm.handleApplicant = function (applicant) {
-      vm.applicants = vm.applicants.filter(function (item) {
-        return item.id !== applicant.id;
-      });
-      DataService.removeApplicant(applicant.id);
+      // Data manipulation (deleteItem by ID) performed completely inside DataService factory
+      vm.applicants = DataService.removeApplicant(applicant.id);
     };
 
     vm.logout = function () {
@@ -194,6 +212,10 @@
     };
   }]);
 
+  /* 
+   * REFACTOR NOTE (Controller using Factory):
+   * InterestsController injects DataService factory and retrieves user interests (getItems).
+   */
   app.controller('InterestsController', ['DataService', 'AuthService', '$window', function (DataService, AuthService, $window) {
     var vm = this;
 
@@ -219,6 +241,10 @@
     };
   }]);
 
+  /* 
+   * REFACTOR NOTE (Controller using Factory):
+   * ProfileController injects DataService factory and delegates user updates (updateItem) to DataService.updateProfile().
+   */
   app.controller('ProfileController', ['DataService', 'AuthService', '$window', function (DataService, AuthService, $window) {
     var vm = this;
 
@@ -245,6 +271,7 @@
       if (Object.keys(vm.errors).length) {
         return;
       }
+      // Delegate profile update (updateItem) to DataService factory
       DataService.updateProfile(vm.profile);
       $window.alert('Profile updated! (demo)');
     };
@@ -255,6 +282,10 @@
     };
   }]);
 
+  /* 
+   * REFACTOR NOTE (Controller using Factory):
+   * ForumController injects DataService factory to retrieve forum discussions.
+   */
   app.controller('ForumController', ['DataService', 'AuthService', '$window', function (DataService, AuthService, $window) {
     var vm = this;
 
@@ -271,6 +302,10 @@
     };
   }]);
 
+  /* 
+   * REFACTOR NOTE (Controller using Factory):
+   * CreatePostController injects DataService factory and delegates post creation (addItem) to DataService.addDiscussion().
+   */
   app.controller('CreatePostController', ['DataService', 'AuthService', '$window', function (DataService, AuthService, $window) {
     var vm = this;
 
@@ -293,6 +328,7 @@
       if (Object.keys(vm.errors).length) {
         return;
       }
+      // Delegate post addition (addItem) to DataService factory
       DataService.addDiscussion(vm.post);
       $window.alert('Posted to forum! (demo)');
       vm.post = { title: '', body: '' };
@@ -304,6 +340,10 @@
     };
   }]);
 
+  /* 
+   * REFACTOR NOTE (Controller using Factory):
+   * NotificationsController injects DataService factory and calls markAllNotificationsRead() factory function.
+   */
   app.controller('NotificationsController', ['DataService', 'AuthService', '$window', function (DataService, AuthService, $window) {
     var vm = this;
 
@@ -315,8 +355,7 @@
     vm.notifications = DataService.getNotifications();
 
     vm.markAllRead = function () {
-      DataService.markAllNotificationsRead();
-      vm.notifications = DataService.getNotifications();
+      vm.notifications = DataService.markAllNotificationsRead();
     };
 
     vm.logout = function () {
