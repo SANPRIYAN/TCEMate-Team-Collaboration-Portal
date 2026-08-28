@@ -6,6 +6,8 @@
 <title>TCEMate | Create Post</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
 </head>
 <body ng-controller="CreatePostController as vm">
   <header class="topbar">
@@ -28,17 +30,29 @@
       <h2>Start a New Discussion</h2>
       <p class="sub">Ask questions, share resources, and find collaborators.</p>
 
-      <form id="forumPostForm" novalidate style="margin-top: 1.5rem;" ng-submit="vm.submitPost()">
+      <form id="forumPostForm" name="postForm" novalidate style="margin-top: 1.5rem;" ng-submit="vm.submitPost()">
         <label for="postTitle">Title</label>
-        <input type="text" id="postTitle" placeholder="Letters, numbers and basic punctuation only" required ng-model="vm.post.title">
-        <span class="error-msg" id="postTitleError">{{ vm.errors.title }}</span>
+        <input type="text" id="postTitle" name="postTitle" placeholder="Letters, numbers and basic punctuation only" required ng-minlength="5" ng-pattern="/^[a-zA-Z0-9\s.,'?!-]{5,}$/" ng-model="vm.post.title">
+        <div class="error-msg" ng-messages="postForm.postTitle.$error" ng-show="postForm.postTitle.$dirty || postForm.$submitted">
+          <span ng-message="required">Please fill this field.</span>
+          <span ng-message="minlength">Title must be at least 5 characters.</span>
+          <span ng-message="pattern">Only letters, numbers and basic punctuation allowed.</span>
+        </div>
+        <span class="error-msg" id="postTitleError" ng-if="vm.errors.title">{{ vm.errors.title }}</span>
 
         <label for="postBody">Details</label>
-        <textarea id="postBody" rows="4" placeholder="Describe your question or opportunity" required ng-model="vm.post.body"></textarea>
-        <span class="error-msg" id="postBodyError">{{ vm.errors.body }}</span>
+        <textarea id="postBody" name="postBody" rows="4" placeholder="Describe your question or opportunity" required ng-minlength="10" ng-model="vm.post.body"></textarea>
+        <div class="error-msg" ng-messages="postForm.postBody.$error" ng-show="postForm.postBody.$dirty || postForm.$submitted">
+          <span ng-message="required">Please fill this field.</span>
+          <span ng-message="minlength">Please write at least 10 characters.</span>
+        </div>
+        <span class="error-msg" id="postBodyError" ng-if="vm.errors.body">{{ vm.errors.body }}</span>
 
         <button type="submit" class="btn-primary">Post to Forum</button>
       </form>
+
+      <!-- Custom Directive: Live Post Preview -->
+      <post-preview-card post="vm.post"></post-preview-card>
     </section>
   </main>
 

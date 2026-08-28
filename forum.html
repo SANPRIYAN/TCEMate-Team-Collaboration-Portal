@@ -6,6 +6,8 @@
 <title>TCEMate | Forum</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
 </head>
 <body ng-controller="ForumController as vm">
   <header class="topbar">
@@ -31,18 +33,7 @@
     </section>
 
     <section class="thread-list">
-      <article class="thread-card" ng-repeat="post in vm.posts">
-        <div class="thread-meta">
-          <span class="tag">{{post.tag}}</span>
-          <span class="posted-by">Posted by {{post.author}}</span>
-        </div>
-        <h4>{{post.title}}</h4>
-        <p>{{post.body}}</p>
-        <div class="thread-footer">
-          <span>{{post.replies}} replies</span>
-          <span>{{post.timeLabel}}</span>
-        </div>
-      </article>
+      <forum-thread-card post="post" ng-repeat="post in vm.posts"></forum-thread-card>
     </section>
 
   </main>

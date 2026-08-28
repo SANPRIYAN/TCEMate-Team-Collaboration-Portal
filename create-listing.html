@@ -6,6 +6,8 @@
 <title>TCEMate | Create Listing</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
 </head>
 <body ng-controller="CreateListingController as vm">
   <header class="topbar">
@@ -28,16 +30,20 @@
       <h2>Create a New Listing</h2>
       <p class="sub">Post a project, hackathon team, or mini-project request.</p>
 
-      <form id="listingForm" novalidate ng-submit="vm.submitListing()">
+      <form id="listingForm" name="listingForm" novalidate ng-submit="vm.submitListing()">
         <fieldset style="border: none; padding: 0; margin: 0;">
           <legend style="display: none;">Listing Details</legend>
 
           <label for="listingTitle">Project Title</label>
-          <input type="text" id="listingTitle" placeholder="e.g. Smart Attendance System" required ng-model="vm.listing.title">
-          <span class="error-msg" id="listingTitleError">{{ vm.errors.title }}</span>
+          <input type="text" id="listingTitle" name="listingTitle" placeholder="e.g. Smart Attendance System" required ng-minlength="3" ng-model="vm.listing.title">
+          <div class="error-msg" ng-messages="listingForm.listingTitle.$error" ng-show="listingForm.listingTitle.$dirty || listingForm.$submitted">
+            <span ng-message="required">Please fill this field.</span>
+            <span ng-message="minlength">Title must be at least 3 characters.</span>
+          </div>
+          <span class="error-msg" id="listingTitleError" ng-if="vm.errors.title">{{ vm.errors.title }}</span>
 
           <label for="listingType">Project Type</label>
-          <input list="projectTypes" id="listingType" placeholder="Type to search..." required ng-model="vm.listing.type">
+          <input list="projectTypes" id="listingType" name="listingType" placeholder="Type to search..." required ng-model="vm.listing.type">
           <datalist id="projectTypes">
             <option value="Academic Mini-Project"></option>
             <option value="Internship Project"></option>
@@ -46,13 +52,17 @@
           </datalist>
 
           <label for="listingDesc">Description</label>
-          <textarea id="listingDesc" rows="4" placeholder="What are you building and what help do you need?" required ng-model="vm.listing.description"></textarea>
-          <span class="error-msg" id="listingDescError">{{ vm.errors.description }}</span>
+          <textarea id="listingDesc" name="listingDesc" rows="4" placeholder="What are you building and what help do you need?" required ng-minlength="10" ng-model="vm.listing.description"></textarea>
+          <div class="error-msg" ng-messages="listingForm.listingDesc.$error" ng-show="listingForm.listingDesc.$dirty || listingForm.$submitted">
+            <span ng-message="required">Please fill this field.</span>
+            <span ng-message="minlength">Description must be at least 10 characters.</span>
+          </div>
+          <span class="error-msg" id="listingDescError" ng-if="vm.errors.description">{{ vm.errors.description }}</span>
 
           <div class="two-col">
             <div>
               <label for="listingDept">Target Department</label>
-              <select id="listingDept" ng-model="vm.listing.department">
+              <select id="listingDept" name="listingDept" ng-model="vm.listing.department">
                 <optgroup label="General">
                   <option value="">Any Department</option>
                 </optgroup>
@@ -66,7 +76,7 @@
             </div>
             <div>
               <label for="listingYear">Target Year</label>
-              <select id="listingYear" ng-model="vm.listing.year">
+              <select id="listingYear" name="listingYear" ng-model="vm.listing.year">
                 <option value="">Any Year</option>
                 <option value="1st Year">1st Year</option>
                 <option value="2nd Year">2nd Year</option>
@@ -84,12 +94,18 @@
           </div>
 
           <label for="listingDeadline">Application Deadline</label>
-          <input type="date" id="listingDeadline" required ng-model="vm.listing.deadline">
-          <span class="error-msg" id="listingDeadlineError">{{ vm.errors.deadline }}</span>
+          <input type="date" id="listingDeadline" name="listingDeadline" required ng-model="vm.listing.deadline">
+          <div class="error-msg" ng-messages="listingForm.listingDeadline.$error" ng-show="listingForm.listingDeadline.$dirty || listingForm.$submitted">
+            <span ng-message="required">Please select a deadline.</span>
+          </div>
+          <span class="error-msg" id="listingDeadlineError" ng-if="vm.errors.deadline">{{ vm.errors.deadline }}</span>
 
           <button type="submit" class="btn-primary">Publish Listing</button>
         </fieldset>
       </form>
+
+      <!-- Custom Directive: Live Listing Preview -->
+      <listing-preview-card listing="vm.listing" team-size="vm.teamSize"></listing-preview-card>
     </section>
   </main>
 

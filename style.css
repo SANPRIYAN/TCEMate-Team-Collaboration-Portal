@@ -435,8 +435,256 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes added {
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes deleted {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
 .listing-card, .thread-card, .auth-card {
   animation: fadeInSlideUp 0.5s ease-out forwards;
+}
+
+/* ==================================================== */
+/* COMPREHENSIVE ANGULARJS NGANIMATE SYSTEM            */
+/* ==================================================== */
+
+/* Keyframe Animations */
+@keyframes ngEnterSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ngLeaveSlideDown {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+}
+
+@keyframes ngPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  70% {
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ngPopOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes ngFlipIn {
+  from {
+    opacity: 0;
+    transform: perspective(400px) rotateX(20deg) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(400px) rotateX(0deg) translateY(0);
+  }
+}
+
+@keyframes ngPulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(166, 53, 0, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(166, 53, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(166, 53, 0, 0); }
+}
+
+/* 1. NG-REPEAT ANIMATIONS (All Repeated Lists Across Pages) */
+.listing-card.ng-enter,
+.thread-card.ng-enter,
+.applicant-row.ng-enter,
+.interest-row.ng-enter,
+.notif-item.ng-enter,
+.stat-card.ng-enter,
+.portfolio-card.ng-enter,
+.skill-tag.ng-enter,
+.team-member.ng-enter,
+.timeline li.ng-enter {
+  animation: 0.35s ease-out ngEnterSlideUp;
+}
+
+.listing-card.ng-leave,
+.thread-card.ng-leave,
+.applicant-row.ng-leave,
+.interest-row.ng-leave,
+.notif-item.ng-leave,
+.stat-card.ng-leave,
+.portfolio-card.ng-leave,
+.skill-tag.ng-leave,
+.team-member.ng-leave,
+.timeline li.ng-leave {
+  animation: 0.3s ease-in ngLeaveSlideDown;
+}
+
+.listing-card.ng-move,
+.thread-card.ng-move,
+.applicant-row.ng-move,
+.interest-row.ng-move,
+.notif-item.ng-move,
+.stat-card.ng-move,
+.portfolio-card.ng-move {
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Stagger Animations for Repeated Items */
+.listing-card.ng-enter-stagger,
+.thread-card.ng-enter-stagger,
+.applicant-row.ng-enter-stagger,
+.interest-row.ng-enter-stagger,
+.notif-item.ng-enter-stagger,
+.stat-card.ng-enter-stagger {
+  transition-delay: 0.05s;
+  animation-delay: 0.05s;
+}
+
+/* 2. NG-HIDE & NG-SHOW TRANSITIONS (Visibility Toggles Across All Pages) */
+.auth-card.ng-hide-add,
+.auth-card.ng-hide-remove,
+.welcome-card.ng-hide-add,
+.welcome-card.ng-hide-remove,
+.form-card.ng-hide-add,
+.form-card.ng-hide-remove,
+.filter-bar.ng-hide-add,
+.filter-bar.ng-hide-remove,
+.animated-box.ng-hide-add,
+.animated-box.ng-hide-remove {
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-card.ng-hide-add,
+.welcome-card.ng-hide-add,
+.form-card.ng-hide-add,
+.filter-bar.ng-hide-add,
+.animated-box.ng-hide-add {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.auth-card.ng-hide-add-active,
+.welcome-card.ng-hide-add-active,
+.form-card.ng-hide-add-active,
+.filter-bar.ng-hide-add-active,
+.animated-box.ng-hide-add-active {
+  opacity: 0;
+  transform: scale(0.95) translateY(-10px);
+}
+
+.auth-card.ng-hide-remove,
+.welcome-card.ng-hide-remove,
+.form-card.ng-hide-remove,
+.filter-bar.ng-hide-remove,
+.animated-box.ng-hide-remove {
+  opacity: 0;
+  transform: scale(0.95) translateY(10px);
+}
+
+.auth-card.ng-hide-remove-active,
+.welcome-card.ng-hide-remove-active,
+.form-card.ng-hide-remove-active,
+.filter-bar.ng-hide-remove-active,
+.animated-box.ng-hide-remove-active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* 3. NG-IF CONDITIONAL ELEMENTS TRANSITIONS */
+.ng-if-fade.ng-enter,
+.preview-card.ng-enter {
+  animation: 0.35s ease-out ngFlipIn;
+}
+
+.ng-if-fade.ng-leave,
+.preview-card.ng-leave {
+  animation: 0.25s ease-in ngPopOut;
+}
+
+.ng-if-pop.ng-enter {
+  animation: 0.3s ease-out ngPopIn;
+}
+
+.ng-if-pop.ng-leave {
+  animation: 0.2s ease-in ngPopOut;
+}
+
+/* 4. NG-CLASS DYNAMIC TRANSITIONS */
+.notif-item.unread-add,
+.notif-item.unread-remove {
+  transition: all 0.4s ease;
+}
+
+.notif-item.unread-remove-active {
+  background-color: var(--surface);
+  border-color: var(--border);
+}
+
+.tab-btn.active-add,
+.tab-btn.active-remove {
+  transition: all 0.25s ease-in-out;
+}
+
+.tab-btn.active-add-active {
+  animation: ngPulseGlow 0.4s ease-out;
+}
+
+/* 5. NGMESSAGES VALIDATION ERROR ANIMATIONS */
+.error-msg.ng-enter,
+.error-msg.ng-active,
+.error-msg span.ng-enter {
+  transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1) all;
+  opacity: 0;
+  transform: translateY(-6px);
+  max-height: 0;
+}
+
+.error-msg.ng-enter.ng-enter-active,
+.error-msg span.ng-enter.ng-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 40px;
+}
+
+.error-msg.ng-leave,
+.error-msg.ng-inactive,
+.error-msg span.ng-leave {
+  transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1) all;
+  opacity: 1;
+  max-height: 40px;
+}
+
+.error-msg.ng-leave.ng-leave-active,
+.error-msg span.ng-leave.ng-leave-active {
+  opacity: 0;
+  transform: translateY(-6px);
+  max-height: 0;
 }
 
 /* CSS3 Media Queries for Responsiveness */
@@ -444,3 +692,4 @@ body {
   .topbar { flex-direction: column; gap: 1rem; }
   .stats-row { grid-template-columns: 1fr; }
 }
+

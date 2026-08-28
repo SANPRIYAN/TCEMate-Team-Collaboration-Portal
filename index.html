@@ -6,6 +6,8 @@
 <title>TCEMate | Dashboard</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
 </head>
 <body ng-controller="LandingController as vm">
   <header class="topbar">
@@ -46,26 +48,12 @@
     </section>
 
     <section class="stats-row">
-      <article class="stat-card" ng-repeat="stat in vm.stats">
-        <span class="stat-num">{{stat.value}}</span>
-        <span class="stat-label">{{stat.label}}</span>
-      </article>
+      <stat-card-widget stat="stat" ng-repeat="stat in vm.stats"></stat-card-widget>
     </section>
 
     <section class="listings">
       <h3>Recent Listings</h3>
-      <article class="listing-card" ng-repeat="project in vm.projects">
-        <div class="listing-head">
-          <span class="tag">{{project.type}}</span>
-          <span class="status" ng-class="{'open':project.status==='open','closed':project.status==='closed'}">{{project.status | uppercase}}</span>
-        </div>
-        <h4>{{project.title}}</h4>
-        <p>{{project.description}}</p>
-        <div class="meta-row">
-          <span>{{project.department}} Dept · {{project.year}}</span>
-          <span>{{project.timeLabel}}</span>
-        </div>
-      </article>
+      <project-card-item project="project" ng-repeat="project in vm.projects"></project-card-item>
     </section>
   </main>
 

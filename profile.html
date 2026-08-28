@@ -6,6 +6,8 @@
 <title>TCEMate | My Profile</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
 </head>
 <body ng-controller="ProfileController as vm">
   <header class="topbar">
@@ -35,35 +37,35 @@
 
     <section class="skills">
       <h3>Core Skills</h3>
-      <ul class="skill-tags">
-        <li ng-repeat="skill in vm.profile.skills">{{skill}}</li>
-      </ul>
+      <!-- Custom Directive: Skill Badge List -->
+      <skill-badge-list skills="vm.profile.skills"></skill-badge-list>
     </section>
 
     <aside class="edit-form-section">
       <h3>Update Profile Details</h3>
-      <form id="profileForm" novalidate ng-submit="vm.saveProfile()">
+      <form id="profileForm" name="profileForm" novalidate ng-submit="vm.saveProfile()">
         <fieldset style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;">
           <legend style="padding: 0 0.5rem; font-weight: 700; color: var(--primary);">Basic Info</legend>
           <label for="pName">Full Name</label>
-          <input type="text" id="pName" placeholder="Letters and spaces only" required ng-model="vm.profile.name">
-          <span class="error-msg" id="pNameError">{{ vm.errors.name }}</span>
+          <input type="text" id="pName" name="pName" placeholder="Letters and spaces only" required ng-pattern="/^[a-zA-Z\s]{2,}$/" ng-model="vm.profile.name">
+          <div class="error-msg" ng-messages="profileForm.pName.$error" ng-show="profileForm.pName.$dirty || profileForm.$submitted">
+            <span ng-message="required">Please fill this field.</span>
+            <span ng-message="pattern">Only letters and spaces are allowed.</span>
+          </div>
+          <span class="error-msg" id="pNameError" ng-if="vm.errors.name">{{ vm.errors.name }}</span>
 
           <label for="pBio">Short Bio</label>
-          <textarea id="pBio" rows="3" placeholder="Tell others about your interests" ng-model="vm.profile.bio"></textarea>
+          <textarea id="pBio" name="pBio" rows="3" placeholder="Tell others about your interests" ng-model="vm.profile.bio"></textarea>
         </fieldset>
 
         <fieldset style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;">
           <legend style="padding: 0 0.5rem; font-weight: 700; color: var(--primary);">Academic Details</legend>
 
           <label for="pDept">Department</label>
-          <input type="text" id="pDept" list="deptList" placeholder="Select or type department" required ng-model="vm.profile.department">
-          <datalist id="deptList">
-            <option value="Information Technology"></option>
-            <option value="Computer Science"></option>
-            <option value="ECE"></option>
-            <option value="Mechanical"></option>
-          </datalist>
+          <input type="text" id="pDept" name="pDept" list="deptList" placeholder="Select or type department" required ng-model="vm.profile.department">
+          <div class="error-msg" ng-messages="profileForm.pDept.$error" ng-show="profileForm.pDept.$dirty || profileForm.$submitted">
+            <span ng-message="required">Please select or enter a department.</span>
+          </div>
 
           <label style="margin-top:1rem;">Year of Study</label>
           <div class="radio-group" style="display:flex; gap:1rem; margin-top:0.3rem;">
@@ -80,7 +82,7 @@
             <label style="font-weight:normal;"><input type="checkbox" ng-model="vm.profile.preferences.hackathon"> Available for Hackathons</label>
             <label style="font-weight:normal;"><input type="checkbox" ng-model="vm.profile.preferences.internship"> Looking for Internships</label>
           </div>
-          <p style="margin-top:0.8rem; font-size:0.8rem; color:var(--text-muted);">Note: Selecting <mark>Internships</mark> makes your profile visible to faculty.</p>
+          <p class="ng-if-fade" ng-if="vm.profile.preferences.internship" style="margin-top:0.8rem; font-size:0.8rem; color:var(--text-muted);">Note: Selecting <mark>Internships</mark> makes your profile visible to faculty.</p>
         </fieldset>
 
         <button type="submit" class="btn-primary">Save Changes</button>

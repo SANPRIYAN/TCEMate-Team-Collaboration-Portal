@@ -8,7 +8,8 @@
    * core data manipulation functions (getItems, addItem, deleteItem, updateItem) rather than 
    * binding methods to 'this' (as done in services).
    */
-  angular.module('tcemate').factory('DataService', function () {
+  DataService.$inject = [];
+  function DataService() {
     var storageKey = 'tcemateData';
     var defaults = {
       students: [
@@ -270,5 +271,6 @@
         return Math.round((matched.length / requiredSkills.length) * 100);
       }
     };
-  });
+  }
+  angular.module('tcemate').factory('DataService', DataService);
 })();

@@ -1,15 +1,16 @@
 /**
  * TCEMate - AngularJS Factory & Controllers Reference File
- * Explicitly specifies the AngularJS Factory pattern and controller bindings.
+ * Explicitly specifies the AngularJS Factory pattern, minification-safe DI ($inject),
+ * module dependencies (ngAnimate, ngMessages), and custom directives.
  */
 
 (function () {
   'use strict';
 
   // ----------------------------------------------------
-  // TYPE: Module Definition
+  // TYPE: Module Definition with Dependencies
   // ----------------------------------------------------
-  var app = angular.module('tcemate', []);
+  var app = angular.module('tcemate', ['ngAnimate', 'ngMessages']);
 
   // ----------------------------------------------------
   // TYPE: Custom Filter Definition
@@ -28,21 +29,24 @@
    * AuthService converted from AngularJS .service() to AngularJS .factory().
    * In a Factory, we return a plain JS object exposing public methods.
    */
-  app.factory('AuthService', function () {
+  AuthService.$inject = [];
+  function AuthService() {
     var loginKey = 'loggedIn';
     return {
       isLoggedIn: function () { return sessionStorage.getItem(loginKey) === 'true'; },
       login: function (email, password) { return { ok: true, message: 'Login successful!' }; },
       logout: function () { sessionStorage.setItem(loginKey, 'false'); }
     };
-  });
+  }
+  app.factory('AuthService', AuthService);
 
   /*
    * REFACTOR NOTE (Service -> Factory with Core Logic Functions):
    * DataService converted from AngularJS .service() to AngularJS .factory().
    * Exposes core data manipulation functions: getItems(), addItem(), deleteItem(), updateItem().
    */
-  app.factory('DataService', function () {
+  DataService.$inject = [];
+  function DataService() {
     var items = [];
 
     function getItems() {
@@ -80,21 +84,24 @@
       getApplicants: function () { return getItems(); },
       getCurrentUser: function () { return {}; }
     };
-  });
+  }
+  app.factory('DataService', DataService);
 
   /*
-   * REFACTOR NOTE (Controller using Factory):
-   * Controller injects DataService and AuthService factories.
-   * Calls factory methods (addItem, deleteItem, updateItem, getItems) for all business logic.
+   * REFACTOR NOTE (Controllers using $inject for Minification-Safe DI):
+   * Controllers inject DataService and AuthService factories using $inject annotations.
    */
-  app.controller('LandingController', ['DataService', 'AuthService', '$window', function (DataService, AuthService, $window) {
+  LandingController.$inject = ['DataService', 'AuthService', '$window'];
+  function LandingController(DataService, AuthService, $window) {
     var vm = this;
     vm.user = DataService.getCurrentUser();
     vm.projects = DataService.getProjects().slice(0, 2);
     vm.logout = function () { AuthService.logout(); $window.location.href = 'login.html'; };
-  }]);
+  }
+  app.controller('LandingController', LandingController);
 
-  app.controller('LoginController', ['AuthService', '$window', function (AuthService, $window) {
+  LoginController.$inject = ['AuthService', '$window'];
+  function LoginController(AuthService, $window) {
     var vm = this;
     vm.mode = 'login';
     vm.loginData = { email: '', password: '' };
@@ -103,43 +110,56 @@
         $window.location.href = 'index.html';
       }
     };
-  }]);
+  }
+  app.controller('LoginController', LoginController);
 
-  app.controller('ProjectsController', ['DataService', function (DataService) {
+  ProjectsController.$inject = ['DataService'];
+  function ProjectsController(DataService) {
     var vm = this;
     vm.projects = DataService.getItems();
     vm.filterProjects = function (project) { return true; };
-  }]);
+  }
+  app.controller('ProjectsController', ProjectsController);
 
-  app.controller('CreateListingController', ['DataService', '$window', function (DataService, $window) {
+  CreateListingController.$inject = ['DataService', '$window'];
+  function CreateListingController(DataService, $window) {
     var vm = this;
     vm.teamSize = 2;
     vm.listing = { title: '', description: '' };
     vm.submitListing = function () { DataService.addItem(vm.listing); };
-  }]);
+  }
+  app.controller('CreateListingController', CreateListingController);
 
-  app.controller('ApplicantsController', ['DataService', function (DataService) {
+  ApplicantsController.$inject = ['DataService'];
+  function ApplicantsController(DataService) {
     var vm = this;
     vm.applicants = DataService.getItems();
     vm.handleApplicant = function (applicant) { vm.applicants = DataService.deleteItem(applicant.id); };
-  }]);
+  }
+  app.controller('ApplicantsController', ApplicantsController);
 
-  app.controller('InterestsController', ['DataService', function (DataService) {
+  InterestsController.$inject = ['DataService'];
+  function InterestsController(DataService) {
     var vm = this;
     vm.activeFilter = 'all';
     vm.setFilter = function (filter) { vm.activeFilter = filter; };
-  }]);
+  }
+  app.controller('InterestsController', InterestsController);
 
-  app.controller('ProfileController', ['DataService', '$window', function (DataService, $window) {
+  ProfileController.$inject = ['DataService', '$window'];
+  function ProfileController(DataService, $window) {
     var vm = this;
     vm.profile = DataService.getCurrentUser();
     vm.saveProfile = function () { DataService.updateItem(vm.profile.id, vm.profile); };
-  }]);
+  }
+  app.controller('ProfileController', ProfileController);
 
-  app.controller('NotificationsController', ['DataService', function (DataService) {
+  NotificationsController.$inject = ['DataService'];
+  function NotificationsController(DataService) {
     var vm = this;
     vm.notifications = DataService.getItems();
     vm.markAllRead = function () { DataService.updateItem(1, { unread: false }); };
-  }]);
+  }
+  app.controller('NotificationsController', NotificationsController);
 
 })();

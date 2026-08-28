@@ -6,6 +6,8 @@
 <title>TCEMate | Notifications</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
 </head>
 <body ng-controller="NotificationsController as vm">
   <header class="topbar">
@@ -30,14 +32,7 @@
     </section>
 
     <section class="notif-list" id="notifList">
-      <article class="notif-item" ng-repeat="notification in vm.notifications" ng-class="{'unread': notification.unread}">
-        <div class="notif-icon">{{notification.icon}}</div>
-        <div class="notif-body">
-          <h4>{{notification.title}}</h4>
-          <p>{{notification.message}}</p>
-          <span class="notif-time">{{notification.timeLabel}}</span>
-        </div>
-      </article>
+      <notification-item-card notification="notification" ng-repeat="notification in vm.notifications"></notification-item-card>
     </section>
   </main>
 

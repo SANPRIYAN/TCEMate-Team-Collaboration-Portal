@@ -6,6 +6,8 @@
 <title>TCEMate | Full Profile</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
 </head>
 <body ng-controller="ProfileController as vm">
   <header class="topbar">
@@ -71,11 +73,7 @@
     <section class="portfolio-section">
       <h3>Portfolio Projects</h3>
       <div class="portfolio-grid">
-        <article class="portfolio-card" ng-repeat="project in vm.profile.projects">
-          <h4>{{project}}</h4>
-          <p>Role: {{ project === 'AI Career Intelligence Platform' ? 'NLP & Matching Logic' : 'Backend Developer' }}</p>
-          <span class="status" ng-class="{'open': project === 'AI Career Intelligence Platform', 'closed': project === 'TCE Parking Portal'}">{{ project === 'AI Career Intelligence Platform' ? 'Active' : 'Completed' }}</span>
-        </article>
+        <portfolio-project-card project="project" ng-repeat="project in vm.profile.projects"></portfolio-project-card>
       </div>
     </section>
 

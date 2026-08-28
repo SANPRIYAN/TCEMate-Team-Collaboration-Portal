@@ -6,6 +6,8 @@
 <title>TCEMate | Manage Applicants</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
 </head>
 <body ng-controller="ApplicantsController as vm">
   <header class="topbar">
@@ -34,18 +36,7 @@
     </section>
 
     <section class="applicant-list" id="applicantList">
-      <article class="applicant-row" ng-repeat="applicant in vm.applicants | orderBy:'-matchScore'">
-        <div class="applicant-avatar">{{ vm.getInitials(applicant.name) }}</div>
-        <div class="applicant-info">
-          <h4>{{ applicant.name }} <span class="reg-id">{{ applicant.regNo }}</span></h4>
-          <p>{{ applicant.department }} · {{ applicant.year }} · Skills: {{ applicant.skills.join(', ') }}</p>
-          <p class="sub">{{ applicant.matchScore | matchLabel }}</p>
-        </div>
-        <div class="applicant-actions">
-          <button class="btn-accept" ng-click="vm.handleApplicant(applicant)">Accept</button>
-          <button class="btn-reject" ng-click="vm.handleApplicant(applicant)">Reject</button>
-        </div>
-      </article>
+      <applicant-row-card applicant="applicant" get-initials="vm.getInitials(name)" on-action="vm.handleApplicant(applicant)" ng-repeat="applicant in vm.applicants | orderBy:'-matchScore'"></applicant-row-card>
     </section>
 
     <section class="team-section">

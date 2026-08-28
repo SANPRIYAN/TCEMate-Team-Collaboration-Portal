@@ -6,6 +6,8 @@
 <title>TCEMate | My Interests</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
 </head>
 <body ng-controller="InterestsController as vm">
   <header class="topbar">
@@ -32,13 +34,7 @@
     </section>
 
     <section class="interest-list" id="interestList">
-      <article class="interest-row" ng-repeat="item in vm.interests | filter:vm.filterByStatus" data-status="{{item.status}}">
-        <div class="interest-info">
-          <h4>{{item.title}}</h4>
-          <p>{{item.details}}</p>
-        </div>
-        <span class="status-pill" ng-class="{'pending': item.status === 'pending', 'accepted': item.status === 'accepted', 'rejected': item.status === 'rejected'}">{{item.status | uppercase}}</span>
-      </article>
+      <interest-row-item item="item" ng-repeat="item in vm.interests | filter:vm.filterByStatus"></interest-row-item>
     </section>
   </main>
 

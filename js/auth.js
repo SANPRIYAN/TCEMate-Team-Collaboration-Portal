@@ -7,7 +7,8 @@
    * The factory pattern returns a custom object literal with public functions,
    * avoiding 'this' bindings and encapsulating logic internally.
    */
-  angular.module('tcemate').factory('AuthService', function () {
+  AuthService.$inject = [];
+  function AuthService() {
     var emailPattern = /^[^\s@]+@(student\.)?tce\.edu$/;
     var passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     var loginKey = 'loggedIn';
@@ -61,5 +62,7 @@
         setLoggedIn(false);
       }
     };
-  });
+  }
+
+  angular.module('tcemate').factory('AuthService', AuthService);
 })();

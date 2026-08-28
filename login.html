@@ -6,6 +6,8 @@
 <title>TCEMate | Login</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
 </head>
 <body class="auth-body" ng-controller="LoginController as vm">
   <header class="topbar">
@@ -14,45 +16,80 @@
   </header>
 
   <main class="auth-wrap">
-    <form class="auth-card" id="loginForm" novalidate ng-submit="vm.login()" ng-hide="vm.mode !== 'login'">
+    <form class="auth-card" id="loginForm" name="loginForm" novalidate ng-submit="vm.login()" ng-hide="vm.mode !== 'login'">
+      <!-- Custom Directive: Auth Branding Header -->
+      <auth-branding-header></auth-branding-header>
+
       <h2>Log in to TCEMate</h2>
       <p class="sub">Enter your college email and password</p>
 
       <label for="loginEmail">Email</label>
-      <input type="email" id="loginEmail" name="loginEmail" placeholder="you@student.tce.edu" required ng-model="vm.loginData.email">
-      <span class="error-msg" id="loginEmailError">{{ vm.loginErrors.email }}</span>
+      <input type="email" id="loginEmail" name="loginEmail" placeholder="you@student.tce.edu" required ng-pattern="/^[^\s@]+@(student\.)?tce\.edu$/" ng-model="vm.loginData.email">
+      <div class="error-msg" ng-messages="loginForm.loginEmail.$error" ng-show="loginForm.loginEmail.$dirty || loginForm.$submitted">
+        <span ng-message="required">Please fill this field.</span>
+        <span ng-message="email">Please enter a valid email address.</span>
+        <span ng-message="pattern">Please enter a valid tce.edu email address.</span>
+      </div>
+      <span class="error-msg" id="loginEmailError" ng-if="vm.loginErrors.email">{{ vm.loginErrors.email }}</span>
 
       <label for="loginPassword">Password</label>
       <input type="password" id="loginPassword" name="loginPassword" placeholder="••••••••" minlength="8" required ng-model="vm.loginData.password">
-      <span class="error-msg" id="loginPasswordError">{{ vm.loginErrors.password }}</span>
+      <div class="error-msg" ng-messages="loginForm.loginPassword.$error" ng-show="loginForm.loginPassword.$dirty || loginForm.$submitted">
+        <span ng-message="required">Please fill this field.</span>
+        <span ng-message="minlength">Password must be at least 8 characters.</span>
+      </div>
+      <span class="error-msg" id="loginPasswordError" ng-if="vm.loginErrors.password">{{ vm.loginErrors.password }}</span>
 
       <button type="submit" class="btn-primary">Log In</button>
       <p class="switch-link">New here? <a href="#" id="showSignup" ng-click="vm.toggleSignup()">Create an account</a></p>
     </form>
 
-    <form class="auth-card hidden" id="signupForm" novalidate ng-submit="vm.register()" ng-hide="vm.mode !== 'signup'">
+    <form class="auth-card" id="signupForm" name="signupForm" novalidate ng-submit="vm.register()" ng-hide="vm.mode !== 'signup'">
+      <!-- Custom Directive: Auth Branding Header -->
+      <auth-branding-header></auth-branding-header>
+
       <h2>Create your account</h2>
       <p class="sub">Join the IT Dept collaboration network</p>
 
       <label for="fullName">Full Name</label>
-      <input type="text" id="fullName" name="fullName" placeholder="Only letters and spaces" required ng-model="vm.signupData.fullName">
-      <span class="error-msg" id="fullNameError">{{ vm.signupErrors.fullName }}</span>
+      <input type="text" id="fullName" name="fullName" placeholder="Only letters and spaces" required ng-pattern="/^[a-zA-Z\s]{2,}$/" ng-model="vm.signupData.fullName">
+      <div class="error-msg" ng-messages="signupForm.fullName.$error" ng-show="signupForm.fullName.$dirty || signupForm.$submitted">
+        <span ng-message="required">Please fill this field.</span>
+        <span ng-message="pattern">Only letters and spaces are allowed.</span>
+      </div>
+      <span class="error-msg" id="fullNameError" ng-if="vm.signupErrors.fullName">{{ vm.signupErrors.fullName }}</span>
 
       <label for="signupEmail">Email</label>
-      <input type="email" id="signupEmail" name="signupEmail" placeholder="you@student.tce.edu" required ng-model="vm.signupData.email">
-      <span class="error-msg" id="signupEmailError">{{ vm.signupErrors.email }}</span>
+      <input type="email" id="signupEmail" name="signupEmail" placeholder="you@student.tce.edu" required ng-pattern="/^[^\s@]+@(student\.)?tce\.edu$/" ng-model="vm.signupData.email">
+      <div class="error-msg" ng-messages="signupForm.signupEmail.$error" ng-show="signupForm.signupEmail.$dirty || signupForm.$submitted">
+        <span ng-message="required">Please fill this field.</span>
+        <span ng-message="pattern">Please enter a valid tce.edu email address.</span>
+      </div>
+      <span class="error-msg" id="signupEmailError" ng-if="vm.signupErrors.email">{{ vm.signupErrors.email }}</span>
 
       <label for="regNo">Register Number</label>
-      <input type="text" id="regNo" name="regNo" placeholder="Digits only, e.g. 2023IT045" required ng-model="vm.signupData.regNo">
-      <span class="error-msg" id="regNoError">{{ vm.signupErrors.regNo }}</span>
+      <input type="text" id="regNo" name="regNo" placeholder="Digits only, e.g. 2023IT045" required ng-pattern="/^[a-zA-Z0-9]{5,}$/" ng-model="vm.signupData.regNo">
+      <div class="error-msg" ng-messages="signupForm.regNo.$error" ng-show="signupForm.regNo.$dirty || signupForm.$submitted">
+        <span ng-message="required">Please fill this field.</span>
+        <span ng-message="pattern">Register number must be letters/digits only.</span>
+      </div>
+      <span class="error-msg" id="regNoError" ng-if="vm.signupErrors.regNo">{{ vm.signupErrors.regNo }}</span>
 
       <label for="phone">Phone Number</label>
-      <input type="tel" id="phone" name="phone" placeholder="10 digits only" required ng-model="vm.signupData.phone">
-      <span class="error-msg" id="phoneError">{{ vm.signupErrors.phone }}</span>
+      <input type="tel" id="phone" name="phone" placeholder="10 digits only" required ng-pattern="/^[0-9]{10}$/" ng-model="vm.signupData.phone">
+      <div class="error-msg" ng-messages="signupForm.phone.$error" ng-show="signupForm.phone.$dirty || signupForm.$submitted">
+        <span ng-message="required">Please fill this field.</span>
+        <span ng-message="pattern">Phone number must be exactly 10 digits.</span>
+      </div>
+      <span class="error-msg" id="phoneError" ng-if="vm.signupErrors.phone">{{ vm.signupErrors.phone }}</span>
 
       <label for="signupPassword">Password</label>
       <input type="password" id="signupPassword" name="signupPassword" placeholder="Min 8 characters" minlength="8" required ng-model="vm.signupData.password">
-      <span class="error-msg" id="signupPasswordError">{{ vm.signupErrors.password }}</span>
+      <div class="error-msg" ng-messages="signupForm.signupPassword.$error" ng-show="signupForm.signupPassword.$dirty || signupForm.$submitted">
+        <span ng-message="required">Please fill this field.</span>
+        <span ng-message="minlength">Password must be at least 8 characters.</span>
+      </div>
+      <span class="error-msg" id="signupPasswordError" ng-if="vm.signupErrors.password">{{ vm.signupErrors.password }}</span>
 
       <button type="submit" class="btn-primary">Sign Up</button>
       <p class="switch-link">Already have an account? <a href="#" id="showLogin" ng-click="vm.toggleLogin()">Log in</a></p>
