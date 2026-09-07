@@ -1,0 +1,14 @@
+# AI Tooling & Agent Files (Non-code)
+.agent/
+.agents/
+.impeccable/
+
+# Dependencies
+node_modules/
+
+# IDE & System Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
