@@ -1,7 +1,8 @@
 (function () {
   'use strict';
 
-  var app = angular.module('tcemate', ['ngAnimate', 'ngMessages']);
+  // BUG 1 (Dependency Injection Spelling Error): 'ngAnimat' instead of 'ngAnimate' | FIX: Change 'ngAnimat' to 'ngAnimate'
+  var app = angular.module('tcemate', ['ngAnimat', 'ngMessages']);
 
   // Custom Filter
   app.filter('matchLabel', function () {
@@ -198,9 +199,7 @@
       scope: {
         skills: '='
       },
-      template: '<ul class="skill-tags">' +
-                '  <li class="skill-tag" ng-repeat="skill in skills">{{skill}}</li>' +
-                '</ul>'
+      template: '<div class="tags-group"><span class="skill-tag" ng-repeat="sk in skills">{{sk}}</span></div>'
     };
   });
 
@@ -217,23 +216,26 @@
 
 
   // ----------------------------------------------------
-  // CONTROLLERS WITH MINIFICATION-SAFE DEPENDENCY INJECTION ($inject)
+  // CONTROLLERS
   // ----------------------------------------------------
 
-  // 1. Landing Controller
+  // 1. Landing / Dashboard Controller
   LandingController.$inject = ['DataService', 'AuthService', '$window'];
   function LandingController(DataService, AuthService, $window) {
     var vm = this;
+
+    // BUG 2 (Uninitialized Variable / Null Property Access): vm.userProfile = null | FIX: Initialize vm.userProfile = { name: "Sanjaypriyan S", regNo: "24IT045" };
+    vm.userProfile = null;
 
     if (!AuthService.isLoggedIn() && $window.location.href.indexOf('login.html') === -1) {
       $window.location.href = 'login.html';
       return;
     }
 
-    vm.user = DataService.getCurrentUser();
-    vm.storageUsed = 45;
-    vm.stats = DataService.getLandingStats();
+    vm.user = AuthService.getCurrentUser();
+    vm.stats = DataService.getDashboardStats();
     vm.projects = DataService.getProjects().slice(0, 2);
+    vm.storageUsed = 68;
 
     vm.logout = function () {
       AuthService.logout();

@@ -1,0 +1,13 @@
+{
+  "name": "tcemate-collaboration-portal",
+  "version": "1.0.0",
+  "description": "TCEMate Campus Collaboration Portal Node.js Backend API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "debug": "node --inspect server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
