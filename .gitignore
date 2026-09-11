@@ -5,6 +5,10 @@
 
 # Dependencies
 node_modules/
+backend/node_modules/
+
+# Environment secrets
+backend/.env
 
 # IDE & System Files
 .vscode/

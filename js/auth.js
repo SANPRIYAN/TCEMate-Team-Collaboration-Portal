@@ -1,65 +1,105 @@
 (function () {
   'use strict';
 
-  /* 
-   * REFACTOR NOTE (Service -> Factory):
-   * Converted AuthService from AngularJS .service() to AngularJS .factory().
-   * The factory pattern returns a custom object literal with public functions,
-   * avoiding 'this' bindings and encapsulating logic internally.
-   */
-  AuthService.$inject = [];
-  function AuthService() {
-    var emailPattern = /^[^\s@]+@(student\.)?tce\.edu$/;
-    var passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-    var loginKey = 'loggedIn';
+  AuthService.$inject = ['$http', '$window', 'API_BASE_URL'];
+  function AuthService($http, $window, API_BASE_URL) {
+    var tokenKey = 'tcemateToken';
+    var userKey = 'tcemateUser';
 
-    function setLoggedIn(value) {
-      sessionStorage.setItem(loginKey, value ? 'true' : 'false');
+    function setToken(token) {
+      if (token) {
+        sessionStorage.setItem(tokenKey, token);
+      } else {
+        sessionStorage.removeItem(tokenKey);
+      }
+    }
+
+    function setUser(user) {
+      if (user) {
+        sessionStorage.setItem(userKey, JSON.stringify(user));
+      } else {
+        sessionStorage.removeItem(userKey);
+      }
+    }
+
+    function callApi(endpoint, payload, method) {
+      var config = {
+        method: method || 'GET',
+        url: API_BASE_URL + endpoint
+      };
+
+      if (payload !== undefined) {
+        config.data = payload;
+        config.headers = config.headers || {};
+        config.headers['Content-Type'] = 'application/json';
+      }
+
+      var token = sessionStorage.getItem(tokenKey);
+      if (token) {
+        config.headers = {
+          Authorization: 'Bearer ' + token
+        };
+      }
+
+      return $http(config).then(function (response) {
+        return response.data || {};
+      }).catch(function (error) {
+        return {
+          success: false,
+          message: error && error.data && error.data.message ? error.data.message : 'Request failed.'
+        };
+      });
     }
 
     return {
+      getToken: function () {
+        return sessionStorage.getItem(tokenKey);
+      },
+      getUser: function () {
+        try {
+          return JSON.parse(sessionStorage.getItem(userKey));
+        } catch (e) {
+          return null;
+        }
+      },
       isLoggedIn: function () {
-        return sessionStorage.getItem(loginKey) === 'true';
+        return !!sessionStorage.getItem(tokenKey);
       },
       login: function (email, password) {
-        var errors = {};
-        if (!emailPattern.test(email)) {
-          errors.email = 'Please enter a valid tce.edu email address.';
-        }
-        if (!passwordPattern.test(password)) {
-          errors.password = 'Password must be 8+ chars with uppercase, lowercase, number, and special character.';
-        }
-        if (Object.keys(errors).length) {
-          return { ok: false, errors: errors };
-        }
-        setLoggedIn(true);
-        return { ok: true, message: 'Login successful! Redirecting...' };
+        return callApi('/auth/login', { email: email, password: password }, 'POST').then(function (result) {
+          if (result && result.success && result.token) {
+            setToken(result.token);
+            setUser(result.user || null);
+            return { ok: true, success: true, message: 'Login successful! Redirecting...', user: result.user };
+          }
+
+          return result && result.success === false ? { ok: false, success: false, message: result.message || 'Login failed.' } : { ok: false, success: false, message: 'Login failed.' };
+        });
       },
       register: function (data) {
-        var errors = {};
-        if (!/^[a-zA-Z\s]{2,}$/.test(data.fullName || '')) {
-          errors.fullName = 'Only letters and spaces are allowed.';
-        }
-        if (!emailPattern.test(data.email || '')) {
-          errors.email = 'Please enter a valid tce.edu email address.';
-        }
-        if (!/^[a-zA-Z0-9]{5,}$/.test(data.regNo || '')) {
-          errors.regNo = 'Register number must be letters/digits only.';
-        }
-        if (!/^[0-9]{10}$/.test(data.phone || '')) {
-          errors.phone = 'Phone number must be exactly 10 digits.';
-        }
-        if (!passwordPattern.test(data.password || '')) {
-          errors.password = 'Password must be 8+ chars with uppercase, lowercase, number, and special character.';
-        }
-        if (Object.keys(errors).length) {
-          return { ok: false, errors: errors };
-        }
-        setLoggedIn(true);
-        return { ok: true, message: 'Account created! Redirecting...' };
+        return callApi('/auth/register', {
+          fullName: data.fullName,
+          email: data.email,
+          regNo: data.regNo,
+          phone: data.phone,
+          password: data.password
+        }, 'POST').then(function (result) {
+          if (result && result.success && result.token) {
+            setToken(result.token);
+            setUser(result.user || null);
+            return { ok: true, success: true, message: 'Account created! Redirecting...', user: result.user };
+          }
+
+          return { ok: false, success: false, message: result && result.message ? result.message : 'Registration failed.' };
+        });
       },
       logout: function () {
-        setLoggedIn(false);
+        setToken(null);
+        setUser(null);
+        if ($window) {
+          $window.sessionStorage.removeItem(tokenKey);
+          $window.sessionStorage.removeItem(userKey);
+        }
       }
     };
   }

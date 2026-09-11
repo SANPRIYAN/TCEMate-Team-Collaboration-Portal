@@ -2,6 +2,7 @@
   'use strict';
 
   var app = angular.module('tcemate', ['ngAnimate', 'ngMessages']);
+  app.constant('API_BASE_URL', 'http://localhost:5000/api');
 
   // Custom Filter
   app.filter('matchLabel', function () {
@@ -230,10 +231,18 @@
       return;
     }
 
-    vm.user = DataService.getCurrentUser();
+    DataService.getCurrentUser().then(function (user) {
+      vm.user = user || { name: 'Student', department: 'Information Technology', year: '3rd Year', section: 'Section A' };
+    });
+
     vm.storageUsed = 45;
-    vm.stats = DataService.getLandingStats();
-    vm.projects = DataService.getProjects().slice(0, 2);
+    DataService.getLandingStats().then(function (stats) {
+      vm.stats = stats;
+    });
+
+    DataService.getProjects().then(function (projects) {
+      vm.projects = (projects || []).slice(0, 2);
+    });
 
     vm.logout = function () {
       AuthService.logout();
@@ -267,23 +276,31 @@
     };
 
     vm.login = function () {
-      var result = AuthService.login(vm.loginData.email, vm.loginData.password);
-      if (result.ok) {
-        $window.alert(result.message);
-        $window.location.href = 'index.html';
-      } else {
-        vm.loginErrors = result.errors;
-      }
+      AuthService.login(vm.loginData.email, vm.loginData.password).then(function (result) {
+        if (result && result.ok) {
+          $window.alert(result.message || 'Login successful! Redirecting...');
+          $window.location.href = 'index.html';
+        } else {
+          vm.loginErrors = {};
+          if (result && result.message) {
+            vm.loginErrors.email = result.message;
+          }
+        }
+      });
     };
 
     vm.register = function () {
-      var result = AuthService.register(vm.signupData);
-      if (result.ok) {
-        $window.alert(result.message);
-        $window.location.href = 'index.html';
-      } else {
-        vm.signupErrors = result.errors;
-      }
+      AuthService.register(vm.signupData).then(function (result) {
+        if (result && result.ok) {
+          $window.alert(result.message || 'Account created! Redirecting...');
+          $window.location.href = 'index.html';
+        } else {
+          vm.signupErrors = {};
+          if (result && result.message) {
+            vm.signupErrors.email = result.message;
+          }
+        }
+      });
     };
   }
   app.controller('LoginController', LoginController);
@@ -298,7 +315,9 @@
       return;
     }
 
-    vm.projects = DataService.getProjects();
+    DataService.getProjects().then(function (projects) {
+      vm.projects = projects || [];
+    });
     vm.searchText = '';
     vm.department = 'Information Technology';
     vm.year = '3rd Year';
@@ -365,8 +384,21 @@
       if (Object.keys(vm.errors).length) {
         return;
       }
-      DataService.createListing(vm.listing, vm.teamSize);
-      $window.alert('Listing published! (demo)');
+      DataService.createListing(vm.listing, vm.teamSize).then(function (response) {
+        if (response && response.success) {
+          $window.alert('Listing published successfully.');
+          vm.listing = {
+            title: '',
+            type: '',
+            description: '',
+            department: 'Information Technology',
+            year: '3rd Year',
+            deadline: ''
+          };
+        } else {
+          $window.alert(response && response.message ? response.message : 'Unable to publish listing.');
+        }
+      });
     };
 
     vm.logout = function () {
@@ -386,7 +418,9 @@
       return;
     }
 
-    vm.applicants = DataService.getApplicants();
+    DataService.getApplicants().then(function (applicants) {
+      vm.applicants = applicants || [];
+    });
     vm.teamMembers = DataService.getTeams();
 
     vm.getInitials = function (name) {
@@ -396,7 +430,11 @@
     };
 
     vm.handleApplicant = function (applicant) {
-      vm.applicants = DataService.removeApplicant(applicant.id);
+      DataService.removeApplicant(applicant.id).then(function (response) {
+        if (response && response.success) {
+          vm.applicants = vm.applicants.filter(function (item) { return item.id !== applicant.id; });
+        }
+      });
     };
 
     vm.logout = function () {
@@ -416,7 +454,9 @@
       return;
     }
 
-    vm.interests = DataService.getInterests();
+    DataService.getInterests().then(function (interests) {
+      vm.interests = interests || [];
+    });
     vm.activeFilter = 'all';
 
     vm.filterByStatus = function (item) {
@@ -444,8 +484,10 @@
       return;
     }
 
-    vm.profile = DataService.getCurrentUser();
-    vm.profile.preferences = vm.profile.preferences || { hackathon: true, internship: true };
+    DataService.getCurrentUser().then(function (user) {
+      vm.profile = user || { name: 'Student', department: 'Information Technology', year: '3rd Year', section: 'Section A', preferences: { hackathon: true, internship: true } };
+      vm.profile.preferences = vm.profile.preferences || { hackathon: true, internship: true };
+    });
     vm.errors = {};
 
     vm.getInitials = function (name) {
@@ -462,8 +504,14 @@
       if (Object.keys(vm.errors).length) {
         return;
       }
-      DataService.updateProfile(vm.profile);
-      $window.alert('Profile updated! (demo)');
+      DataService.updateProfile(vm.profile).then(function (updatedUser) {
+        if (updatedUser) {
+          vm.profile = updatedUser;
+          $window.alert('Profile updated successfully.');
+        } else {
+          $window.alert('Unable to update profile.');
+        }
+      });
     };
 
     vm.logout = function () {
@@ -483,7 +531,9 @@
       return;
     }
 
-    vm.posts = DataService.getDiscussions();
+    DataService.getDiscussions().then(function (posts) {
+      vm.posts = posts || [];
+    });
 
     vm.logout = function () {
       AuthService.logout();
@@ -516,9 +566,16 @@
       if (Object.keys(vm.errors).length) {
         return;
       }
-      DataService.addDiscussion(vm.post);
-      $window.alert('Posted to forum! (demo)');
-      vm.post = { title: '', body: '' };
+      DataService.addDiscussion(vm.post).then(function (response) {
+        if (response && response.success) {
+          $window.alert('Posted to forum successfully.');
+          vm.post = { title: '', body: '' };
+          return DataService.getDiscussions().then(function (posts) {
+            vm.posts = posts || [];
+          });
+        }
+        $window.alert(response && response.message ? response.message : 'Unable to create post.');
+      });
     };
 
     vm.logout = function () {
@@ -538,10 +595,19 @@
       return;
     }
 
-    vm.notifications = DataService.getNotifications();
+    DataService.getNotifications().then(function (notifications) {
+      vm.notifications = notifications || [];
+    });
 
     vm.markAllRead = function () {
-      vm.notifications = DataService.markAllNotificationsRead();
+      DataService.markAllNotificationsRead().then(function (response) {
+        if (response && response.success) {
+          vm.notifications = vm.notifications.map(function (item) {
+            item.unread = false;
+            return item;
+          });
+        }
+      });
     };
 
     vm.logout = function () {
