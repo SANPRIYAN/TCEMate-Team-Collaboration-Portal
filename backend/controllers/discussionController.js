@@ -1,4 +1,5 @@
 const Discussion = require('../models/Discussion');
+const mongoose = require('mongoose');
 
 const discussionToResponse = (discussion) => ({
   id: discussion._id,
@@ -24,6 +25,9 @@ exports.getDiscussions = async (req, res) => {
 
 exports.getDiscussionById = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid discussion ID.' });
+    }
     const discussion = await Discussion.findById(req.params.id);
     if (!discussion) {
       return res.status(404).json({ success: false, message: 'Discussion not found.' });

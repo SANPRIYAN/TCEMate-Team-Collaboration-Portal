@@ -32,11 +32,12 @@
         <option>AI Career Intelligence Platform</option>
         <option>TCE Parking Portal</option>
       </select>
-      <p class="sub">{{ vm.applicants.length }} pending applications</p>
+      <p class="sub">{{ vm.applicants.length }} applications</p>
     </section>
 
     <section class="applicant-list" id="applicantList">
-      <applicant-row-card applicant="applicant" get-initials="vm.getInitials(name)" on-action="vm.handleApplicant(applicant)" ng-repeat="applicant in vm.applicants | orderBy:'-matchScore'"></applicant-row-card>
+      <applicant-row-card applicant="applicant" get-initials="vm.getInitials(name)" on-accept="vm.updateApplicant(applicant, 'accepted')" on-reject="vm.updateApplicant(applicant, 'rejected')" ng-repeat="applicant in vm.applicants | orderBy:'-matchScore'"></applicant-row-card>
+      <p class="sub" ng-if="!vm.applicants.length">No applications yet.</p>
     </section>
 
     <section class="team-section">

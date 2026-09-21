@@ -29,6 +29,10 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
 
+    if (!/^[a-zA-Z]+(?:[ '-][a-zA-Z]+)*$/.test(fullName.trim())) {
+      return res.status(400).json({ success: false, message: 'Name may contain letters, spaces, apostrophes, and hyphens only.' });
+    }
+
     const emailPattern = /^[^\s@]+@(student\.)?tce\.edu$/i;
     if (!emailPattern.test(email)) {
       return res.status(400).json({ success: false, message: 'Please enter a valid tce.edu email address.' });

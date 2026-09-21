@@ -42,6 +42,7 @@
       restrict: 'E',
       scope: {
         project: '='
+        ,onApply: '&'
       },
       template: '<article class="listing-card">' +
                 '  <div class="listing-head">' +
@@ -54,6 +55,7 @@
                 '    <span class="dept-label">{{project.department}} Dept · {{project.year}}</span>' +
                 '    <span>{{project.timeLabel}}</span>' +
                 '  </div>' +
+                '  <button type="button" class="btn-primary" ng-if="project.canApply" ng-disabled="project.applying || project.applied" ng-click="onApply({project: project})">{{project.applied ? "Applied" : (project.applying ? "Applying..." : "Show Interest")}}</button>' +
                 '</article>'
     };
   });
@@ -125,7 +127,8 @@
       scope: {
         applicant: '=',
         getInitials: '&',
-        onAction: '&'
+        onAccept: '&',
+        onReject: '&'
       },
       template: '<article class="applicant-row">' +
                 '  <div class="applicant-avatar">{{ getInitials({name: applicant.name}) }}</div>' +
@@ -135,8 +138,9 @@
                 '    <p class="sub">{{ applicant.matchScore | matchLabel }}</p>' +
                 '  </div>' +
                 '  <div class="applicant-actions">' +
-                '    <button class="btn-accept" ng-click="onAction({applicant: applicant})">Accept</button>' +
-                '    <button class="btn-reject" ng-click="onAction({applicant: applicant})">Reject</button>' +
+                '    <span class="status-pill" ng-if="applicant.status !== \'pending\'">{{applicant.status | uppercase}}</span>' +
+                '    <button class="btn-accept" ng-if="applicant.status === \'pending\'" ng-click="onAccept({applicant: applicant})">Accept</button>' +
+                '    <button class="btn-reject" ng-if="applicant.status === \'pending\'" ng-click="onReject({applicant: applicant})">Reject</button>' +
                 '  </div>' +
                 '</article>'
     };
@@ -151,8 +155,9 @@
       },
       template: '<article class="interest-row" data-status="{{item.status}}">' +
                 '  <div class="interest-info">' +
-                '    <h4>{{item.title}}</h4>' +
-                '    <p>{{item.details}}</p>' +
+                '    <h4>{{item.projectDetails.title || item.title}}</h4>' +
+                '    <p>{{item.projectDetails.description || item.details}}</p>' +
+                '    <small>{{item.createdAt | date:"medium"}}</small>' +
                 '  </div>' +
                 '  <span class="status-pill" ng-class="{\'pending\': item.status===\'pending\', \'accepted\': item.status===\'accepted\', \'rejected\': item.status===\'rejected\'}">{{item.status | uppercase}}</span>' +
                 '</article>'
@@ -165,6 +170,7 @@
       restrict: 'E',
       scope: {
         notification: '='
+        ,onRead: '&'
       },
       template: '<article class="notif-item" ng-class="{\'unread\': notification.unread}">' +
                 '  <div class="notif-icon">{{notification.icon}}</div>' +
@@ -172,6 +178,7 @@
                 '    <h4>{{notification.title}}</h4>' +
                 '    <p>{{notification.message}}</p>' +
                 '    <span class="notif-time">{{notification.timeLabel}}</span>' +
+                '    <button type="button" class="btn-secondary" ng-if="notification.unread" ng-click="onRead({notification: notification})">Mark as read</button>' +
                 '  </div>' +
                 '</article>'
     };
@@ -315,8 +322,24 @@
       return;
     }
 
+    vm.projects = [];
+    vm.currentUser = AuthService.getUser();
     DataService.getProjects().then(function (projects) {
-      vm.projects = projects || [];
+      DataService.getMyApplications().then(function (applications) {
+        var applied = {};
+        (applications || []).forEach(function (application) {
+          var projectId = application.projectDetails && application.projectDetails.id;
+          if (!projectId && application.project) {
+            projectId = application.project.id || application.project._id || application.project;
+          }
+          if (projectId) applied[projectId.toString()] = true;
+        });
+        vm.projects = (projects || []).map(function (project) {
+          project.canApply = project.status === 'open' && (!project.createdBy || project.createdBy !== (vm.currentUser && vm.currentUser.id));
+          project.applied = !!applied[project.id.toString()];
+          return project;
+        });
+      });
     });
     vm.searchText = '';
     vm.department = 'Information Technology';
@@ -333,6 +356,20 @@
     vm.logout = function () {
       AuthService.logout();
       $window.location.href = 'login.html';
+    };
+
+    vm.applyToProject = function (project) {
+      if (project.applying || project.applied) return;
+      project.applying = true;
+      DataService.applyToProject(project, vm.currentUser).then(function (response) {
+        project.applying = false;
+        if (response && response.success) {
+          project.applied = true;
+          $window.alert('Your interest has been submitted.');
+        } else {
+          $window.alert(response && response.message ? response.message : 'Unable to submit your interest.');
+        }
+      });
     };
   }
   app.controller('ProjectsController', ProjectsController);
@@ -429,10 +466,16 @@
       }).join('').slice(0, 2);
     };
 
-    vm.handleApplicant = function (applicant) {
-      DataService.removeApplicant(applicant.id).then(function (response) {
+    vm.updateApplicant = function (applicant, status) {
+      if (applicant.updating) return;
+      applicant.updating = true;
+      DataService.updateApplicantStatus(applicant.id, status).then(function (response) {
+        applicant.updating = false;
         if (response && response.success) {
-          vm.applicants = vm.applicants.filter(function (item) { return item.id !== applicant.id; });
+          applicant.status = status;
+          $window.alert(status === 'accepted' ? 'Applicant accepted.' : 'Applicant rejected.');
+        } else {
+          $window.alert(response && response.message ? response.message : 'Unable to update applicant.');
         }
       });
     };
@@ -498,8 +541,8 @@
 
     vm.saveProfile = function () {
       vm.errors = {};
-      if (!/^[a-zA-Z\s]{2,}$/.test(vm.profile.name || '')) {
-        vm.errors.name = 'Only letters and spaces are allowed.';
+      if (!/^[a-zA-Z]+(?:[ '-][a-zA-Z]+)*$/.test((vm.profile.name || '').trim())) {
+        vm.errors.name = 'Use letters, spaces, apostrophes, or hyphens only.';
       }
       if (Object.keys(vm.errors).length) {
         return;
@@ -598,6 +641,15 @@
     DataService.getNotifications().then(function (notifications) {
       vm.notifications = notifications || [];
     });
+
+    vm.markRead = function (notification) {
+      if (!notification.unread || notification.updating) return;
+      notification.updating = true;
+      DataService.markNotificationRead(notification.id).then(function (response) {
+        notification.updating = false;
+        if (response && response.success) notification.unread = false;
+      });
+    };
 
     vm.markAllRead = function () {
       DataService.markAllNotificationsRead().then(function (response) {

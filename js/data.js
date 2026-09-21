@@ -41,6 +41,11 @@
           return response && response.success ? (response.applicants || []) : [];
         });
       },
+      getMyApplications: function () {
+        return request('GET', '/applicants?mine=true').then(function (response) {
+          return response && response.success ? (response.applicants || []) : [];
+        });
+      },
       getTeams: function () {
         return [
           { id: 1, name: 'Current Team', role: 'Lead' },
@@ -55,6 +60,24 @@
       getInterests: function () {
         return request('GET', '/interests').then(function (response) {
           return response && response.success ? (response.interests || []) : [];
+        });
+      },
+      applyToProject: function (project, user) {
+        return request('POST', '/applicants', {
+          project: project.id,
+          name: user.name,
+          regNo: user.regNo,
+          department: user.department,
+          year: user.year,
+          skills: user.skills || [],
+          matchScore: project.matchScore || 0
+        }).then(function (response) {
+          return response;
+        });
+      },
+      updateApplicantStatus: function (applicantId, status) {
+        return request('PUT', '/applicants/' + applicantId, { status: status }).then(function (response) {
+          return response;
         });
       },
       getDiscussions: function () {
@@ -115,6 +138,11 @@
       },
       markAllNotificationsRead: function () {
         return request('PUT', '/notifications/read-all').then(function (response) {
+          return response;
+        });
+      },
+      markNotificationRead: function (notificationId) {
+        return request('PUT', '/notifications/' + notificationId + '/read').then(function (response) {
           return response;
         });
       },

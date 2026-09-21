@@ -52,7 +52,8 @@
     </section>
 
     <section class="listings">
-      <project-card-item project="project" ng-repeat="project in vm.projects | filter:vm.filterProjects"></project-card-item>
+      <project-card-item project="project" on-apply="vm.applyToProject(project)" ng-repeat="project in vm.projects | filter:vm.filterProjects"></project-card-item>
+      <p class="sub" ng-if="!vm.projects.length">No projects match your filters.</p>
     </section>
   </main>
 

@@ -47,10 +47,10 @@
         <fieldset style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;">
           <legend style="padding: 0 0.5rem; font-weight: 700; color: var(--primary);">Basic Info</legend>
           <label for="pName">Full Name</label>
-          <input type="text" id="pName" name="pName" placeholder="Letters and spaces only" required ng-pattern="/^[a-zA-Z\s]{2,}$/" ng-model="vm.profile.name">
+          <input type="text" id="pName" name="pName" placeholder="Letters, spaces, apostrophes, or hyphens" required ng-pattern="/^[a-zA-Z]+(?:[ '-][a-zA-Z]+)*$/" ng-model="vm.profile.name">
           <div class="error-msg" ng-messages="profileForm.pName.$error" ng-show="profileForm.pName.$dirty || profileForm.$submitted">
             <span ng-message="required">Please fill this field.</span>
-            <span ng-message="pattern">Only letters and spaces are allowed.</span>
+            <span ng-message="pattern">Use letters, spaces, apostrophes, or hyphens only.</span>
           </div>
           <span class="error-msg" id="pNameError" ng-if="vm.errors.name">{{ vm.errors.name }}</span>
 

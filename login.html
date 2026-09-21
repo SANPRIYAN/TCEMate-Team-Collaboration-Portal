@@ -84,10 +84,11 @@
       <span class="error-msg" id="phoneError" ng-if="vm.signupErrors.phone">{{ vm.signupErrors.phone }}</span>
 
       <label for="signupPassword">Password</label>
-      <input type="password" id="signupPassword" name="signupPassword" placeholder="Min 8 characters" minlength="8" required ng-model="vm.signupData.password">
+      <input type="password" id="signupPassword" name="signupPassword" placeholder="8+ chars, upper/lower/number/symbol" minlength="8" required ng-pattern="/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}/" ng-model="vm.signupData.password">
       <div class="error-msg" ng-messages="signupForm.signupPassword.$error" ng-show="signupForm.signupPassword.$dirty || signupForm.$submitted">
         <span ng-message="required">Please fill this field.</span>
         <span ng-message="minlength">Password must be at least 8 characters.</span>
+        <span ng-message="pattern">Use 8+ characters with uppercase, lowercase, number, and symbol.</span>
       </div>
       <span class="error-msg" id="signupPasswordError" ng-if="vm.signupErrors.password">{{ vm.signupErrors.password }}</span>
 

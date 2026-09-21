@@ -1,8 +1,16 @@
 const Interest = require('../models/Interest');
+const mongoose = require('mongoose');
+const Project = require('../models/Project');
 
 const interestToResponse = (interest) => ({
   id: interest._id,
   user: interest.user,
+  project: interest.project,
+  projectDetails: interest.project && interest.project.title ? {
+    id: interest.project._id,
+    title: interest.project.title,
+    description: interest.project.description
+  } : undefined,
   title: interest.title,
   details: interest.details,
   status: interest.status,
@@ -12,7 +20,9 @@ const interestToResponse = (interest) => ({
 
 exports.getInterests = async (req, res) => {
   try {
-    const interests = await Interest.find({}).sort({ createdAt: -1 });
+    const interests = await Interest.find({ user: req.user.id })
+      .populate('project', 'title description')
+      .sort({ createdAt: -1 });
     res.json({ success: true, interests: interests.map(interestToResponse) });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Unable to fetch interests.' });
@@ -21,14 +31,26 @@ exports.getInterests = async (req, res) => {
 
 exports.createInterest = async (req, res) => {
   try {
-    const { title, details, status } = req.body;
+    const { project: projectId, title, details, status } = req.body;
 
-    if (!title) {
-      return res.status(400).json({ success: false, message: 'Interest title is required.' });
+    if (!projectId || !title) {
+      return res.status(400).json({ success: false, message: 'Project and interest title are required.' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(projectId)) {
+      return res.status(400).json({ success: false, message: 'Invalid project ID.' });
+    }
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Project not found.' });
+    }
+    const existing = await Interest.findOne({ user: req.user.id, project: projectId });
+    if (existing) {
+      return res.status(409).json({ success: false, message: 'You have already shown interest in this project.' });
     }
 
     const interest = await Interest.create({
       user: req.user ? req.user.id : undefined,
+      project: projectId,
       title,
       details: details || '',
       status: status || 'pending'
@@ -42,7 +64,10 @@ exports.createInterest = async (req, res) => {
 
 exports.updateInterest = async (req, res) => {
   try {
-    const interest = await Interest.findById(req.params.id);
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid interest ID.' });
+    }
+    const interest = await Interest.findOne({ _id: req.params.id, user: req.user.id });
     if (!interest) {
       return res.status(404).json({ success: false, message: 'Interest not found.' });
     }
@@ -61,7 +86,10 @@ exports.updateInterest = async (req, res) => {
 
 exports.deleteInterest = async (req, res) => {
   try {
-    const interest = await Interest.findById(req.params.id);
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid interest ID.' });
+    }
+    const interest = await Interest.findOne({ _id: req.params.id, user: req.user.id });
     if (!interest) {
       return res.status(404).json({ success: false, message: 'Interest not found.' });
     }

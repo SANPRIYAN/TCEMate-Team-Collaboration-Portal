@@ -32,7 +32,8 @@
     </section>
 
     <section class="notif-list" id="notifList">
-      <notification-item-card notification="notification" ng-repeat="notification in vm.notifications"></notification-item-card>
+      <notification-item-card notification="notification" on-read="vm.markRead(notification)" ng-repeat="notification in vm.notifications"></notification-item-card>
+      <p class="sub" ng-if="!vm.notifications.length">No notifications yet.</p>
     </section>
   </main>
 

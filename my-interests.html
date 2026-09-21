@@ -35,6 +35,7 @@
 
     <section class="interest-list" id="interestList">
       <interest-row-item item="item" ng-repeat="item in vm.interests | filter:vm.filterByStatus"></interest-row-item>
+      <p class="sub" ng-if="!vm.interests.length">If you have no interests yet, browse projects to show interest.</p>
     </section>
   </main>
 

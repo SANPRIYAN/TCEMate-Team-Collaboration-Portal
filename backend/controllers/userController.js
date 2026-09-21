@@ -34,6 +34,10 @@ exports.updateCurrentUser = async (req, res) => {
     const allowedFields = ['name', 'department', 'year', 'section', 'bio', 'skills', 'projects', 'preferences', 'phone'];
     const updates = {};
 
+    if (req.body.name !== undefined && !/^[a-zA-Z]+(?:[ '-][a-zA-Z]+)*$/.test(String(req.body.name).trim())) {
+      return res.status(400).json({ success: false, message: 'Name may contain letters, spaces, apostrophes, and hyphens only.' });
+    }
+
     allowedFields.forEach((field) => {
       if (req.body[field] !== undefined) {
         updates[field] = req.body[field];
