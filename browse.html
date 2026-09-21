@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TCEMate | Browse Listings</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=details-flow">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
@@ -52,7 +52,7 @@
     </section>
 
     <section class="listings">
-      <project-card-item project="project" on-apply="vm.applyToProject(project)" ng-repeat="project in vm.projects | filter:vm.filterProjects"></project-card-item>
+      <project-card-item project="project" on-open="vm.openProject(project)" on-apply="vm.applyToProject(project)" ng-repeat="project in vm.projects | filter:vm.filterProjects"></project-card-item>
       <p class="sub" ng-if="!vm.projects.length">No projects match your filters.</p>
     </section>
   </main>
@@ -61,8 +61,8 @@
     <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
   </footer>
 
-  <script src="js/app.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/auth.js"></script>
+  <script src="js/app.js?v=details-flow"></script>
+  <script src="js/data.js?v=details-flow"></script>
+  <script src="js/auth.js?v=details-flow"></script>
 </body>
 </html>

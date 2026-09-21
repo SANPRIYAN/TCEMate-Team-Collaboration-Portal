@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Project Details</title>
+<link rel="stylesheet" href="style.css?v=details-flow">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
+</head>
+<body ng-controller="ProjectDetailsController as vm">
+  <header class="topbar">
+    <h1 class="logo">TCEMate</h1>
+    <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="browse.html" class="active">Browse</a>
+      <a href="forum.html">Forum</a>
+      <a href="notifications.html">Alerts</a>
+      <a href="create-listing.html">Post</a>
+      <a href="manage-applicants.html">My Listings</a>
+      <a href="my-interests.html">Interests</a>
+      <a href="profile-view.html">Profile</a>
+      <a href="#" class="nav-logout" ng-click="vm.logout()">Logout</a>
+    </nav>
+  </header>
+  <main class="page-wrap">
+    <button type="button" class="btn-secondary" ng-click="vm.backToBrowse()">← Back to Browse</button>
+    <p class="sub project-detail-loading" ng-if="vm.loading">Loading project...</p>
+    <p class="error-msg" ng-if="vm.error">{{vm.error}}</p>
+    <section class="project-detail-card" ng-if="vm.project && !vm.loading">
+      <div class="listing-head"><span class="tag">{{vm.project.type || 'Project'}}</span><span class="status" ng-class="{open: vm.project.status === 'open', closed: vm.project.status === 'closed'}">{{vm.project.status | uppercase}}</span></div>
+      <h2>{{vm.project.title}}</h2>
+      <p class="project-detail-description">{{vm.project.description}}</p>
+      <div class="project-detail-grid">
+        <div><small>Department</small><strong>{{vm.project.department}}</strong></div>
+        <div><small>Year</small><strong>{{vm.project.year}}</strong></div>
+        <div><small>Team size</small><strong>{{vm.project.teamSize}}</strong></div>
+        <div><small>Created</small><strong>{{vm.project.createdAt | date:'mediumDate'}}</strong></div>
+        <div ng-if="vm.project.owner"><small>Project owner</small><strong>{{vm.project.owner.name}}</strong></div>
+      </div>
+      <button type="button" class="btn-primary project-detail-apply" ng-if="vm.project.canApply" ng-disabled="vm.project.applying || vm.project.applied" ng-click="vm.applyToProject()">{{vm.project.applied ? 'Applied' : (vm.project.applying ? 'Applying...' : 'Show Interest')}}</button>
+      <p class="sub" ng-if="!vm.project.canApply && !vm.project.applied">This project is not available for your account.</p>
+    </section>
+  </main>
+  <script src="js/app.js?v=details-flow"></script>
+  <script src="js/data.js?v=details-flow"></script>
+  <script src="js/auth.js?v=details-flow"></script>
+</body>
+</html>

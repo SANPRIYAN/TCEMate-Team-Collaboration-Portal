@@ -36,8 +36,18 @@
           return response && response.success ? (response.projects || []) : [];
         });
       },
+      getProject: function (projectId) {
+        return request('GET', '/projects/' + encodeURIComponent(projectId)).then(function (response) {
+          return response && response.success ? response.project : null;
+        });
+      },
       getApplicants: function () {
         return request('GET', '/applicants').then(function (response) {
+          return response && response.success ? (response.applicants || []) : [];
+        });
+      },
+      getApplicantsForProject: function (projectId) {
+        return request('GET', '/applicants?project=' + encodeURIComponent(projectId)).then(function (response) {
           return response && response.success ? (response.applicants || []) : [];
         });
       },
@@ -101,6 +111,27 @@
             { value: (data.applicants || []).length, label: 'Pending Requests' },
             { value: 12, label: 'Connections' }
           ];
+        });
+      },
+      getDashboardData: function () {
+        return $q.all({
+          projects: this.getProjects(),
+          applications: this.getMyApplications(),
+          interests: this.getInterests(),
+          notifications: this.getNotifications()
+        }).then(function (data) {
+          var projects = data.projects || [];
+          var notifications = data.notifications || [];
+          return {
+            stats: [
+              { value: projects.length, label: 'Projects Available', icon: '⌂' },
+              { value: (data.applications || []).length, label: 'My Applications', icon: '↗' },
+              { value: (data.interests || []).length, label: 'My Interests', icon: '☆' },
+              { value: notifications.filter(function (notification) { return notification.unread; }).length, label: 'Unread Notifications', icon: '!' }
+            ],
+            projects: projects.slice(0, 4),
+            notifications: notifications.slice(0, 4)
+          };
         });
       },
       updateProfile: function (profile) {

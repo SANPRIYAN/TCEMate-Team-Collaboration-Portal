@@ -33,8 +33,22 @@ exports.getApplicants = async (req, res) => {
       return res.json({ success: true, applicants: applicants.map(applicantToResponse) });
     }
 
-    const ownedProjects = await Project.find({ createdBy: req.user.id }).select('_id');
-    const applicants = await Applicant.find({ project: { $in: ownedProjects.map((project) => project._id) } })
+    let projectIds;
+    if (req.query.project) {
+      if (!mongoose.Types.ObjectId.isValid(req.query.project)) {
+        return res.status(400).json({ success: false, message: 'Invalid project ID.' });
+      }
+      const project = await Project.findById(req.query.project).select('createdBy');
+      if (!project) return res.status(404).json({ success: false, message: 'Project not found.' });
+      if (!project.createdBy || project.createdBy.toString() !== req.user.id.toString()) {
+        return res.status(403).json({ success: false, message: 'Only the project owner can view applicants.' });
+      }
+      projectIds = [project._id];
+    } else {
+      const ownedProjects = await Project.find({ createdBy: req.user.id }).select('_id');
+      projectIds = ownedProjects.map((project) => project._id);
+    }
+    const applicants = await Applicant.find({ project: { $in: projectIds } })
       .populate('project', 'title description')
       .sort({ createdAt: -1 });
     res.json({ success: true, applicants: applicants.map(applicantToResponse) });

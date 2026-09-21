@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TCEMate | Manage Applicants</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=team-flow">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
@@ -28,23 +28,32 @@
   <main class="page-wrap">
     <section class="listing-picker">
       <label for="activeListing">Active Listing</label>
-      <select id="activeListing">
-        <option>AI Career Intelligence Platform</option>
-        <option>TCE Parking Portal</option>
+      <select id="activeListing" ng-model="vm.selectedProject" ng-options="project as project.title for project in vm.projects track by project.id" ng-change="vm.selectProject()">
+        <option value="">Select a project</option>
       </select>
-      <p class="sub">{{ vm.applicants.length }} applications</p>
+      <p class="sub">{{ vm.applicants.length }} applications · {{ (vm.applicants | filter:{status:'pending'}).length }} pending</p>
     </section>
 
     <section class="applicant-list" id="applicantList">
       <applicant-row-card applicant="applicant" get-initials="vm.getInitials(name)" on-accept="vm.updateApplicant(applicant, 'accepted')" on-reject="vm.updateApplicant(applicant, 'rejected')" ng-repeat="applicant in vm.applicants | orderBy:'-matchScore'"></applicant-row-card>
-      <p class="sub" ng-if="!vm.applicants.length">No applications yet.</p>
+      <p class="sub" ng-if="vm.loading">Loading applications...</p>
+      <p class="sub" ng-if="!vm.loading && !vm.applicants.length">No applications yet.</p>
     </section>
 
     <section class="team-section">
       <h3>My Team</h3>
       <div class="team-avatars">
-        <div class="team-member" ng-repeat="member in vm.teamMembers"><span class="avatar-circle small">{{ vm.getInitials(member.name) }}</span><span>{{ member.name }} ({{ member.role }})</span></div>
-        <div class="team-member empty-slot">+</div>
+        <div class="team-member" ng-repeat="member in vm.teamMembers"><span class="avatar-circle small">{{ vm.getInitials(member.name) }}</span><span>{{ member.name }}<small>{{ member.role }}</small></span></div>
+        <button type="button" class="team-add-button" ng-click="vm.toggleTeamManager()" aria-label="Manage team members">+</button>
+      </div>
+      <p class="sub" ng-if="vm.teamMembers.length === 1">No team members yet.</p>
+      <div class="team-manager" ng-if="vm.showTeamManager">
+        <h4>Pending applicants</h4>
+        <p class="sub" ng-if="!(vm.applicants | filter:{status:'pending'}).length">No pending applicants available.</p>
+        <div class="team-manager-row" ng-repeat="applicant in vm.applicants | filter:{status:'pending'}">
+          <span>{{ applicant.name }}</span>
+          <button type="button" class="btn-accept" ng-click="vm.updateApplicant(applicant, 'accepted')">Accept</button>
+        </div>
       </div>
     </section>
   </main>
@@ -53,8 +62,8 @@
     <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
   </footer>
 
-  <script src="js/app.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/auth.js"></script>
+  <script src="js/app.js?v=team-flow"></script>
+  <script src="js/data.js?v=team-flow"></script>
+  <script src="js/auth.js?v=team-flow"></script>
 </body>
 </html>

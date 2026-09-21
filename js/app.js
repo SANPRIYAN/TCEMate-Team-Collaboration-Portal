@@ -43,6 +43,7 @@
       scope: {
         project: '='
         ,onApply: '&'
+        ,onOpen: '&'
       },
       template: '<article class="listing-card">' +
                 '  <div class="listing-head">' +
@@ -55,6 +56,7 @@
                 '    <span class="dept-label">{{project.department}} Dept · {{project.year}}</span>' +
                 '    <span>{{project.timeLabel}}</span>' +
                 '  </div>' +
+                '  <button type="button" class="btn-secondary project-open-button" ng-click="onOpen({project: project})">Open</button>' +
                 '  <button type="button" class="btn-primary" ng-if="project.canApply" ng-disabled="project.applying || project.applied" ng-click="onApply({project: project})">{{project.applied ? "Applied" : (project.applying ? "Applying..." : "Show Interest")}}</button>' +
                 '</article>'
     };
@@ -242,19 +244,16 @@
       vm.user = user || { name: 'Student', department: 'Information Technology', year: '3rd Year', section: 'Section A' };
     });
 
-    vm.storageUsed = 45;
-    DataService.getLandingStats().then(function (stats) {
-      vm.stats = stats;
-    });
-
-    DataService.getProjects().then(function (projects) {
-      vm.projects = (projects || []).slice(0, 2);
+    vm.dashboard = { stats: [], projects: [], notifications: [] };
+    DataService.getDashboardData().then(function (dashboard) {
+      vm.dashboard = dashboard;
     });
 
     vm.logout = function () {
       AuthService.logout();
       $window.location.href = 'login.html';
     };
+
   }
   app.controller('LandingController', LandingController);
 
@@ -358,6 +357,12 @@
       $window.location.href = 'login.html';
     };
 
+    vm.openProject = function (project) {
+      if (project && project.id) {
+        $window.location.href = 'project-details.html?id=' + encodeURIComponent(project.id);
+      }
+    };
+
     vm.applyToProject = function (project) {
       if (project.applying || project.applied) return;
       project.applying = true;
@@ -373,6 +378,69 @@
     };
   }
   app.controller('ProjectsController', ProjectsController);
+
+  ProjectDetailsController.$inject = ['DataService', 'AuthService', '$window'];
+  function ProjectDetailsController(DataService, AuthService, $window) {
+    var vm = this;
+    vm.project = null;
+    vm.currentUser = AuthService.getUser();
+    vm.loading = true;
+    vm.error = '';
+
+    if (!AuthService.isLoggedIn()) {
+      $window.location.href = 'login.html';
+      return;
+    }
+
+    var query = new URLSearchParams($window.location.search);
+    var projectId = query.get('id');
+    if (!projectId) {
+      vm.loading = false;
+      vm.error = 'Project ID is missing.';
+      return;
+    }
+
+    DataService.getProject(projectId).then(function (project) {
+      vm.project = project;
+      if (!project) {
+        vm.error = 'Project not found.';
+        vm.loading = false;
+        return;
+      }
+      vm.project.canApply = project.status === 'open' && String(project.createdBy && (project.createdBy.id || project.createdBy._id || project.createdBy)) !== String(vm.currentUser && vm.currentUser.id);
+      return DataService.getMyApplications().then(function (applications) {
+        vm.project.applied = (applications || []).some(function (application) {
+          var appliedProject = application.projectDetails && application.projectDetails.id || application.project;
+          return String(appliedProject && (appliedProject.id || appliedProject._id || appliedProject)) === String(projectId);
+        });
+        vm.loading = false;
+      });
+    });
+
+    vm.applyToProject = function () {
+      if (!vm.project || vm.project.applying || vm.project.applied) return;
+      vm.project.applying = true;
+      DataService.applyToProject(vm.project, vm.currentUser).then(function (response) {
+        vm.project.applying = false;
+        if (response && response.success) {
+          vm.project.applied = true;
+          $window.alert('Your interest has been submitted.');
+        } else {
+          $window.alert(response && response.message ? response.message : 'Unable to submit your interest.');
+        }
+      });
+    };
+
+    vm.backToBrowse = function () {
+      $window.location.href = 'browse.html';
+    };
+
+    vm.logout = function () {
+      AuthService.logout();
+      $window.location.href = 'login.html';
+    };
+  }
+  app.controller('ProjectDetailsController', ProjectDetailsController);
 
   // 4. Create Listing Controller
   CreateListingController.$inject = ['DataService', 'AuthService', '$window'];
@@ -455,10 +523,38 @@
       return;
     }
 
-    DataService.getApplicants().then(function (applicants) {
-      vm.applicants = applicants || [];
+    vm.projects = [];
+    vm.applicants = [];
+    vm.teamMembers = [];
+    vm.selectedProject = null;
+    vm.showTeamManager = false;
+    vm.currentUser = AuthService.getUser();
+
+    function loadProjectApplicants() {
+      if (!vm.selectedProject) return;
+      vm.loading = true;
+      DataService.getApplicantsForProject(vm.selectedProject.id).then(function (applicants) {
+        vm.applicants = applicants || [];
+        vm.teamMembers = [{ name: vm.selectedProject.owner ? vm.selectedProject.owner.name : vm.currentUser.name, role: 'Lead', department: vm.selectedProject.department, year: vm.selectedProject.year }]
+          .concat(vm.applicants.filter(function (applicant) { return applicant.status === 'accepted'; }).map(function (applicant) {
+            return { name: applicant.name, role: 'Member', department: applicant.department, year: applicant.year };
+          }));
+        vm.loading = false;
+      });
+    }
+
+    DataService.getProjects().then(function (projects) {
+      vm.projects = (projects || []).filter(function (project) {
+        return String(project.createdBy || '') === String(vm.currentUser && vm.currentUser.id);
+      });
+      if (vm.projects.length) {
+        vm.selectedProject = vm.projects[0];
+        DataService.getProject(vm.selectedProject.id).then(function (project) {
+          vm.selectedProject = project || vm.selectedProject;
+          loadProjectApplicants();
+        });
+      }
     });
-    vm.teamMembers = DataService.getTeams();
 
     vm.getInitials = function (name) {
       return (name || '').split(' ').map(function (part) {
@@ -473,11 +569,21 @@
         applicant.updating = false;
         if (response && response.success) {
           applicant.status = status;
+          loadProjectApplicants();
           $window.alert(status === 'accepted' ? 'Applicant accepted.' : 'Applicant rejected.');
         } else {
           $window.alert(response && response.message ? response.message : 'Unable to update applicant.');
         }
       });
+    };
+
+    vm.selectProject = function () {
+      vm.showTeamManager = false;
+      loadProjectApplicants();
+    };
+
+    vm.toggleTeamManager = function () {
+      vm.showTeamManager = !vm.showTeamManager;
     };
 
     vm.logout = function () {

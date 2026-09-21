@@ -14,6 +14,12 @@ const projectToResponse = (project) => ({
   deadline: project.deadline,
   teamSize: project.teamSize,
   createdBy: project.createdBy,
+  owner: project.createdBy && project.createdBy.name ? {
+    id: project.createdBy._id,
+    name: project.createdBy.name,
+    department: project.createdBy.department,
+    year: project.createdBy.year
+  } : undefined,
   createdAt: project.createdAt,
   updatedAt: project.updatedAt
 });
@@ -32,7 +38,7 @@ exports.getProjectById = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ success: false, message: 'Invalid project ID.' });
     }
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findById(req.params.id).populate('createdBy', 'name department year');
     if (!project) {
       return res.status(404).json({ success: false, message: 'Project not found.' });
     }
