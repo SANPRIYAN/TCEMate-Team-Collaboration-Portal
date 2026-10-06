@@ -46,18 +46,24 @@
         ,onOpen: '&'
       },
       template: '<article class="listing-card">' +
-                '  <div class="listing-head">' +
-                '    <span class="tag">{{project.type}}</span>' +
-                '    <span class="status" ng-class="{\'open\':project.status===\'open\',\'closed\':project.status===\'closed\'}">{{project.status | uppercase}}</span>' +
+                '  <div class="card-top">' +
+                '    <div class="card-avatar">{{project.title.charAt(0).toUpperCase()}}</div>' +
+                '    <div class="card-top-meta">' +
+                '      <div class="listing-head">' +
+                '        <span class="tag">{{project.type || \'Project\'}}</span>' +
+                '        <span class="status" ng-class="{\'open\':project.status===\'open\',\'closed\':project.status===\'closed\'}">{{project.status | uppercase}}</span>' +
+                '      </div>' +
+                '      <h4>{{project.title}}</h4>' +
+                '    </div>' +
                 '  </div>' +
-                '  <h4>{{project.title}}</h4>' +
-                '  <p>{{project.description}}</p>' +
-                '  <div class="meta-row">' +
-                '    <span class="dept-label">{{project.department}} Dept · {{project.year}}</span>' +
-                '    <span>{{project.timeLabel}}</span>' +
+                '  <p class="card-desc">{{project.description}}</p>' +
+                '  <div class="card-footer">' +
+                '    <span class="meta-row" style="margin-top:0;"><span>{{project.department}} · {{project.year}}</span></span>' +
+                '    <span style="display:flex;gap:0.5rem;flex-wrap:wrap;">' +
+                '      <button type="button" class="card-cta-secondary" ng-click="onOpen({project: project})">View →</button>' +
+                '      <button type="button" class="card-cta" ng-if="project.canApply" ng-disabled="project.applying || project.applied" ng-click="onApply({project: project})">{{project.applied ? \'Applied\' : (project.applying ? \'Applying...\' : \'Show Interest\')}}</button>' +
+                '    </span>' +
                 '  </div>' +
-                '  <button type="button" class="btn-secondary project-open-button" ng-click="onOpen({project: project})">Open</button>' +
-                '  <button type="button" class="btn-primary" ng-if="project.canApply" ng-disabled="project.applying || project.applied" ng-click="onApply({project: project})">{{project.applied ? "Applied" : (project.applying ? "Applying..." : "Show Interest")}}</button>' +
                 '</article>'
     };
   });
@@ -66,19 +72,19 @@
   app.directive('forumThreadCard', function () {
     return {
       restrict: 'E',
-      scope: {
-        post: '='
-      },
+      scope: { post: '=' },
       template: '<article class="thread-card">' +
-                '  <div class="thread-meta">' +
-                '    <span class="tag">{{post.tag}}</span>' +
-                '    <span class="posted-by">Posted by {{post.author}}</span>' +
+                '  <div class="thread-card-top">' +
+                '    <div class="thread-avatar">{{(post.author || \'?\'). charAt(0).toUpperCase()}}</div>' +
+                '    <div class="thread-body">' +
+                '      <div class="thread-meta"><span class="tag">{{post.tag || \'Discussion\'}}</span><span class="posted-by">{{post.author}}</span></div>' +
+                '      <h4>{{post.title}}</h4>' +
+                '    </div>' +
                 '  </div>' +
-                '  <h4>{{post.title}}</h4>' +
-                '  <p>{{post.body}}</p>' +
+                '  <p class="thread-preview">{{post.body}}</p>' +
                 '  <div class="thread-footer">' +
-                '    <span>{{post.replies}} replies</span>' +
-                '    <span>{{post.timeLabel}}</span>' +
+                '    <span>{{post.replies || 0}} replies · <time>{{post.createdAt | date:"MMM d, yyyy"}}</time></span>' +
+                '    <a class="thread-view-link" href="forum.html">View discussion →</a>' +
                 '  </div>' +
                 '</article>'
     };
@@ -115,7 +121,7 @@
                 '  <h4>{{listing.title || "Untitled Project"}}</h4>' +
                 '  <p>{{listing.description || "Description preview..."}}</p>' +
                 '  <div class="meta-row">' +
-                '    <span>{{listing.department || "IT"}} Dept · {{listing.year || "3rd Year"}}</span>' +
+                '    <span><span ng-if="listing.department">{{listing.department}} Dept</span><span ng-if="listing.year"> · {{listing.year}}</span></span>' +
                 '    <span>Team Size: {{teamSize}}</span>' +
                 '  </div>' +
                 '</div>'
@@ -136,7 +142,7 @@
                 '  <div class="applicant-avatar">{{ getInitials({name: applicant.name}) }}</div>' +
                 '  <div class="applicant-info">' +
                 '    <h4>{{ applicant.name }} <span class="reg-id">{{ applicant.regNo }}</span></h4>' +
-                '    <p>{{ applicant.department }} · {{ applicant.year }} · Skills: {{ applicant.skills.join(", ") }}</p>' +
+                '    <p>{{ applicant.department }} · {{ applicant.year }}<span ng-if="applicant.skills && applicant.skills.length"> · Skills: {{ applicant.skills.join(", ") }}</span></p>' +
                 '    <p class="sub">{{ applicant.matchScore | matchLabel }}</p>' +
                 '  </div>' +
                 '  <div class="applicant-actions">' +
@@ -152,16 +158,17 @@
   app.directive('interestRowItem', function () {
     return {
       restrict: 'E',
-      scope: {
-        item: '='
-      },
-      template: '<article class="interest-row" data-status="{{item.status}}">' +
-                '  <div class="interest-info">' +
-                '    <h4>{{item.projectDetails.title || item.title}}</h4>' +
+      scope: { item: '=' },
+      template: '<article class="interest-card">' +
+                '  <div class="interest-card-icon">★</div>' +
+                '  <div class="interest-card-body">' +
+                '    <h4>{{item.projectDetails.title || item.title || \'Project\'}}</h4>' +
                 '    <p>{{item.projectDetails.description || item.details}}</p>' +
-                '    <small>{{item.createdAt | date:"medium"}}</small>' +
+                '    <small>Applied · {{item.createdAt | date:"MMM d, yyyy"}}</small>' +
                 '  </div>' +
-                '  <span class="status-pill" ng-class="{\'pending\': item.status===\'pending\', \'accepted\': item.status===\'accepted\', \'rejected\': item.status===\'rejected\'}">{{item.status | uppercase}}</span>' +
+                '  <div class="interest-card-status">' +
+                '    <span class="status-pill" ng-class="{\'pending\': item.status===\'pending\', \'accepted\': item.status===\'accepted\', \'rejected\': item.status===\'rejected\'}">{{item.status | uppercase}}</span>' +
+                '  </div>' +
                 '</article>'
     };
   });
@@ -170,17 +177,16 @@
   app.directive('notificationItemCard', function () {
     return {
       restrict: 'E',
-      scope: {
-        notification: '='
-        ,onRead: '&'
-      },
-      template: '<article class="notif-item" ng-class="{\'unread\': notification.unread}">' +
-                '  <div class="notif-icon">{{notification.icon}}</div>' +
-                '  <div class="notif-body">' +
+      scope: { notification: '=', onRead: '&' },
+      template: '<article class="notif-card" ng-class="{\'unread\': notification.unread}">' +
+                '  <div class="notif-dot-wrap">{{notification.icon || \'!\'  }}</div>' +
+                '  <div class="notif-card-body">' +
                 '    <h4>{{notification.title}}</h4>' +
                 '    <p>{{notification.message}}</p>' +
-                '    <span class="notif-time">{{notification.timeLabel}}</span>' +
-                '    <button type="button" class="btn-secondary" ng-if="notification.unread" ng-click="onRead({notification: notification})">Mark as read</button>' +
+                '    <span class="notif-card-time">{{notification.createdAt ? (notification.createdAt | date:"MMM d, yyyy · h:mm a") : notification.timeLabel}}</span>' +
+                '  </div>' +
+                '  <div class="notif-card-action" ng-if="notification.unread">' +
+                '    <button type="button" ng-click="onRead({notification: notification})">Mark read</button>' +
                 '  </div>' +
                 '</article>'
     };
@@ -194,9 +200,8 @@
         project: '='
       },
       template: '<article class="portfolio-card">' +
-                '  <h4>{{project}}</h4>' +
-                '  <p>Role: {{ project === "AI Career Intelligence Platform" ? "NLP & Matching Logic" : "Backend Developer" }}</p>' +
-                '  <span class="status" ng-class="{\'open\': project === "AI Career Intelligence Platform", \'closed\': project === "TCE Parking Portal"}">{{ project === "AI Career Intelligence Platform" ? "Active" : "Completed" }}</span>' +
+            '  <h4>{{project.title || project}}</h4>' +
+            '  <p ng-if="project.description">{{project.description}}</p>' +
                 '</article>'
     };
   });
@@ -220,8 +225,32 @@
       restrict: 'E',
       template: '<div style="text-align: center; margin-bottom: 1rem;">' +
                 '  <h3 style="color: var(--primary); font-weight: 700;">Thiagarajar College of Engineering</h3>' +
-                '  <p style="font-size: 0.85rem; color: var(--text-muted);">Department of Information Technology</p>' +
+                '  <p style="font-size: 0.85rem; color: var(--text-muted);">Student Team Collaboration Portal</p>' +
                 '</div>'
+    };
+  });
+
+  app.directive('tcemateAppNav', function () {
+    return {
+      restrict: 'E',
+      scope: {
+        active: '@',
+        onLogout: '&'
+      },
+      template: '<header class="app-nav-shell">' +
+                '  <a class="app-nav-brand" href="dashboard.html"><span class="brand-mark">TC</span><span>TCEMate</span></a>' +
+                '  <nav class="app-nav-links" aria-label="Application navigation">' +
+                '    <a href="dashboard.html" ng-class="{active: active === \'dashboard\'}" ng-attr-aria-current="{{active === \'dashboard\' ? \'page\' : undefined}}">Dashboard</a>' +
+                '    <a href="browse.html" ng-class="{active: active === \'browse\'}" ng-attr-aria-current="{{active === \'browse\' ? \'page\' : undefined}}">Browse</a>' +
+                '    <a href="forum.html" ng-class="{active: active === \'forum\'}" ng-attr-aria-current="{{active === \'forum\' ? \'page\' : undefined}}">Forum</a>' +
+                '    <a href="create-listing.html" ng-class="{active: active === \'post\'}" ng-attr-aria-current="{{active === \'post\' ? \'page\' : undefined}}">Post</a>' +
+                '    <a href="manage-applicants.html" ng-class="{active: active === \'listings\'}" ng-attr-aria-current="{{active === \'listings\' ? \'page\' : undefined}}">My Listings</a>' +
+                '    <a href="my-interests.html" ng-class="{active: active === \'interests\'}" ng-attr-aria-current="{{active === \'interests\' ? \'page\' : undefined}}">Interests</a>' +
+                '    <a href="notifications.html" ng-class="{active: active === \'notifications\'}" ng-attr-aria-current="{{active === \'notifications\' ? \'page\' : undefined}}">Notifications</a>' +
+                '    <a href="profile-view.html" ng-class="{active: active === \'profile\'}" ng-attr-aria-current="{{active === \'profile\' ? \'page\' : undefined}}">Profile</a>' +
+                '    <button type="button" class="app-nav-logout" ng-click="onLogout()">Log out</button>' +
+                '  </nav>' +
+                '</header>'
     };
   });
 
@@ -241,12 +270,14 @@
     }
 
     DataService.getCurrentUser().then(function (user) {
-      vm.user = user || { name: 'Student', department: 'Information Technology', year: '3rd Year', section: 'Section A' };
+      vm.user = user || {};
     });
 
     vm.dashboard = { stats: [], projects: [], notifications: [] };
+    vm.dashboardLoading = true;
     DataService.getDashboardData().then(function (dashboard) {
       vm.dashboard = dashboard;
+      vm.dashboardLoading = false;
     });
 
     vm.logout = function () {
@@ -258,18 +289,19 @@
   app.controller('LandingController', LandingController);
 
   // 2. Login Controller
-  LoginController.$inject = ['AuthService', '$window'];
-  function LoginController(AuthService, $window) {
+  LoginController.$inject = ['AuthService', '$window', '$timeout'];
+  function LoginController(AuthService, $window, $timeout) {
     var vm = this;
 
-    vm.mode = 'login';
+    vm.mode = $window.location.hash === '#signup' ? 'signup' : 'login';
     vm.loginData = { email: '', password: '' };
     vm.signupData = { fullName: '', email: '', regNo: '', phone: '', password: '' };
     vm.loginErrors = {};
     vm.signupErrors = {};
+    vm.authTransition = false;
 
     if (AuthService.isLoggedIn()) {
-      $window.location.href = 'index.html';
+      $window.location.href = 'dashboard.html';
       return;
     }
 
@@ -284,8 +316,10 @@
     vm.login = function () {
       AuthService.login(vm.loginData.email, vm.loginData.password).then(function (result) {
         if (result && result.ok) {
-          $window.alert(result.message || 'Login successful! Redirecting...');
-          $window.location.href = 'index.html';
+          vm.authTransition = true;
+          $timeout(function () {
+            $window.location.href = 'dashboard.html';
+          }, 800);
         } else {
           vm.loginErrors = {};
           if (result && result.message) {
@@ -298,8 +332,10 @@
     vm.register = function () {
       AuthService.register(vm.signupData).then(function (result) {
         if (result && result.ok) {
-          $window.alert(result.message || 'Account created! Redirecting...');
-          $window.location.href = 'index.html';
+          vm.authTransition = true;
+          $timeout(function () {
+            $window.location.href = 'dashboard.html';
+          }, 800);
         } else {
           vm.signupErrors = {};
           if (result && result.message) {
@@ -322,6 +358,9 @@
     }
 
     vm.projects = [];
+    vm.loading = true;
+    vm.notice = '';
+    vm.error = '';
     vm.currentUser = AuthService.getUser();
     DataService.getProjects().then(function (projects) {
       DataService.getMyApplications().then(function (applications) {
@@ -338,11 +377,18 @@
           project.applied = !!applied[project.id.toString()];
           return project;
         });
+        vm.loading = false;
+      }).catch(function () {
+        vm.loading = false;
+        vm.error = 'Unable to load projects. Please try again.';
       });
+    }).catch(function () {
+      vm.loading = false;
+      vm.error = 'Unable to load projects. Please try again.';
     });
     vm.searchText = '';
-    vm.department = 'Information Technology';
-    vm.year = '3rd Year';
+    vm.department = 'All Departments';
+    vm.year = 'Any Year';
 
     vm.filterProjects = function (project) {
       var search = (vm.searchText || '').toLowerCase();
@@ -363,6 +409,10 @@
       }
     };
 
+    vm.retryLoad = function () {
+      $window.location.reload();
+    };
+
     vm.applyToProject = function (project) {
       if (project.applying || project.applied) return;
       project.applying = true;
@@ -370,9 +420,9 @@
         project.applying = false;
         if (response && response.success) {
           project.applied = true;
-          $window.alert('Your interest has been submitted.');
+          vm.notice = 'Your interest has been submitted.';
         } else {
-          $window.alert(response && response.message ? response.message : 'Unable to submit your interest.');
+          vm.actionError = response && response.message ? response.message : 'Unable to submit your interest.';
         }
       });
     };
@@ -386,6 +436,7 @@
     vm.currentUser = AuthService.getUser();
     vm.loading = true;
     vm.error = '';
+    vm.notice = '';
 
     if (!AuthService.isLoggedIn()) {
       $window.location.href = 'login.html';
@@ -415,6 +466,9 @@
         });
         vm.loading = false;
       });
+    }).catch(function () {
+      vm.error = 'Unable to load this project. Please try again.';
+      vm.loading = false;
     });
 
     vm.applyToProject = function () {
@@ -424,15 +478,19 @@
         vm.project.applying = false;
         if (response && response.success) {
           vm.project.applied = true;
-          $window.alert('Your interest has been submitted.');
+          vm.notice = 'Your interest has been submitted.';
         } else {
-          $window.alert(response && response.message ? response.message : 'Unable to submit your interest.');
+          vm.error = response && response.message ? response.message : 'Unable to submit your interest.';
         }
       });
     };
 
     vm.backToBrowse = function () {
       $window.location.href = 'browse.html';
+    };
+
+    vm.retryLoad = function () {
+      $window.location.reload();
     };
 
     vm.logout = function () {
@@ -462,6 +520,9 @@
       deadline: ''
     };
     vm.errors = {};
+    vm.saving = false;
+    vm.notice = '';
+    vm.error = '';
 
     vm.decreaseTeam = function () {
       if (vm.teamSize > 1) {
@@ -489,9 +550,12 @@
       if (Object.keys(vm.errors).length) {
         return;
       }
+      vm.saving = true;
+      vm.error = '';
       DataService.createListing(vm.listing, vm.teamSize).then(function (response) {
+        vm.saving = false;
         if (response && response.success) {
-          $window.alert('Listing published successfully.');
+          vm.notice = 'Your project listing has been published.';
           vm.listing = {
             title: '',
             type: '',
@@ -501,7 +565,7 @@
             deadline: ''
           };
         } else {
-          $window.alert(response && response.message ? response.message : 'Unable to publish listing.');
+          vm.error = response && response.message ? response.message : 'Unable to publish listing.';
         }
       });
     };
@@ -528,10 +592,19 @@
     vm.teamMembers = [];
     vm.selectedProject = null;
     vm.showTeamManager = false;
+    vm.projectsLoading = true;
+    vm.loading = false;
+    vm.notice = '';
+    vm.error = '';
     vm.currentUser = AuthService.getUser();
 
     function loadProjectApplicants() {
-      if (!vm.selectedProject) return;
+      if (!vm.selectedProject) {
+        vm.applicants = [];
+        vm.teamMembers = [];
+        vm.loading = false;
+        return;
+      }
       vm.loading = true;
       DataService.getApplicantsForProject(vm.selectedProject.id).then(function (applicants) {
         vm.applicants = applicants || [];
@@ -543,10 +616,9 @@
       });
     }
 
-    DataService.getProjects().then(function (projects) {
-      vm.projects = (projects || []).filter(function (project) {
-        return String(project.createdBy || '') === String(vm.currentUser && vm.currentUser.id);
-      });
+    DataService.getMyProjects(vm.currentUser).then(function (projects) {
+      vm.projects = projects || [];
+      vm.projectsLoading = false;
       if (vm.projects.length) {
         vm.selectedProject = vm.projects[0];
         DataService.getProject(vm.selectedProject.id).then(function (project) {
@@ -554,7 +626,14 @@
           loadProjectApplicants();
         });
       }
+    }).catch(function () {
+      vm.projectsLoading = false;
+      vm.error = 'Unable to load your project listings. Please try again.';
     });
+
+    vm.retryLoad = function () {
+      $window.location.reload();
+    };
 
     vm.getInitials = function (name) {
       return (name || '').split(' ').map(function (part) {
@@ -570,9 +649,9 @@
         if (response && response.success) {
           applicant.status = status;
           loadProjectApplicants();
-          $window.alert(status === 'accepted' ? 'Applicant accepted.' : 'Applicant rejected.');
+          vm.notice = status === 'accepted' ? 'Applicant accepted.' : 'Applicant rejected.';
         } else {
-          $window.alert(response && response.message ? response.message : 'Unable to update applicant.');
+          vm.error = response && response.message ? response.message : 'Unable to update applicant.';
         }
       });
     };
@@ -603,9 +682,20 @@
       return;
     }
 
+    vm.interests = [];
+    vm.loading = true;
+    vm.error = '';
     DataService.getInterests().then(function (interests) {
       vm.interests = interests || [];
+      vm.loading = false;
+    }).catch(function () {
+      vm.error = 'Unable to load your interests. Please try again.';
+      vm.loading = false;
     });
+
+    vm.retryLoad = function () {
+      $window.location.reload();
+    };
     vm.activeFilter = 'all';
 
     vm.filterByStatus = function (item) {
@@ -633,10 +723,32 @@
       return;
     }
 
+    vm.profile = { skills: [], projects: [], preferences: { hackathon: false, internship: false } };
+    vm.ownedProjects = [];
+    vm.loading = true;
+    vm.saving = false;
+    vm.notice = '';
+    vm.error = '';
     DataService.getCurrentUser().then(function (user) {
-      vm.profile = user || { name: 'Student', department: 'Information Technology', year: '3rd Year', section: 'Section A', preferences: { hackathon: true, internship: true } };
-      vm.profile.preferences = vm.profile.preferences || { hackathon: true, internship: true };
+      vm.profile = user || { skills: [], projects: [], preferences: { hackathon: false, internship: false } };
+      vm.profile.skills = vm.profile.skills || [];
+      vm.profile.projects = vm.profile.projects || [];
+      vm.profile.preferences = vm.profile.preferences || { hackathon: false, internship: false };
+      if (/profile-view\.html$/.test($window.location.pathname)) {
+        return DataService.getMyProjects(user || AuthService.getUser()).then(function (projects) {
+          vm.ownedProjects = projects || [];
+        });
+      }
+    }).then(function () {
+      vm.loading = false;
+    }).catch(function () {
+      vm.loading = false;
+      vm.error = 'Unable to load your profile. Please try again.';
     });
+
+    vm.retryLoad = function () {
+      $window.location.reload();
+    };
     vm.errors = {};
 
     vm.getInitials = function (name) {
@@ -653,12 +765,15 @@
       if (Object.keys(vm.errors).length) {
         return;
       }
+      vm.saving = true;
+      vm.error = '';
       DataService.updateProfile(vm.profile).then(function (updatedUser) {
+        vm.saving = false;
         if (updatedUser) {
           vm.profile = updatedUser;
-          $window.alert('Profile updated successfully.');
+          vm.notice = 'Your profile has been updated.';
         } else {
-          $window.alert('Unable to update profile.');
+          vm.error = 'Unable to update profile. Please try again.';
         }
       });
     };
@@ -680,9 +795,20 @@
       return;
     }
 
+    vm.posts = [];
+    vm.loading = true;
+    vm.error = '';
     DataService.getDiscussions().then(function (posts) {
       vm.posts = posts || [];
+      vm.loading = false;
+    }).catch(function () {
+      vm.error = 'Unable to load discussions. Please try again.';
+      vm.loading = false;
     });
+
+    vm.retryLoad = function () {
+      $window.location.reload();
+    };
 
     vm.logout = function () {
       AuthService.logout();
@@ -703,6 +829,9 @@
 
     vm.post = { title: '', body: '' };
     vm.errors = {};
+    vm.saving = false;
+    vm.notice = '';
+    vm.error = '';
 
     vm.submitPost = function () {
       vm.errors = {};
@@ -715,15 +844,18 @@
       if (Object.keys(vm.errors).length) {
         return;
       }
+      vm.saving = true;
+      vm.error = '';
       DataService.addDiscussion(vm.post).then(function (response) {
+        vm.saving = false;
         if (response && response.success) {
-          $window.alert('Posted to forum successfully.');
+          vm.notice = 'Your discussion has been posted.';
           vm.post = { title: '', body: '' };
           return DataService.getDiscussions().then(function (posts) {
             vm.posts = posts || [];
           });
         }
-        $window.alert(response && response.message ? response.message : 'Unable to create post.');
+        vm.error = response && response.message ? response.message : 'Unable to create post.';
       });
     };
 
@@ -744,9 +876,19 @@
       return;
     }
 
+    vm.notifications = [];
+    vm.loading = true;
     DataService.getNotifications().then(function (notifications) {
       vm.notifications = notifications || [];
+      vm.loading = false;
+    }).catch(function () {
+      vm.error = 'Unable to load notifications. Please try again.';
+      vm.loading = false;
     });
+
+    vm.retryLoad = function () {
+      $window.location.reload();
+    };
 
     vm.markRead = function (notification) {
       if (!notification.unread || notification.updating) return;

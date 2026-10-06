@@ -4,18 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TCEMate | Login</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=tcemate-ux-5">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
 </head>
-<body class="auth-body" ng-controller="LoginController as vm">
+<body class="app-page auth-body" ng-controller="LoginController as vm">
   <header class="topbar">
-    <h1 class="logo">TCEMate</h1>
-    <nav class="main-nav"></nav>
+    <a class="logo" href="index.html">TCEMate</a>
+    <nav class="main-nav" aria-label="Public navigation">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="#loginForm">Log in</a>
+      <a href="login.html#signup">Register</a>
+    </nav>
   </header>
 
   <main class="auth-wrap">
+    <section class="auth-transition" ng-if="vm.authTransition" role="status" aria-live="polite">
+      <span class="auth-spinner" aria-hidden="true"></span>
+      <h2>Welcome to TCEMate</h2>
+      <p>Preparing your dashboard...</p>
+    </section>
+
     <form class="auth-card" id="loginForm" name="loginForm" novalidate ng-submit="vm.login()" ng-hide="vm.mode !== 'login'">
       <!-- Custom Directive: Auth Branding Header -->
       <auth-branding-header></auth-branding-header>
@@ -49,7 +60,7 @@
       <auth-branding-header></auth-branding-header>
 
       <h2>Create your account</h2>
-      <p class="sub">Join the IT Dept collaboration network</p>
+      <p class="sub">A shared project space for TCE students</p>
 
       <label for="fullName">Full Name</label>
       <input type="text" id="fullName" name="fullName" placeholder="Only letters and spaces" required ng-pattern="/^[a-zA-Z\s]{2,}$/" ng-model="vm.signupData.fullName">
@@ -97,12 +108,17 @@
     </form>
   </main>
 
-  <footer class="site-footer">
-    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  <footer class="rich-footer auth-rich-footer">
+    <div class="rich-footer-inner">
+      <div class="rich-footer-brand"><strong>TCEMate</strong><p>Student collaboration at Thiagarajar College of Engineering, Madurai.</p></div>
+      <div class="rich-footer-col"><h4>Discover</h4><a href="index.html">Home</a><a href="about.html">About TCEMate</a></div>
+      <div class="rich-footer-col"><h4>Community</h4><a href="login.html">Log in</a><a href="login.html#signup">Register</a></div>
+    </div>
+    <div class="rich-footer-bottom"><span><span class="brand-mark">TC</span> &copy; 2026 TCEMate</span><span>Thiagarajar College of Engineering · Madurai</span></div>
   </footer>
 
-  <script src="js/app.js"></script>
-  <script src="js/data.js"></script>
+  <script src="js/app.js?v=tcemate-ux-5"></script>
+  <script src="js/data.js?v=tcemate-ux-5"></script>
   <script src="js/auth.js"></script>
 </body>
 </html>

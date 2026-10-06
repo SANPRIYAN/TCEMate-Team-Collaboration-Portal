@@ -30,6 +30,8 @@ TCEMate is a college team-collaboration portal for students of Thiagarajar Colle
 │   ├── data.js
 │   └── angular-methods.js
 ├── index.html
+├── about.html
+├── dashboard.html
 ├── login.html
 ├── browse.html
 ├── create-listing.html
@@ -107,7 +109,9 @@ python -m http.server 8000
 Then open:
 
 - http://localhost:8000/login.html
-- http://localhost:8000/index.html
+- http://localhost:8000/index.html (public home)
+- http://localhost:8000/about.html
+- http://localhost:8000/dashboard.html (requires login)
 
 Alternatively use a VS Code Live Server extension.
 

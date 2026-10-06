@@ -4,93 +4,86 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TCEMate | Full Profile</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=tcemate-ux-5">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
 </head>
-<body ng-controller="ProfileController as vm">
-  <header class="topbar">
-    <h1 class="logo">TCEMate</h1>
-    <nav class="main-nav">
-      <a href="index.html">Dashboard</a>
-      <a href="browse.html">Browse</a>
-      <a href="forum.html">Forum</a>
-      <a href="notifications.html">Alerts</a>
-      <a href="create-listing.html">Post</a>
-      <a href="manage-applicants.html">My Listings</a>
-      <a href="my-interests.html">Interests</a>
-      <a href="profile-view.html" class="active">Profile</a>
-      <a href="#" id="logoutBtn" class="nav-logout" ng-click="vm.logout()">Logout</a>
-    </nav>
-  </header>
+<body class="app-page" ng-controller="ProfileController as vm">
+  <tcemate-app-nav active="profile" on-logout="vm.logout()"></tcemate-app-nav>
 
   <main class="page-wrap">
-    <section class="profile-header">
-      <figure style="margin: 0;">
-        <div class="avatar-circle">{{ vm.getInitials(vm.profile.name) }}</div>
-        <figcaption style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">Profile Photo</figcaption>
-      </figure>
+    <div class="page-banner-compact">
       <div>
+        <p class="eyebrow-light">STUDENT PROFILE</p>
+        <h1>Your profile</h1>
+        <p>How other students see you on TCEMate.</p>
+      </div>
+      <div class="page-banner-action">
+        <a href="profile.html" class="button-light">Edit profile</a>
+      </div>
+    </div>
+    <div class="page-state page-state-loading" ng-if="vm.loading" role="status"><span class="state-spinner" aria-hidden="true"></span><div><h3>Loading your profile</h3><p>Retrieving your student information.</p></div></div>
+    <div class="page-state" ng-if="vm.error" role="alert"><span class="state-icon" aria-hidden="true">!</span><div><h3>Unable to load your profile</h3><p>{{vm.error}}</p><button type="button" class="state-link-button" ng-click="vm.retryLoad()">Try again <span aria-hidden="true">→</span></button></div></div>
+    <section class="profile-layout" ng-if="!vm.loading && vm.profile.name">
+      <aside class="profile-identity-card">
+        <div class="profile-campus-strip" aria-hidden="true"></div>
+        <div class="avatar-circle">{{ vm.getInitials(vm.profile.name) }}</div>
         <h2>{{vm.profile.name}}</h2>
-        <p class="sub">{{vm.profile.department}} · {{vm.profile.year}}, {{vm.profile.section}}</p>
-        <p class="bio">{{vm.profile.bio}}</p>
+        <p class="profile-email" ng-if="vm.profile.email">{{vm.profile.email}}</p>
+        <p class="sub">{{vm.profile.department}}<span ng-if="vm.profile.year"> · {{vm.profile.year}}</span><span ng-if="vm.profile.section"> · {{vm.profile.section}}</span></p>
+        <p class="bio" ng-if="vm.profile.bio">{{vm.profile.bio}}</p>
+      </aside>
 
-        <a href="profile.html" class="btn-primary" style="display:inline-block; width:auto; padding:0.5rem 1.5rem; margin-top:1.5rem; text-decoration:none;">Edit Profile</a>
+      <div class="profile-main-col">
+        <section class="profile-section-card" ng-if="vm.profile.skills && vm.profile.skills.length">
+          <h3>Skills</h3>
+          <skill-badge-list skills="vm.profile.skills"></skill-badge-list>
+        </section>
+
+        <section class="profile-section-card" ng-if="vm.ownedProjects.length">
+          <h3>Projects listed</h3>
+          <div class="portfolio-grid">
+            <portfolio-project-card project="project" ng-repeat="project in vm.ownedProjects track by project.id"></portfolio-project-card>
+          </div>
+        </section>
+
+        <section class="profile-empty-state" ng-if="!(vm.profile.skills || []).length && !vm.ownedProjects.length">
+          <span class="profile-empty-mark" aria-hidden="true">TC</span>
+          <h3>Your profile is ready to grow</h3>
+          <p>Add skills and projects so potential teammates can learn what you enjoy working on.</p>
+          <a class="btn-secondary" href="profile.html">Add profile details</a>
+        </section>
       </div>
     </section>
 
-    <section class="history-section">
-      <h3>Academic History</h3>
-      <ol class="timeline">
-        <li>
-          <span class="timeline-date">2025 – Present</span>
-          <h4>AI Consortium Internship</h4>
-          <p>Working on the AI Career Intelligence Platform as part of a four-person team.</p>
-        </li>
-        <li>
-          <span class="timeline-date">2025</span>
-          <h4>TCE Parking Portal — Team Project</h4>
-          <p>Built a smart parking booking system as a department mini-project.</p>
-        </li>
-        <li>
-          <span class="timeline-date">2023</span>
-          <h4>Joined IT Department, Section A</h4>
-          <p>Started undergraduate studies at Thiagarajar College of Engineering.</p>
-        </li>
-      </ol>
-    </section>
-
-    <section class="portfolio-section">
-      <h3>Portfolio Projects</h3>
-      <div class="portfolio-grid">
-        <portfolio-project-card project="project" ng-repeat="project in vm.profile.projects"></portfolio-project-card>
-      </div>
-    </section>
-
-    <section class="stats-row">
-      <article class="stat-card">
-        <span class="stat-num">2</span>
-        <span class="stat-label">Collaborations</span>
+    <section class="stats-row profile-facts" ng-if="!vm.loading && vm.profile.name">
+      <article class="stat-card" ng-if="vm.profile.skills">
+        <span class="stat-num">{{vm.profile.skills.length}}</span>
+        <span class="stat-label">Skills listed</span>
       </article>
       <article class="stat-card">
-        <span class="stat-num">14</span>
-        <span class="stat-label">Connections</span>
+        <span class="stat-num">{{vm.ownedProjects.length}}</span>
+        <span class="stat-label">Projects listed</span>
       </article>
-      <article class="stat-card">
-        <span class="stat-label" style="display:block; margin-bottom:0.5rem; font-weight:600;">Profile Completion</span>
-        <progress value="85" max="100" style="width:100%; height:8px;"></progress>
-        <span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-top:0.3rem;">85% Complete</span>
+      <article class="stat-card" ng-if="vm.profile.createdAt">
+        <span class="stat-num profile-date">{{vm.profile.createdAt | date:'MMM yyyy'}}</span>
+        <span class="stat-label">Member since</span>
       </article>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <p>&copy; 2026 TCEMate — Thiagarajar College of Engineering, Madurai</p>
+  <footer class="rich-footer">
+    <div class="rich-footer-inner">
+      <div class="rich-footer-brand"><strong>TCEMate</strong><p>Team Up. Build Together.<br>Thiagarajar College of Engineering, Madurai</p></div>
+      <div class="rich-footer-col"><h4>Explore</h4><a href="browse.html">Browse Projects</a><a href="forum.html">Forum</a><a href="create-listing.html">Create Project</a></div>
+      <div class="rich-footer-col"><h4>Your space</h4><a href="dashboard.html">Dashboard</a><a href="my-interests.html">My Interests</a><a href="notifications.html">Notifications</a></div>
+    </div>
+    <div class="rich-footer-bottom"><span><span class="brand-mark">TC</span> &copy; 2026 TCEMate</span><span>Thiagarajar College of Engineering · Madurai</span></div>
   </footer>
 
-  <script src="js/app.js"></script>
-  <script src="js/data.js"></script>
+  <script src="js/app.js?v=tcemate-ux-5"></script>
+  <script src="js/data.js?v=tcemate-ux-5"></script>
   <script src="js/auth.js"></script>
 </body>
 </html>

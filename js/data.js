@@ -30,12 +30,30 @@
       });
     }
 
-    return {
-      getProjects: function () {
-        return request('GET', '/projects').then(function (response) {
-          return response && response.success ? (response.projects || []) : [];
+    function getProjects() {
+      return request('GET', '/projects').then(function (response) {
+        return response && response.success ? (response.projects || []) : [];
+      });
+    }
+
+    function getMyProjects(user) {
+      var userId = user && (user.id || user._id);
+      if (!userId) {
+        return $q.when([]);
+      }
+
+      return getProjects().then(function (projects) {
+        return projects.filter(function (project) {
+          var owner = project.createdBy || project.owner;
+          var ownerId = owner && typeof owner === 'object' ? (owner.id || owner._id) : owner;
+          return String(ownerId || '') === String(userId);
         });
-      },
+      });
+    }
+
+    return {
+      getProjects: getProjects,
+      getMyProjects: getMyProjects,
       getProject: function (projectId) {
         return request('GET', '/projects/' + encodeURIComponent(projectId)).then(function (response) {
           return response && response.success ? response.project : null;
@@ -55,12 +73,6 @@
         return request('GET', '/applicants?mine=true').then(function (response) {
           return response && response.success ? (response.applicants || []) : [];
         });
-      },
-      getTeams: function () {
-        return [
-          { id: 1, name: 'Current Team', role: 'Lead' },
-          { id: 2, name: 'Project Partner', role: 'Member' }
-        ];
       },
       getNotifications: function () {
         return request('GET', '/notifications').then(function (response) {
@@ -106,10 +118,10 @@
           applicants: this.getApplicants()
         }).then(function (data) {
           var openProjects = (data.projects || []).filter(function (project) { return project.status === 'open'; }).length;
+          var pendingApplicants = (data.applicants || []).filter(function (applicant) { return applicant.status === 'pending'; }).length;
           return [
             { value: openProjects, label: 'Active Projects' },
-            { value: (data.applicants || []).length, label: 'Pending Requests' },
-            { value: 12, label: 'Connections' }
+            { value: pendingApplicants, label: 'Pending Requests' }
           ];
         });
       },
@@ -124,7 +136,7 @@
           var notifications = data.notifications || [];
           return {
             stats: [
-              { value: projects.length, label: 'Projects Available', icon: '⌂' },
+              { value: projects.filter(function (project) { return project.status === 'open'; }).length, label: 'Projects Available', icon: '⌂' },
               { value: (data.applications || []).length, label: 'My Applications', icon: '↗' },
               { value: (data.interests || []).length, label: 'My Interests', icon: '☆' },
               { value: notifications.filter(function (notification) { return notification.unread; }).length, label: 'Unread Notifications', icon: '!' }
