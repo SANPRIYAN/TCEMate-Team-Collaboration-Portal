@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<title>TCEMate | Verify Email</title>
+<link rel="stylesheet" href="style.css?v=tcemate-ux-5">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
+</head>
+<body class="app-page auth-body" ng-controller="EmailVerificationController as vm">
+  <header class="topbar">
+    <a class="logo" href="index.html">TCEMate</a>
+    <nav class="main-nav" aria-label="Public navigation">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="login.html">Log in</a>
+    </nav>
+  </header>
+  <main class="auth-wrap">
+    <section class="auth-card" aria-live="polite">
+      <auth-branding-header></auth-branding-header>
+      <h2>Verify your TCE email</h2>
+      <p class="sub" ng-if="vm.loading">Checking your verification link…</p>
+      <p class="inline-error" ng-if="vm.error" role="alert">{{vm.error}}</p>
+      <p class="inline-notice" ng-if="vm.notice" role="status">{{vm.notice}}</p>
+      <p class="switch-link" ng-if="vm.notice"><a href="login.html">Continue to login</a></p>
+    </section>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/app.js?v=tcemate-auth-1"></script>
+  <script src="js/data.js?v=tcemate-ux-5"></script>
+  <script src="js/auth.js?v=tcemate-auth-1"></script>
+</body>
+</html>

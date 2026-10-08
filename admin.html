@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Admin Dashboard</title>
+<link rel="stylesheet" href="style.css?v=admin-v1">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
+</head>
+<body class="app-page" ng-controller="AdminDashboardController as vm">
+  <tcemate-app-nav active="admin" on-logout="vm.logout()"></tcemate-app-nav>
+  <main class="page-wrap admin-wrap">
+    <section class="admin-hero">
+      <p class="eyebrow-light">THIAGARAJAR COLLEGE OF ENGINEERING</p>
+      <h1>Platform administration</h1>
+      <p>Monitor platform activity, support students, and moderate inappropriate content.</p>
+    </section>
+    <p class="inline-error" ng-if="vm.error" role="alert">{{vm.error}}</p>
+    <div class="page-state page-state-loading" ng-if="vm.loading" role="status">
+      <span class="state-spinner" aria-hidden="true"></span>
+      <div><h3>Loading platform activity</h3><p>Statistics are retrieved from the TCEMate database.</p></div>
+    </div>
+    <section class="admin-stats" aria-label="Platform statistics" ng-if="!vm.loading && !vm.error">
+      <article class="admin-stat" ng-repeat="stat in vm.stats track by stat.label">
+        <span class="admin-stat-value">{{stat.value}}</span>
+        <span class="admin-stat-label">{{stat.label}}</span>
+      </article>
+    </section>
+    <section class="admin-shortcuts" aria-label="Administration tools">
+      <a class="admin-shortcut" href="admin-students.html"><span class="admin-shortcut-icon" aria-hidden="true">01</span><span><strong>Students</strong><small>View student accounts and activity</small></span><span aria-hidden="true">→</span></a>
+      <a class="admin-shortcut" href="admin-projects.html"><span class="admin-shortcut-icon" aria-hidden="true">02</span><span><strong>Projects</strong><small>Monitor listings, deadlines, and interest</small></span><span aria-hidden="true">→</span></a>
+      <a class="admin-shortcut" href="admin-interests.html"><span class="admin-shortcut-icon" aria-hidden="true">03</span><span><strong>Interests / applications</strong><small>Review platform-wide application activity</small></span><span aria-hidden="true">→</span></a>
+      <a class="admin-shortcut" href="admin-moderation.html"><span class="admin-shortcut-icon" aria-hidden="true">04</span><span><strong>Platform moderation</strong><small>Review and remove inappropriate discussions</small></span><span aria-hidden="true">→</span></a>
+    </section>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/app.js?v=admin-v1"></script>
+  <script src="js/data.js?v=admin-v1"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

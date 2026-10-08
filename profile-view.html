@@ -37,7 +37,7 @@
 
       <div class="profile-main-col">
         <section class="profile-section-card" ng-if="vm.profile.skills && vm.profile.skills.length">
-          <h3>Skills</h3>
+          <h3>Student Skills</h3>
           <skill-badge-list skills="vm.profile.skills"></skill-badge-list>
         </section>
 
@@ -60,7 +60,7 @@
     <section class="stats-row profile-facts" ng-if="!vm.loading && vm.profile.name">
       <article class="stat-card" ng-if="vm.profile.skills">
         <span class="stat-num">{{vm.profile.skills.length}}</span>
-        <span class="stat-label">Skills listed</span>
+        <span class="stat-label">Student skills</span>
       </article>
       <article class="stat-card">
         <span class="stat-num">{{vm.ownedProjects.length}}</span>
@@ -82,6 +82,7 @@
     <div class="rich-footer-bottom"><span><span class="brand-mark">TC</span> &copy; 2026 TCEMate</span><span>Thiagarajar College of Engineering · Madurai</span></div>
   </footer>
 
+  <script src="js/config.js"></script>
   <script src="js/app.js?v=tcemate-ux-5"></script>
   <script src="js/data.js?v=tcemate-ux-5"></script>
   <script src="js/auth.js"></script>

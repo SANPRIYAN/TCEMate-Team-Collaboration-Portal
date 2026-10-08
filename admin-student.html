@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Student Activity</title>
+<link rel="stylesheet" href="style.css?v=admin-v1">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
+</head>
+<body class="app-page" ng-controller="AdminStudentController as vm">
+  <tcemate-app-nav active="students" on-logout="vm.logout()"></tcemate-app-nav>
+  <main class="page-wrap admin-wrap">
+    <a class="admin-back-link" href="admin-students.html">← Back to students</a>
+    <div class="page-state page-state-loading" ng-if="vm.loading" role="status"><span class="state-spinner" aria-hidden="true"></span><div><h3>Loading student activity</h3><p>Retrieving the student's database records.</p></div></div>
+    <p class="inline-error" ng-if="vm.error" role="alert">{{vm.error}}</p>
+    <section ng-if="!vm.loading && vm.student">
+      <header class="admin-page-heading"><div><p class="eyebrow">STUDENT ACTIVITY</p><h1>{{vm.student.name}}</h1><p><a ng-href="mailto:{{vm.student.email}}">{{vm.student.email}}</a></p></div><span class="admin-status" ng-class="vm.student.accountStatus">{{vm.student.accountStatus}}</span></header>
+      <div class="admin-profile-facts">
+        <article><small>Department</small><strong>{{vm.student.department || '—'}}</strong></article>
+        <article><small>Year</small><strong>{{vm.student.year || '—'}}</strong></article>
+        <article><small>Section</small><strong>{{vm.student.section || '—'}}</strong></article>
+        <article><small>Joined</small><strong>{{vm.student.createdAt | date:'mediumDate'}}</strong></article>
+      </div>
+      <section class="admin-data-panel">
+        <div class="panel-heading"><div><p class="section-kicker">PROFILE</p><h2>Student skills</h2></div></div>
+        <div class="admin-chip-list" ng-if="vm.student.skills.length">
+          <span class="admin-skill-chip" ng-repeat="skill in vm.student.skills track by skill.id">{{skill.name}}</span>
+        </div>
+        <p class="admin-empty" ng-if="!vm.student.skills.length">No skills submitted.</p>
+      </section>
+      <section class="admin-data-panel">
+        <div class="panel-heading"><div><p class="section-kicker">OWNED LISTINGS</p><h2>Projects created</h2></div><span>{{vm.projects.length}}</span></div>
+        <article class="admin-activity-row" ng-repeat="project in vm.projects track by project.id">
+          <div><h3>{{project.title}}</h3><p>{{project.description}}</p><small>Required: {{project.requiredSkills.join(', ') || 'Not specified'}} · Deadline {{project.deadline | date:'mediumDate'}}</small></div>
+          <span class="admin-status" ng-class="project.status">{{project.status}}</span>
+        </article>
+        <p class="admin-empty" ng-if="!vm.projects.length">No projects created.</p>
+      </section>
+      <section class="admin-data-panel">
+        <div class="panel-heading"><div><p class="section-kicker">APPLICATION ACTIVITY</p><h2>Interests sent</h2></div><span>{{vm.interests.length}}</span></div>
+        <article class="admin-activity-row" ng-repeat="interest in vm.interests track by interest.id">
+          <div><h3>{{interest.project.title || interest.title}}</h3><p>{{interest.details || 'No additional details provided.'}}</p><small>Project owner: {{interest.project.owner.name || 'Unavailable'}} · {{interest.createdAt | date:'medium'}}</small></div>
+          <span class="admin-status" ng-class="interest.status">{{interest.status}}</span>
+        </article>
+        <p class="admin-empty" ng-if="!vm.interests.length">No interests or applications recorded.</p>
+      </section>
+    </section>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/app.js?v=admin-v1"></script>
+  <script src="js/data.js?v=admin-v1"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

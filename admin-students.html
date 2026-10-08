@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Students</title>
+<link rel="stylesheet" href="style.css?v=admin-v1">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
+</head>
+<body class="app-page" ng-controller="AdminStudentsController as vm">
+  <tcemate-app-nav active="students" on-logout="vm.logout()"></tcemate-app-nav>
+  <main class="page-wrap admin-wrap">
+    <header class="admin-page-heading"><div><p class="eyebrow">PLATFORM DIRECTORY</p><h1>Students</h1><p>Student account details and activity counts from MongoDB.</p></div><span class="admin-count" ng-if="!vm.loading">{{vm.students.length}} students</span></header>
+    <label class="admin-search-label" for="studentSearch">Search students</label>
+    <input class="admin-search" id="studentSearch" type="search" ng-model="vm.search" placeholder="Search by name, email, department, year, or section">
+    <p class="inline-error" ng-if="vm.error" role="alert">{{vm.error}}</p>
+    <div class="page-state page-state-loading" ng-if="vm.loading" role="status"><span class="state-spinner" aria-hidden="true"></span><div><h3>Loading students</h3><p>Retrieving student records and activity totals.</p></div></div>
+    <div class="admin-table-wrap" ng-if="!vm.loading && !vm.error">
+      <table class="admin-table">
+        <thead><tr><th>Name</th><th>Email</th><th>Department</th><th>Year / Section</th><th>Student skills</th><th>Projects</th><th>Interests</th><th>Account</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr ng-repeat="student in vm.students | filter:vm.search track by student.id">
+            <td data-label="Name"><strong>{{student.name}}</strong></td>
+            <td data-label="Email"><a ng-href="mailto:{{student.email}}">{{student.email}}</a></td>
+            <td data-label="Department">{{student.department || '—'}}</td>
+            <td data-label="Year / Section">{{student.year || '—'}}<span ng-if="student.section"> · {{student.section}}</span></td>
+            <td data-label="Student skills">{{student.skills.join(', ') || '—'}}</td>
+            <td data-label="Projects">{{student.projectsCreated}}</td>
+            <td data-label="Interests">{{student.interestsSent}}</td>
+            <td data-label="Account"><span class="admin-status" ng-class="student.accountStatus">{{student.accountStatus}}</span></td>
+            <td data-label="Actions"><a class="admin-row-link" ng-href="admin-student.html?id={{student.id}}">View activity</a><div class="admin-row-actions"><button type="button" ng-click="vm.setActive(student)">{{student.accountStatus === 'active' ? 'Suspend' : 'Reactivate'}}</button><button type="button" class="danger" ng-click="vm.deleteStudent(student)">Delete</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="page-state" ng-if="!vm.students.length"><div><h3>No students found</h3><p>Student accounts will appear here after registration.</p></div></div>
+      <div class="page-state" ng-if="vm.students.length && !(vm.students | filter:vm.search).length"><div><h3>No matching students</h3><p>Try a different search term.</p></div></div>
+    </div>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/app.js?v=admin-v1"></script>
+  <script src="js/data.js?v=admin-v1"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

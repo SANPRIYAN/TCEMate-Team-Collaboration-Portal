@@ -25,9 +25,19 @@
       }).catch(function (error) {
         return {
           success: false,
-          message: error && error.data && error.data.message ? error.data.message : 'Request failed.'
+          message: error && error.data && error.data.message ? error.data.message : 'Request failed.',
+          status: error && error.status,
+          missingSkills: error && error.data && error.data.missingSkills || []
         };
       });
+    }
+
+    function formatDateInput(value) {
+      if (!(value instanceof Date)) return value;
+      var year = value.getFullYear();
+      var month = String(value.getMonth() + 1).padStart(2, '0');
+      var day = String(value.getDate()).padStart(2, '0');
+      return year + '-' + month + '-' + day;
     }
 
     function getProjects() {
@@ -84,15 +94,9 @@
           return response && response.success ? (response.interests || []) : [];
         });
       },
-      applyToProject: function (project, user) {
+      applyToProject: function (project) {
         return request('POST', '/applicants', {
-          project: project.id,
-          name: user.name,
-          regNo: user.regNo,
-          department: user.department,
-          year: user.year,
-          skills: user.skills || [],
-          matchScore: project.matchScore || 0
+          project: project.id
         }).then(function (response) {
           return response;
         });
@@ -111,6 +115,21 @@
         return request('GET', '/users/me').then(function (response) {
           return response && response.success ? response.user : null;
         });
+      },
+      getAdminOverview: function () {
+        return request('GET', '/admin/overview');
+      },
+      getAdminStudents: function () {
+        return request('GET', '/admin/students');
+      },
+      getAdminStudent: function (studentId) {
+        return request('GET', '/admin/students/' + encodeURIComponent(studentId));
+      },
+      getAdminProjects: function () {
+        return request('GET', '/admin/projects');
+      },
+      getAdminInterests: function () {
+        return request('GET', '/admin/interests');
       },
       getLandingStats: function () {
         return $q.all({
@@ -147,7 +166,15 @@
         });
       },
       updateProfile: function (profile) {
-        return request('PUT', '/users/me', profile).then(function (response) {
+        return request('PUT', '/users/me', {
+          name: profile.name,
+          phone: profile.phone,
+          department: profile.department,
+          year: profile.year,
+          section: profile.section,
+          bio: profile.bio,
+          preferences: profile.preferences
+        }).then(function (response) {
           return response && response.success ? response.user : null;
         });
       },
@@ -158,12 +185,37 @@
           type: listing.type,
           department: listing.department,
           year: listing.year,
-          deadline: listing.deadline,
+          deadline: formatDateInput(listing.deadline),
+          requiredSkills: listing.requiredSkills,
           teamSize: teamSize,
           status: 'open'
         }).then(function (response) {
           return response;
         });
+      },
+      addSkill: function (name) {
+        return request('POST', '/users/me/skills', { name: name });
+      },
+      updateSkill: function (skillId, name) {
+        return request('PUT', '/users/me/skills/' + encodeURIComponent(skillId), { name: name });
+      },
+      deleteSkill: function (skillId) {
+        return request('DELETE', '/users/me/skills/' + encodeURIComponent(skillId));
+      },
+      deleteProject: function (projectId) {
+        return request('DELETE', '/projects/' + encodeURIComponent(projectId));
+      },
+      setStudentActive: function (studentId, isActive) {
+        return request('PATCH', '/admin/students/' + encodeURIComponent(studentId) + '/status', { isActive: isActive });
+      },
+      deleteStudent: function (studentId) {
+        return request('DELETE', '/admin/students/' + encodeURIComponent(studentId));
+      },
+      getAdminDiscussions: function () {
+        return request('GET', '/admin/discussions');
+      },
+      deleteDiscussion: function (discussionId) {
+        return request('DELETE', '/discussions/' + encodeURIComponent(discussionId));
       },
       removeApplicant: function (applicantId) {
         return request('DELETE', '/applicants/' + applicantId).then(function (response) {
@@ -196,7 +248,10 @@
           return 0;
         }
         var matched = required.filter(function (skill) {
-          return candidate.indexOf(skill) !== -1;
+          return candidate.some(function (candidateSkill) {
+            var candidateName = candidateSkill && candidateSkill.name || candidateSkill;
+            return String(candidateName || '').trim().toLowerCase() === String(skill || '').trim().toLowerCase();
+          });
         });
         return Math.round((matched.length / required.length) * 100);
       }

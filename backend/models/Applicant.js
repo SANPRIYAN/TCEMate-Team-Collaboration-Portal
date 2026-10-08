@@ -17,4 +17,6 @@ const applicantSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+applicantSchema.index({ project: 1, user: 1 }, { unique: true, partialFilterExpression: { project: { $type: 'objectId' }, user: { $type: 'objectId' } } });
+
 module.exports = mongoose.model('Applicant', applicantSchema);

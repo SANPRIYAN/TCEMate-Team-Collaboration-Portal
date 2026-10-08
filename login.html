@@ -31,17 +31,17 @@
       <!-- Custom Directive: Auth Branding Header -->
       <auth-branding-header></auth-branding-header>
 
-      <h2>Log in to TCEMate</h2>
-      <p class="sub">Enter your college email and password</p>
+      <h2>{{vm.loginRole === 'admin' ? 'Administrator sign in' : 'Log in to TCEMate'}}</h2>
+      <p class="sub">{{vm.loginRole === 'admin' ? 'Administrator account sign in' : 'Enter your official TCE student email and password'}}</p>
 
       <label for="loginEmail">Email</label>
-      <input type="email" id="loginEmail" name="loginEmail" placeholder="you@student.tce.edu" required ng-pattern="/^[^\s@]+@(student\.)?tce\.edu$/" ng-model="vm.loginData.email">
+      <input type="email" id="loginEmail" name="loginEmail" ng-attr-placeholder="{{vm.loginRole === 'admin' ? 'Administrator email' : 'you@student.tce.edu'}}" required ng-model="vm.loginData.email">
       <div class="error-msg" ng-messages="loginForm.loginEmail.$error" ng-show="loginForm.loginEmail.$dirty || loginForm.$submitted">
         <span ng-message="required">Please fill this field.</span>
         <span ng-message="email">Please enter a valid email address.</span>
-        <span ng-message="pattern">Please enter a valid tce.edu email address.</span>
       </div>
       <span class="error-msg" id="loginEmailError" ng-if="vm.loginErrors.email">{{ vm.loginErrors.email }}</span>
+      <p class="inline-notice" ng-if="vm.verificationMessage" role="status">{{vm.verificationMessage}}</p>
 
       <label for="loginPassword">Password</label>
       <input type="password" id="loginPassword" name="loginPassword" placeholder="••••••••" minlength="8" required ng-model="vm.loginData.password">
@@ -51,11 +51,49 @@
       </div>
       <span class="error-msg" id="loginPasswordError" ng-if="vm.loginErrors.password">{{ vm.loginErrors.password }}</span>
 
-      <button type="submit" class="btn-primary">Log In</button>
-      <p class="switch-link">New here? <a href="#" id="showSignup" ng-click="vm.toggleSignup()">Create an account</a></p>
+      <button type="submit" class="btn-primary">{{vm.loginRole === 'admin' ? 'Admin Log In' : 'Log In'}}</button>
+      <p class="switch-link"><a href="#" ng-click="vm.showForgotPassword()">Forgot password?</a></p>
+      <p class="switch-link"><a href="#" ng-click="vm.toggleAdminLogin()">{{vm.loginRole === 'admin' ? 'Student login' : 'Administrator login'}}</a></p>
+      <p class="switch-link" ng-if="vm.adminSetupAvailable"><a href="#" ng-click="vm.showAdminSetup()">Administrator setup</a></p>
+      <p class="switch-link" ng-if="vm.loginRole === 'student'">New here? <a href="#" id="showSignup" ng-click="vm.toggleSignup()">Create an account</a></p>
     </form>
 
-    <form class="auth-card" id="signupForm" name="signupForm" novalidate ng-submit="vm.register()" ng-hide="vm.mode !== 'signup'">
+    <form class="auth-card" name="adminSetupForm" novalidate ng-submit="vm.startAdminSetup(adminSetupForm)" ng-if="vm.mode === 'adminSetup' && vm.adminSetupAvailable">
+      <auth-branding-header></auth-branding-header>
+      <h2>Administrator Setup</h2>
+      <p class="sub">Create the first administrator using the pre-authorized email and the setup secret configured by the server operator.</p>
+      <label for="adminSetupName">Full Name</label>
+      <input type="text" id="adminSetupName" name="fullName" required maxlength="100" ng-pattern="/^[a-zA-Z]+(?:[ '-][a-zA-Z]+)*$/" ng-model="vm.adminSetupData.fullName">
+      <p class="inline-error" ng-if="adminSetupForm.fullName.$error.pattern && adminSetupForm.$submitted" role="alert">Use letters, spaces, apostrophes, or hyphens in your name.</p>
+      <label for="adminSetupEmail">Email</label>
+      <input type="email" id="adminSetupEmail" name="email" required autocomplete="email" ng-model="vm.adminSetupData.email">
+      <label for="adminSetupPassword">Password</label>
+      <input type="password" id="adminSetupPassword" name="password" required minlength="8" maxlength="128" ng-pattern="/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,128}$/" ng-model="vm.adminSetupData.password">
+      <p class="field-helper">Use 8-128 characters with at least one uppercase letter, one lowercase letter, one number, and one symbol.</p>
+      <p class="inline-error" ng-if="adminSetupForm.password.$invalid && adminSetupForm.password.$touched" role="alert">Your password must meet all four requirements above.</p>
+      <label for="adminSetupConfirmPassword">Confirm Password</label>
+      <input type="password" id="adminSetupConfirmPassword" name="confirmPassword" required minlength="8" maxlength="128" ng-model="vm.adminSetupData.confirmPassword">
+      <p class="inline-error" ng-if="vm.adminSetupData.confirmPassword && vm.adminSetupData.password !== vm.adminSetupData.confirmPassword" role="alert">Passwords do not match.</p>
+      <label for="adminSetupSecret">Administrator setup secret</label>
+      <input type="password" id="adminSetupSecret" name="setupSecret" required minlength="32" maxlength="256" autocomplete="off" ng-model="vm.adminSetupData.setupSecret">
+      <p class="inline-error" ng-if="vm.adminSetupError" role="alert">{{vm.adminSetupError}}</p>
+      <button type="submit" class="btn-primary">Create Administrator</button>
+      <p class="switch-link"><a href="#" ng-click="vm.backToLogin()">Back to login</a></p>
+    </form>
+
+    <form class="auth-card" name="forgotForm" novalidate ng-submit="vm.requestPasswordReset()" ng-hide="vm.mode !== 'forgot'">
+      <auth-branding-header></auth-branding-header>
+      <h2>Reset your password</h2>
+      <p class="sub">Enter your account email and we’ll send a one-time reset link if an account exists.</p>
+      <label for="resetEmail">Email</label>
+      <input type="email" id="resetEmail" name="resetEmail" required ng-model="vm.resetEmail" autocomplete="email">
+      <p class="inline-notice" ng-if="vm.resetMessage" role="status">{{vm.resetMessage}}</p>
+      <p class="inline-error" ng-if="vm.resetError" role="alert">{{vm.resetError}}</p>
+      <button type="submit" class="btn-primary">Send reset link</button>
+      <p class="switch-link"><a href="#" ng-click="vm.toggleLogin()">Back to login</a></p>
+    </form>
+
+    <form class="auth-card" id="signupForm" name="signupForm" novalidate ng-submit="vm.register(signupForm)" ng-hide="vm.mode !== 'signup'">
       <!-- Custom Directive: Auth Branding Header -->
       <auth-branding-header></auth-branding-header>
 
@@ -63,7 +101,7 @@
       <p class="sub">A shared project space for TCE students</p>
 
       <label for="fullName">Full Name</label>
-      <input type="text" id="fullName" name="fullName" placeholder="Only letters and spaces" required ng-pattern="/^[a-zA-Z\s]{2,}$/" ng-model="vm.signupData.fullName">
+      <input type="text" id="fullName" name="fullName" placeholder="Your full name" maxlength="100" required ng-pattern="/^[a-zA-Z]+(?:[ '-][a-zA-Z]+)*$/" ng-model="vm.signupData.fullName">
       <div class="error-msg" ng-messages="signupForm.fullName.$error" ng-show="signupForm.fullName.$dirty || signupForm.$submitted">
         <span ng-message="required">Please fill this field.</span>
         <span ng-message="pattern">Only letters and spaces are allowed.</span>
@@ -71,15 +109,16 @@
       <span class="error-msg" id="fullNameError" ng-if="vm.signupErrors.fullName">{{ vm.signupErrors.fullName }}</span>
 
       <label for="signupEmail">Email</label>
-      <input type="email" id="signupEmail" name="signupEmail" placeholder="you@student.tce.edu" required ng-pattern="/^[^\s@]+@(student\.)?tce\.edu$/" ng-model="vm.signupData.email">
+      <input type="email" id="signupEmail" name="signupEmail" placeholder="you@student.tce.edu" autocomplete="email" required ng-pattern="/^[^@\s]+@student\.tce\.edu$/i" ng-model="vm.signupData.email">
+      <p class="field-helper">Official TCE Student Email. Use your official @student.tce.edu email address.</p>
       <div class="error-msg" ng-messages="signupForm.signupEmail.$error" ng-show="signupForm.signupEmail.$dirty || signupForm.$submitted">
         <span ng-message="required">Please fill this field.</span>
-        <span ng-message="pattern">Please enter a valid tce.edu email address.</span>
+        <span ng-message="pattern">Please use your official TCE student email address.</span>
       </div>
       <span class="error-msg" id="signupEmailError" ng-if="vm.signupErrors.email">{{ vm.signupErrors.email }}</span>
 
       <label for="regNo">Register Number</label>
-      <input type="text" id="regNo" name="regNo" placeholder="Digits only, e.g. 2023IT045" required ng-pattern="/^[a-zA-Z0-9]{5,}$/" ng-model="vm.signupData.regNo">
+      <input type="text" id="regNo" name="regNo" placeholder="e.g. 2023IT045" maxlength="30" required ng-pattern="/^[a-zA-Z0-9]{5,30}$/" ng-model="vm.signupData.regNo">
       <div class="error-msg" ng-messages="signupForm.regNo.$error" ng-show="signupForm.regNo.$dirty || signupForm.$submitted">
         <span ng-message="required">Please fill this field.</span>
         <span ng-message="pattern">Register number must be letters/digits only.</span>
@@ -95,7 +134,7 @@
       <span class="error-msg" id="phoneError" ng-if="vm.signupErrors.phone">{{ vm.signupErrors.phone }}</span>
 
       <label for="signupPassword">Password</label>
-      <input type="password" id="signupPassword" name="signupPassword" placeholder="8+ chars, upper/lower/number/symbol" minlength="8" required ng-pattern="/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}/" ng-model="vm.signupData.password">
+      <input type="password" id="signupPassword" name="signupPassword" placeholder="8+ chars, upper/lower/number/symbol" minlength="8" maxlength="128" required ng-pattern="/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,128}$/" ng-model="vm.signupData.password">
       <div class="error-msg" ng-messages="signupForm.signupPassword.$error" ng-show="signupForm.signupPassword.$dirty || signupForm.$submitted">
         <span ng-message="required">Please fill this field.</span>
         <span ng-message="minlength">Password must be at least 8 characters.</span>
@@ -103,6 +142,7 @@
       </div>
       <span class="error-msg" id="signupPasswordError" ng-if="vm.signupErrors.password">{{ vm.signupErrors.password }}</span>
 
+      <p class="inline-error" ng-if="vm.signupFormMessage" role="alert">{{vm.signupFormMessage}}</p>
       <button type="submit" class="btn-primary">Sign Up</button>
       <p class="switch-link">Already have an account? <a href="#" id="showLogin" ng-click="vm.toggleLogin()">Log in</a></p>
     </form>
@@ -117,8 +157,9 @@
     <div class="rich-footer-bottom"><span><span class="brand-mark">TC</span> &copy; 2026 TCEMate</span><span>Thiagarajar College of Engineering · Madurai</span></div>
   </footer>
 
-  <script src="js/app.js?v=tcemate-ux-5"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js?v=tcemate-auth-1"></script>
   <script src="js/data.js?v=tcemate-ux-5"></script>
-  <script src="js/auth.js"></script>
+  <script src="js/auth.js?v=tcemate-auth-1"></script>
 </body>
 </html>

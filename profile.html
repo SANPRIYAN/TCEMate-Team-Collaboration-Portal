@@ -38,7 +38,19 @@
       <div class="profile-edit-main">
         <section class="profile-section-card skills">
           <div class="section-rule-heading"><div><p class="eyebrow">YOUR TOOLKIT</p><h3>Skills</h3></div></div>
-          <skill-badge-list skills="vm.profile.skills"></skill-badge-list>
+          <div class="profile-skill-editor" ng-repeat="skill in vm.profile.skills track by skill.id">
+            <form class="profile-skill-edit" ng-if="vm.editingSkillId === skill.id" ng-submit="vm.saveSkill(skill)">
+              <label class="sr-only" ng-attr-for="skillEdit-{{skill.id}}">Edit {{skill.name}}</label>
+              <input type="text" ng-attr-id="skillEdit-{{skill.id}}" maxlength="50" required ng-model="vm.editingSkillName">
+              <button type="submit" class="button-secondary">Save</button>
+              <button type="button" class="button-secondary" ng-click="vm.cancelEditSkill()">Cancel</button>
+            </form>
+            <div class="profile-skill-actions" ng-if="vm.editingSkillId !== skill.id">
+              <span>{{skill.name}}</span>
+              <button type="button" ng-click="vm.startEditSkill(skill)">Edit</button>
+              <button type="button" ng-click="vm.removeSkill(skill)">Remove</button>
+            </div>
+          </div>
         </section>
 
         <aside class="edit-form-section">
@@ -56,9 +68,12 @@
 
           <label for="pBio">Short Bio</label>
           <textarea id="pBio" name="pBio" rows="3" placeholder="Tell others about your interests" ng-model="vm.profile.bio"></textarea>
-          <label for="pSkills">Skills</label>
-          <input type="text" id="pSkills" name="pSkills" ng-list=", " ng-model="vm.profile.skills" placeholder="Separate skills with commas">
-          <p class="field-helper">Add the skills you would like teammates to find on your profile.</p>
+          <label for="pSkills">Add a skill</label>
+          <div class="two-col">
+            <input type="text" id="pSkills" name="pSkills" ng-model="vm.newSkillName" maxlength="50" placeholder="e.g. React">
+            <button type="button" class="button-secondary" ng-click="vm.addSkill()">Add skill</button>
+          </div>
+          <p class="field-helper">Skills are self-declared profile information and can be edited or removed at any time.</p>
         </fieldset>
 
         <fieldset style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;">
@@ -115,6 +130,7 @@
     <div class="rich-footer-bottom"><span><span class="brand-mark">TC</span> &copy; 2026 TCEMate</span><span>Thiagarajar College of Engineering · Madurai</span></div>
   </footer>
 
+  <script src="js/config.js"></script>
   <script src="js/app.js?v=tcemate-ux-5"></script>
   <script src="js/data.js?v=tcemate-ux-5"></script>
   <script src="js/auth.js"></script>

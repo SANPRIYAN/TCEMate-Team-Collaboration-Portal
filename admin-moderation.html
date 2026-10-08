@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Platform Moderation</title>
+<link rel="stylesheet" href="style.css?v=admin-v2">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
+</head>
+<body class="app-page" ng-controller="AdminModerationController as vm">
+  <tcemate-app-nav active="moderation" on-logout="vm.logout()"></tcemate-app-nav>
+  <main class="page-wrap admin-wrap">
+    <header class="admin-page-heading"><div><p class="eyebrow">PLATFORM MANAGEMENT</p><h1>Content moderation</h1><p>Review public discussions and remove content that violates community expectations.</p></div><span class="admin-count" ng-if="!vm.loading">{{vm.discussions.length}} discussions</span></header>
+    <p class="inline-notice" ng-if="vm.notice" role="status">{{vm.notice}}</p>
+    <p class="inline-error" ng-if="vm.error" role="alert">{{vm.error}}</p>
+    <div class="page-state page-state-loading" ng-if="vm.loading" role="status"><span class="state-spinner" aria-hidden="true"></span><div><h3>Loading discussions</h3><p>Retrieving published community content.</p></div></div>
+    <section class="admin-data-panel" ng-if="!vm.loading && !vm.error">
+      <article class="admin-activity-row" ng-repeat="discussion in vm.discussions track by discussion._id">
+        <div><p class="eyebrow">{{discussion.tag || 'Discussion'}} · {{discussion.createdAt | date:'medium'}}</p><h2>{{discussion.title}}</h2><p>{{discussion.body}}</p><small>Posted by {{discussion.author}}</small></div>
+        <button type="button" class="admin-danger-button" ng-click="vm.removeDiscussion(discussion)">Remove content</button>
+      </article>
+      <div class="page-state" ng-if="!vm.discussions.length"><div><h3>No discussions</h3><p>There is no published discussion content to moderate.</p></div></div>
+    </section>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/app.js?v=admin-v2"></script>
+  <script src="js/data.js?v=admin-v2"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

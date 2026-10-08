@@ -36,9 +36,8 @@
 
       var token = sessionStorage.getItem(tokenKey);
       if (token) {
-        config.headers = {
-          Authorization: 'Bearer ' + token
-        };
+        config.headers = config.headers || {};
+        config.headers.Authorization = 'Bearer ' + token;
       }
 
       return $http(config).then(function (response) {
@@ -46,7 +45,8 @@
       }).catch(function (error) {
         return {
           success: false,
-          message: error && error.data && error.data.message ? error.data.message : 'Request failed.'
+          message: error && error.data && error.data.message ? error.data.message : 'Request failed.',
+          code: error && error.data && error.data.code
         };
       });
     }
@@ -65,15 +65,17 @@
       isLoggedIn: function () {
         return !!sessionStorage.getItem(tokenKey);
       },
-      login: function (email, password) {
-        return callApi('/auth/login', { email: email, password: password }, 'POST').then(function (result) {
+      login: function (email, password, role) {
+        var endpoint = role === 'admin' ? '/auth/admin/login' : '/auth/login';
+        return callApi(endpoint, { email: email, password: password }, 'POST').then(function (result) {
           if (result && result.success && result.token) {
             setToken(result.token);
             setUser(result.user || null);
             return { ok: true, success: true, message: 'Login successful! Redirecting...', user: result.user };
           }
-
-          return result && result.success === false ? { ok: false, success: false, message: result.message || 'Login failed.' } : { ok: false, success: false, message: 'Login failed.' };
+          return result && result.success === false
+            ? { ok: false, success: false, message: result.message || 'Login failed.', code: result.code }
+            : { ok: false, success: false, message: 'Login failed.' };
         });
       },
       register: function (data) {
@@ -84,14 +86,37 @@
           phone: data.phone,
           password: data.password
         }, 'POST').then(function (result) {
-          if (result && result.success && result.token) {
-            setToken(result.token);
-            setUser(result.user || null);
-            return { ok: true, success: true, message: 'Account created! Redirecting...', user: result.user };
+          if (result && result.success) {
+            return {
+              ok: true,
+              success: true,
+              email: result.user && result.user.email ? result.user.email : data.email,
+              message: result.message || 'Registration successful. You can now log in.'
+            };
           }
 
-          return { ok: false, success: false, message: result && result.message ? result.message : 'Registration failed.' };
+          return {
+            ok: false,
+            success: false,
+            message: result && result.message ? result.message : 'Registration failed.',
+            code: result && result.code
+          };
         });
+      },
+      requestPasswordReset: function (email) {
+        return callApi('/auth/forgot-password', { email: email }, 'POST');
+      },
+      verifyEmail: function (token) {
+        return callApi('/auth/verify-email', { token: token }, 'POST');
+      },
+      getAdminSetupStatus: function () {
+        return callApi('/auth/admin/setup/status');
+      },
+      startAdminSetup: function (data) {
+        return callApi('/auth/admin/setup', data, 'POST');
+      },
+      resetPassword: function (token, password) {
+        return callApi('/auth/reset-password', { token: token, password: password }, 'POST');
       },
       logout: function () {
         setToken(null);

@@ -13,4 +13,6 @@ const interestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+interestSchema.index({ project: 1, user: 1 }, { unique: true, partialFilterExpression: { project: { $type: 'objectId' }, user: { $type: 'objectId' } } });
+
 module.exports = mongoose.model('Interest', interestSchema);

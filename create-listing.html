@@ -99,6 +99,11 @@
             <button type="button" id="increaseTeam" ng-click="vm.increaseTeam()">+</button>
           </div>
 
+          <label for="requiredSkills">Required Skills</label>
+          <textarea id="requiredSkills" name="requiredSkills" rows="2" placeholder="React, Node.js, MongoDB" ng-model="vm.requiredSkillsInput" ng-change="vm.updateRequiredSkills()" required></textarea>
+          <p class="field-helper">Separate skills with commas or new lines. Add at least one skill; students matching every required skill are eligible to apply.</p>
+          <span class="error-msg" id="requiredSkillsError" ng-if="vm.errors.requiredSkills">{{vm.errors.requiredSkills}}</span>
+
           <label for="listingDeadline">Application Deadline</label>
           <input type="date" id="listingDeadline" name="listingDeadline" required ng-model="vm.listing.deadline">
           <div class="error-msg" ng-messages="listingForm.listingDeadline.$error" ng-show="listingForm.listingDeadline.$dirty || listingForm.$submitted">
@@ -124,6 +129,7 @@
     <div class="rich-footer-bottom"><span><span class="brand-mark">TC</span> &copy; 2026 TCEMate</span><span>Thiagarajar College of Engineering · Madurai</span></div>
   </footer>
 
+  <script src="js/config.js"></script>
   <script src="js/app.js?v=tcemate-ux-5"></script>
   <script src="js/data.js?v=tcemate-ux-5"></script>
   <script src="js/auth.js"></script>

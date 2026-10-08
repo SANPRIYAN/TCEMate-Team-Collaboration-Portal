@@ -2,7 +2,9 @@
   'use strict';
 
   var app = angular.module('tcemate', ['ngAnimate', 'ngMessages']);
-  app.constant('API_BASE_URL', 'http://localhost:5000/api');
+  var configuredApiUrl = window.TCEMateConfig && window.TCEMateConfig.apiBaseUrl;
+  var localHost = ['localhost', '127.0.0.1'].indexOf(window.location.hostname) !== -1;
+  app.constant('API_BASE_URL', (configuredApiUrl || (localHost ? 'http://localhost:5000/api' : window.location.origin + '/api')).replace(/\/+$/, ''));
 
   // Custom Filter
   app.filter('matchLabel', function () {
@@ -57,11 +59,13 @@
                 '    </div>' +
                 '  </div>' +
                 '  <p class="card-desc">{{project.description}}</p>' +
+                '  <p class="field-helper" ng-if="project.requiredSkills.length"><strong>Required skills:</strong> {{project.requiredSkills.join(", ")}}</p>' +
+                '  <p class="field-helper" ng-if="project.match"><strong>{{project.match.matchPercentage}}% match</strong><span ng-if="project.match.missingSkills.length"> · Missing: {{project.match.missingSkills.join(", ")}}</span><span ng-if="project.match.eligible"> · Eligible to apply</span></p>' +
                 '  <div class="card-footer">' +
                 '    <span class="meta-row" style="margin-top:0;"><span>{{project.department}} · {{project.year}}</span></span>' +
                 '    <span style="display:flex;gap:0.5rem;flex-wrap:wrap;">' +
                 '      <button type="button" class="card-cta-secondary" ng-click="onOpen({project: project})">View →</button>' +
-                '      <button type="button" class="card-cta" ng-if="project.canApply" ng-disabled="project.applying || project.applied" ng-click="onApply({project: project})">{{project.applied ? \'Applied\' : (project.applying ? \'Applying...\' : \'Show Interest\')}}</button>' +
+                '      <button type="button" class="card-cta" ng-if="project.canApply" ng-disabled="project.applying || project.applied || (project.match && !project.match.eligible)" ng-click="onApply({project: project})">{{project.applied ? \'Applied\' : (project.applying ? \'Applying...\' : (project.match && !project.match.eligible ? \'Not eligible\' : \'Show Interest\'))}}</button>' +
                 '    </span>' +
                 '  </div>' +
                 '</article>'
@@ -120,6 +124,7 @@
                 '  </div>' +
                 '  <h4>{{listing.title || "Untitled Project"}}</h4>' +
                 '  <p>{{listing.description || "Description preview..."}}</p>' +
+                '  <p class="field-helper" ng-if="listing.requiredSkills.length"><strong>Required skills:</strong> {{listing.requiredSkills.join(", ")}}</p>' +
                 '  <div class="meta-row">' +
                 '    <span><span ng-if="listing.department">{{listing.department}} Dept</span><span ng-if="listing.year"> · {{listing.year}}</span></span>' +
                 '    <span>Team Size: {{teamSize}}</span>' +
@@ -142,7 +147,8 @@
                 '  <div class="applicant-avatar">{{ getInitials({name: applicant.name}) }}</div>' +
                 '  <div class="applicant-info">' +
                 '    <h4>{{ applicant.name }} <span class="reg-id">{{ applicant.regNo }}</span></h4>' +
-                '    <p>{{ applicant.department }} · {{ applicant.year }}<span ng-if="applicant.skills && applicant.skills.length"> · Skills: {{ applicant.skills.join(", ") }}</span></p>' +
+                '    <p>{{ applicant.department }} · {{ applicant.year }}</p>' +
+                '    <p ng-if="applicant.skills && applicant.skills.length"><strong>Student skills:</strong> {{ applicant.skills.join(", ") }}</p>' +
                 '    <p class="sub">{{ applicant.matchScore | matchLabel }}</p>' +
                 '  </div>' +
                 '  <div class="applicant-actions">' +
@@ -214,7 +220,7 @@
         skills: '='
       },
       template: '<ul class="skill-tags">' +
-                '  <li class="skill-tag" ng-repeat="skill in skills">{{skill}}</li>' +
+                '  <li class="skill-tag" ng-repeat="skill in skills track by (skill.id || skill.name || skill)"><span>{{skill.name || skill}}</span></li>' +
                 '</ul>'
     };
   });
@@ -230,7 +236,7 @@
     };
   });
 
-  app.directive('tcemateAppNav', function () {
+  app.directive('tcemateAppNav', ['AuthService', '$window', function (AuthService, $window) {
     return {
       restrict: 'E',
       scope: {
@@ -238,21 +244,40 @@
         onLogout: '&'
       },
       template: '<header class="app-nav-shell">' +
-                '  <a class="app-nav-brand" href="dashboard.html"><span class="brand-mark">TC</span><span>TCEMate</span></a>' +
+                '  <a class="app-nav-brand" ng-href="{{user.role === \'admin\' ? \'admin.html\' : \'dashboard.html\'}}"><span class="brand-mark">TC</span><span>TCEMate</span></a>' +
                 '  <nav class="app-nav-links" aria-label="Application navigation">' +
-                '    <a href="dashboard.html" ng-class="{active: active === \'dashboard\'}" ng-attr-aria-current="{{active === \'dashboard\' ? \'page\' : undefined}}">Dashboard</a>' +
-                '    <a href="browse.html" ng-class="{active: active === \'browse\'}" ng-attr-aria-current="{{active === \'browse\' ? \'page\' : undefined}}">Browse</a>' +
-                '    <a href="forum.html" ng-class="{active: active === \'forum\'}" ng-attr-aria-current="{{active === \'forum\' ? \'page\' : undefined}}">Forum</a>' +
-                '    <a href="create-listing.html" ng-class="{active: active === \'post\'}" ng-attr-aria-current="{{active === \'post\' ? \'page\' : undefined}}">Post</a>' +
-                '    <a href="manage-applicants.html" ng-class="{active: active === \'listings\'}" ng-attr-aria-current="{{active === \'listings\' ? \'page\' : undefined}}">My Listings</a>' +
-                '    <a href="my-interests.html" ng-class="{active: active === \'interests\'}" ng-attr-aria-current="{{active === \'interests\' ? \'page\' : undefined}}">Interests</a>' +
-                '    <a href="notifications.html" ng-class="{active: active === \'notifications\'}" ng-attr-aria-current="{{active === \'notifications\' ? \'page\' : undefined}}">Notifications</a>' +
-                '    <a href="profile-view.html" ng-class="{active: active === \'profile\'}" ng-attr-aria-current="{{active === \'profile\' ? \'page\' : undefined}}">Profile</a>' +
+                '    <span ng-if="user.role !== \'admin\'" class="app-nav-student-links">' +
+                '      <a href="dashboard.html" ng-class="{active: active === \'dashboard\'}" ng-attr-aria-current="{{active === \'dashboard\' ? \'page\' : undefined}}">Dashboard</a>' +
+                '      <a href="browse.html" ng-class="{active: active === \'browse\'}" ng-attr-aria-current="{{active === \'browse\' ? \'page\' : undefined}}">Browse</a>' +
+                '      <a href="forum.html" ng-class="{active: active === \'forum\'}" ng-attr-aria-current="{{active === \'forum\' ? \'page\' : undefined}}">Forum</a>' +
+                '      <a href="create-listing.html" ng-class="{active: active === \'post\'}" ng-attr-aria-current="{{active === \'post\' ? \'page\' : undefined}}">Post</a>' +
+                '      <a href="manage-applicants.html" ng-class="{active: active === \'listings\'}" ng-attr-aria-current="{{active === \'listings\' ? \'page\' : undefined}}">My Listings</a>' +
+                '      <a href="my-interests.html" ng-class="{active: active === \'interests\'}" ng-attr-aria-current="{{active === \'interests\' ? \'page\' : undefined}}">Interests</a>' +
+                '      <a href="notifications.html" ng-class="{active: active === \'notifications\'}" ng-attr-aria-current="{{active === \'notifications\' ? \'page\' : undefined}}">Notifications</a>' +
+                '      <a href="profile-view.html" ng-class="{active: active === \'profile\'}" ng-attr-aria-current="{{active === \'profile\' ? \'page\' : undefined}}">Profile</a>' +
+                '    </span>' +
+                '    <span ng-if="user.role === \'admin\'" class="app-nav-admin-links">' +
+                '      <a href="admin.html" ng-class="{active: active === \'admin\'}" ng-attr-aria-current="{{active === \'admin\' ? \'page\' : undefined}}">Dashboard</a>' +
+                '      <a href="admin-students.html" ng-class="{active: active === \'students\'}" ng-attr-aria-current="{{active === \'students\' ? \'page\' : undefined}}">Students</a>' +
+                '      <a href="admin-projects.html" ng-class="{active: active === \'projects\'}" ng-attr-aria-current="{{active === \'projects\' ? \'page\' : undefined}}">Projects</a>' +
+                '      <a href="admin-interests.html" ng-class="{active: active === \'interests\'}" ng-attr-aria-current="{{active === \'interests\' ? \'page\' : undefined}}">Interests</a>' +
+                '      <a href="admin-moderation.html" ng-class="{active: active === \'moderation\'}" ng-attr-aria-current="{{active === \'moderation\' ? \'page\' : undefined}}">Moderation</a>' +
+                '    </span>' +
                 '    <button type="button" class="app-nav-logout" ng-click="onLogout()">Log out</button>' +
                 '  </nav>' +
-                '</header>'
+                '</header>',
+      link: function (scope) {
+                scope.user = AuthService.getUser() || {};
+                var currentPage = ($window.location.pathname.split('/').pop() || '').toLowerCase();
+                var adminPage = /^admin(?:-[a-z]+)*\.html$/.test(currentPage);
+                if (scope.user.role === 'admin' && !adminPage) {
+                  $window.location.replace('admin.html');
+                } else if (scope.user.role !== 'admin' && adminPage) {
+                  $window.location.replace('login.html#admin');
+                }
+      }
     };
-  });
+  }]);
 
 
   // ----------------------------------------------------
@@ -269,14 +294,19 @@
       return;
     }
 
-    DataService.getCurrentUser().then(function (user) {
-      vm.user = user || {};
-    });
-
     vm.dashboard = { stats: [], projects: [], notifications: [] };
     vm.dashboardLoading = true;
-    DataService.getDashboardData().then(function (dashboard) {
-      vm.dashboard = dashboard;
+    DataService.getCurrentUser().then(function (user) {
+      if (user && user.role === 'admin') {
+        $window.location.replace('admin.html');
+        return;
+      }
+      vm.user = user || {};
+      return DataService.getDashboardData().then(function (dashboard) {
+        vm.dashboard = dashboard;
+        vm.dashboardLoading = false;
+      });
+    }).catch(function () {
       vm.dashboardLoading = false;
     });
 
@@ -294,31 +324,72 @@
     var vm = this;
 
     vm.mode = $window.location.hash === '#signup' ? 'signup' : 'login';
+    vm.loginRole = $window.location.hash === '#admin' ? 'admin' : 'student';
     vm.loginData = { email: '', password: '' };
     vm.signupData = { fullName: '', email: '', regNo: '', phone: '', password: '' };
     vm.loginErrors = {};
     vm.signupErrors = {};
     vm.authTransition = false;
+    vm.adminSetupAvailable = false;
+    vm.adminSetupData = { fullName: '', email: '', password: '', confirmPassword: '', setupSecret: '' };
+    AuthService.getAdminSetupStatus().then(function (result) {
+      vm.adminSetupAvailable = !!(result && result.success && result.available);
+    });
 
     if (AuthService.isLoggedIn()) {
-      $window.location.href = 'dashboard.html';
+      var currentUser = AuthService.getUser() || {};
+      $window.location.href = currentUser.role === 'admin' ? 'admin.html' : 'dashboard.html';
       return;
     }
 
     vm.toggleSignup = function () {
       vm.mode = 'signup';
+      vm.loginRole = 'student';
     };
 
     vm.toggleLogin = function () {
       vm.mode = 'login';
     };
 
+    vm.toggleAdminLogin = function () {
+      vm.mode = 'login';
+      vm.loginRole = vm.loginRole === 'admin' ? 'student' : 'admin';
+    };
+
+    vm.showAdminSetup = function () {
+      vm.mode = 'adminSetup';
+      vm.adminSetupError = '';
+      vm.adminSetupMessage = '';
+    };
+
+    vm.showForgotPassword = function () {
+      vm.mode = 'forgot';
+      vm.resetEmail = vm.loginData.email;
+      vm.resetMessage = '';
+      vm.resetError = '';
+    };
+
+    vm.requestPasswordReset = function () {
+      AuthService.requestPasswordReset(vm.resetEmail).then(function (result) {
+        if (result && result.success) {
+          vm.resetMessage = result.message;
+          vm.resetError = '';
+        } else {
+          vm.resetError = result && result.message ? result.message : 'Unable to request a password reset.';
+        }
+      });
+    };
+
     vm.login = function () {
-      AuthService.login(vm.loginData.email, vm.loginData.password).then(function (result) {
+      if (vm.loginRole === 'student' && !/^[^@\s]+@student\.tce\.edu$/i.test((vm.loginData.email || '').trim())) {
+        vm.loginErrors.email = 'Please use your official TCE student email address.';
+        return;
+      }
+      AuthService.login(vm.loginData.email, vm.loginData.password, vm.loginRole).then(function (result) {
         if (result && result.ok) {
           vm.authTransition = true;
           $timeout(function () {
-            $window.location.href = 'dashboard.html';
+            $window.location.href = result.user && result.user.role === 'admin' ? 'admin.html' : 'dashboard.html';
           }, 800);
         } else {
           vm.loginErrors = {};
@@ -329,23 +400,118 @@
       });
     };
 
-    vm.register = function () {
+    vm.register = function (form) {
+      vm.signupFormMessage = '';
+      if (form && form.$invalid) {
+        form.$setSubmitted();
+        return;
+      }
       AuthService.register(vm.signupData).then(function (result) {
         if (result && result.ok) {
-          vm.authTransition = true;
-          $timeout(function () {
-            $window.location.href = 'dashboard.html';
-          }, 800);
+          vm.mode = 'login';
+          vm.loginRole = 'student';
+          vm.loginData.email = result.email;
+          vm.loginData.password = '';
+          vm.verificationMessage = result.message;
+          vm.signupData.password = '';
         } else {
           vm.signupErrors = {};
-          if (result && result.message) {
-            vm.signupErrors.email = result.message;
-          }
+          vm.signupFormMessage = result && result.message ? result.message : 'Registration failed. Please review the form and try again.';
+        }
+      });
+    };
+
+    vm.startAdminSetup = function (form) {
+      vm.adminSetupError = '';
+      if (form && form.$invalid) {
+        form.$setSubmitted();
+        return;
+      }
+      if (vm.adminSetupData.password !== vm.adminSetupData.confirmPassword) {
+        vm.adminSetupError = 'Passwords do not match.';
+        return;
+      }
+      AuthService.startAdminSetup(vm.adminSetupData).then(function (result) {
+        if (result && result.success) {
+          vm.adminSetupAvailable = false;
+          vm.mode = 'login';
+          vm.loginRole = 'admin';
+          vm.loginData.email = vm.adminSetupData.email;
+          vm.loginData.password = '';
+          vm.verificationMessage = result.message;
+          vm.adminSetupData.password = '';
+          vm.adminSetupData.confirmPassword = '';
+          vm.adminSetupData.setupSecret = '';
+        } else {
+          vm.adminSetupError = result && result.message ? result.message : 'Administrator setup could not be started.';
+        }
+      });
+    };
+
+    vm.backToLogin = function () {
+      vm.mode = 'login';
+      vm.adminSetupData.setupSecret = '';
+      vm.adminSetupData.password = '';
+      vm.adminSetupData.confirmPassword = '';
+    };
+  }
+  app.controller('LoginController', LoginController);
+
+  ResetPasswordController.$inject = ['AuthService', '$window'];
+  function ResetPasswordController(AuthService, $window) {
+    var vm = this;
+    vm.token = new URLSearchParams($window.location.search).get('token') || '';
+    vm.password = '';
+    vm.confirmPassword = '';
+    vm.error = '';
+    vm.notice = '';
+    vm.submit = function () {
+      vm.error = '';
+      if (!vm.token) {
+        vm.error = 'This password reset link is missing its token.';
+        return;
+      }
+      if (vm.password !== vm.confirmPassword) {
+        vm.error = 'The passwords do not match.';
+        return;
+      }
+      AuthService.resetPassword(vm.token, vm.password).then(function (response) {
+        if (response && response.success) {
+          vm.notice = response.message;
+          vm.password = '';
+          vm.confirmPassword = '';
+          $window.history.replaceState({}, document.title, $window.location.pathname);
+        } else {
+          vm.error = response && response.message ? response.message : 'Unable to reset your password.';
         }
       });
     };
   }
-  app.controller('LoginController', LoginController);
+  app.controller('ResetPasswordController', ResetPasswordController);
+
+  EmailVerificationController.$inject = ['AuthService', '$window'];
+  function EmailVerificationController(AuthService, $window) {
+    var vm = this;
+    var token = new URLSearchParams($window.location.search).get('token') || '';
+    vm.loading = true;
+    vm.error = '';
+    vm.notice = '';
+    if (!token) {
+      vm.loading = false;
+      vm.error = 'This verification link is missing its token.';
+      return;
+    }
+    AuthService.verifyEmail(token).then(function (result) {
+      vm.loading = false;
+      if (result && result.success) {
+        vm.notice = result.message;
+        $window.history.replaceState({}, document.title, $window.location.pathname);
+      } else {
+        vm.error = result && result.message ? result.message : 'Email verification could not be completed.';
+      }
+    });
+  }
+  app.controller('EmailVerificationController', EmailVerificationController);
 
   // 3. Projects Controller (Browse)
   ProjectsController.$inject = ['DataService', 'AuthService', '$window'];
@@ -373,7 +539,10 @@
           if (projectId) applied[projectId.toString()] = true;
         });
         vm.projects = (projects || []).map(function (project) {
-          project.canApply = project.status === 'open' && (!project.createdBy || project.createdBy !== (vm.currentUser && vm.currentUser.id));
+          var ownerId = project.createdBy && typeof project.createdBy === 'object'
+            ? (project.createdBy.id || project.createdBy._id)
+            : project.createdBy;
+          project.canApply = project.status === 'open' && String(ownerId || '') !== String(vm.currentUser && vm.currentUser.id || '');
           project.applied = !!applied[project.id.toString()];
           return project;
         });
@@ -423,6 +592,9 @@
           vm.notice = 'Your interest has been submitted.';
         } else {
           vm.actionError = response && response.message ? response.message : 'Unable to submit your interest.';
+          if (response && response.missingSkills && response.missingSkills.length) {
+            vm.actionError += ' Missing skills: ' + response.missingSkills.join(', ') + '.';
+          }
         }
       });
     };
@@ -458,7 +630,10 @@
         vm.loading = false;
         return;
       }
-      vm.project.canApply = project.status === 'open' && String(project.createdBy && (project.createdBy.id || project.createdBy._id || project.createdBy)) !== String(vm.currentUser && vm.currentUser.id);
+      var ownerId = project.createdBy && typeof project.createdBy === 'object'
+        ? (project.createdBy.id || project.createdBy._id)
+        : project.createdBy;
+      vm.project.canApply = project.status === 'open' && String(ownerId || '') !== String(vm.currentUser && vm.currentUser.id || '');
       return DataService.getMyApplications().then(function (applications) {
         vm.project.applied = (applications || []).some(function (application) {
           var appliedProject = application.projectDetails && application.projectDetails.id || application.project;
@@ -481,6 +656,9 @@
           vm.notice = 'Your interest has been submitted.';
         } else {
           vm.error = response && response.message ? response.message : 'Unable to submit your interest.';
+          if (response && response.missingSkills && response.missingSkills.length) {
+            vm.error += ' Missing skills: ' + response.missingSkills.join(', ') + '.';
+          }
         }
       });
     };
@@ -517,8 +695,10 @@
       description: '',
       department: 'Information Technology',
       year: '3rd Year',
-      deadline: ''
+      deadline: '',
+      requiredSkills: []
     };
+    vm.requiredSkillsInput = '';
     vm.errors = {};
     vm.saving = false;
     vm.notice = '';
@@ -536,6 +716,12 @@
       }
     };
 
+    vm.updateRequiredSkills = function () {
+      vm.listing.requiredSkills = (vm.requiredSkillsInput || '').split(/[,\n]/).map(function (skill) {
+        return skill.trim();
+      }).filter(Boolean);
+    };
+
     vm.submitListing = function () {
       vm.errors = {};
       if (!vm.listing.title || vm.listing.title.length < 3) {
@@ -546,6 +732,10 @@
       }
       if (!vm.listing.deadline) {
         vm.errors.deadline = 'Please select a deadline.';
+      }
+      vm.updateRequiredSkills();
+      if (!vm.listing.requiredSkills.length) {
+        vm.errors.requiredSkills = 'Add at least one required skill.';
       }
       if (Object.keys(vm.errors).length) {
         return;
@@ -562,8 +752,10 @@
             description: '',
             department: 'Information Technology',
             year: '3rd Year',
-            deadline: ''
+            deadline: '',
+            requiredSkills: []
           };
+          vm.requiredSkillsInput = '';
         } else {
           vm.error = response && response.message ? response.message : 'Unable to publish listing.';
         }
@@ -608,9 +800,9 @@
       vm.loading = true;
       DataService.getApplicantsForProject(vm.selectedProject.id).then(function (applicants) {
         vm.applicants = applicants || [];
-        vm.teamMembers = [{ name: vm.selectedProject.owner ? vm.selectedProject.owner.name : vm.currentUser.name, role: 'Lead', department: vm.selectedProject.department, year: vm.selectedProject.year }]
+        vm.teamMembers = [{ name: vm.selectedProject.owner ? vm.selectedProject.owner.name : vm.currentUser.name, role: 'Lead', department: vm.selectedProject.department, year: vm.selectedProject.year, skills: vm.selectedProject.owner && vm.selectedProject.owner.skills || [] }]
           .concat(vm.applicants.filter(function (applicant) { return applicant.status === 'accepted'; }).map(function (applicant) {
-            return { name: applicant.name, role: 'Member', department: applicant.department, year: applicant.year };
+            return { name: applicant.name, role: 'Member', department: applicant.department, year: applicant.year, skills: applicant.skills || [] };
           }));
         vm.loading = false;
       });
@@ -643,6 +835,7 @@
 
     vm.updateApplicant = function (applicant, status) {
       if (applicant.updating) return;
+      if (status === 'rejected' && !$window.confirm('Reject this application?')) return;
       applicant.updating = true;
       DataService.updateApplicantStatus(applicant.id, status).then(function (response) {
         applicant.updating = false;
@@ -729,6 +922,7 @@
     vm.saving = false;
     vm.notice = '';
     vm.error = '';
+    vm.newSkillName = '';
     DataService.getCurrentUser().then(function (user) {
       vm.profile = user || { skills: [], projects: [], preferences: { hackathon: false, internship: false } };
       vm.profile.skills = vm.profile.skills || [];
@@ -750,6 +944,65 @@
       $window.location.reload();
     };
     vm.errors = {};
+
+    vm.addSkill = function () {
+      var name = (vm.newSkillName || '').trim();
+      if (!name) {
+        vm.error = 'Enter a skill name.';
+        return;
+      }
+      DataService.addSkill(name).then(function (response) {
+        if (response && response.success) {
+          vm.profile.skills = response.skills || [];
+          vm.newSkillName = '';
+          vm.error = '';
+          vm.notice = 'Skill added to your profile.';
+        } else {
+          vm.error = response && response.message ? response.message : 'Unable to submit this skill.';
+        }
+      });
+    };
+
+    vm.startEditSkill = function (skill) {
+      vm.editingSkillId = skill.id;
+      vm.editingSkillName = skill.name;
+    };
+
+    vm.cancelEditSkill = function () {
+      vm.editingSkillId = '';
+      vm.editingSkillName = '';
+    };
+
+    vm.saveSkill = function (skill) {
+      var name = (vm.editingSkillName || '').trim();
+      if (!name) {
+        vm.error = 'Enter a skill name.';
+        return;
+      }
+      DataService.updateSkill(skill.id, name).then(function (response) {
+        if (response && response.success) {
+          vm.profile.skills = response.skills || [];
+          vm.cancelEditSkill();
+          vm.error = '';
+          vm.notice = 'Skill updated.';
+        } else {
+          vm.error = response && response.message ? response.message : 'Unable to update this skill.';
+        }
+      });
+    };
+
+    vm.removeSkill = function (skill) {
+      if (!$window.confirm('Remove ' + skill.name + ' from your profile?')) return;
+      DataService.deleteSkill(skill.id).then(function (response) {
+        if (response && response.success) {
+          vm.profile.skills = response.skills || [];
+          vm.error = '';
+          vm.notice = 'Skill removed from your profile.';
+        } else {
+          vm.error = response && response.message ? response.message : 'Unable to remove this skill.';
+        }
+      });
+    };
 
     vm.getInitials = function (name) {
       return (name || '').split(' ').map(function (part) {
@@ -916,5 +1169,259 @@
     };
   }
   app.controller('NotificationsController', NotificationsController);
+
+  function authorizeAdminPage(DataService, AuthService, $window) {
+    if (!AuthService.isLoggedIn()) {
+      $window.location.replace('login.html#admin');
+      return Promise.resolve(null);
+    }
+    return DataService.getCurrentUser().then(function (user) {
+      if (!user || user.role !== 'admin') {
+        $window.location.replace('login.html#admin');
+        return null;
+      }
+      return user;
+    });
+  }
+
+  AdminDashboardController.$inject = ['DataService', 'AuthService', '$window'];
+  function AdminDashboardController(DataService, AuthService, $window) {
+    var vm = this;
+    vm.loading = true;
+    vm.error = '';
+    vm.stats = [];
+    authorizeAdminPage(DataService, AuthService, $window).then(function (user) {
+      if (!user) return;
+      vm.user = user;
+      return DataService.getAdminOverview().then(function (response) {
+        if (!response || !response.success) {
+          vm.error = response && response.message ? response.message : 'Unable to load platform statistics.';
+          return;
+        }
+        var stats = response.stats || {};
+        vm.stats = [
+          { label: 'Total students', value: stats.totalStudents || 0 },
+          { label: 'Total projects', value: stats.totalProjects || 0 },
+          { label: 'Interests / applications', value: stats.totalInterests || 0 },
+          { label: 'Active users', value: stats.activeUsers || 0 },
+          { label: 'Open projects', value: stats.openProjects || 0 },
+          { label: 'Closed projects', value: stats.closedProjects || 0 }
+        ];
+      });
+    }).catch(function () {
+      vm.error = 'Unable to load platform statistics.';
+    }).finally(function () {
+      vm.loading = false;
+    });
+    vm.logout = function () {
+      AuthService.logout();
+      $window.location.href = 'login.html';
+    };
+  }
+  app.controller('AdminDashboardController', AdminDashboardController);
+
+  AdminStudentsController.$inject = ['DataService', 'AuthService', '$window'];
+  function AdminStudentsController(DataService, AuthService, $window) {
+    var vm = this;
+    vm.students = [];
+    vm.loading = true;
+    vm.error = '';
+    vm.search = '';
+    authorizeAdminPage(DataService, AuthService, $window).then(function (user) {
+      if (!user) return;
+      return DataService.getAdminStudents().then(function (response) {
+        if (response && response.success) vm.students = response.students || [];
+        else vm.error = response && response.message ? response.message : 'Unable to load students.';
+      });
+    }).catch(function () {
+      vm.error = 'Unable to load students.';
+    }).finally(function () {
+      vm.loading = false;
+    });
+    vm.setActive = function (student) {
+      var nextState = student.accountStatus !== 'active';
+      var action = nextState ? 'reactivate' : 'suspend';
+      if (!$window.confirm('Are you sure you want to ' + action + ' ' + student.name + '?')) return;
+      DataService.setStudentActive(student.id, nextState).then(function (response) {
+        if (response && response.success) {
+          student.accountStatus = nextState ? 'active' : 'inactive';
+          vm.error = '';
+        } else {
+          vm.error = response && response.message ? response.message : 'Unable to update this account.';
+        }
+      });
+    };
+    vm.deleteStudent = function (student) {
+      var confirmation = 'Permanently delete ' + student.name + '? This also removes their projects, project applications/interests, authored discussions, and related notifications. This cannot be undone.';
+      if (!$window.confirm(confirmation)) return;
+      DataService.deleteStudent(student.id).then(function (response) {
+        if (response && response.success) {
+          vm.students = vm.students.filter(function (item) { return item.id !== student.id; });
+          vm.error = '';
+        } else {
+          vm.error = response && response.message ? response.message : 'Unable to delete this student.';
+        }
+      });
+    };
+    vm.logout = function () {
+      AuthService.logout();
+      $window.location.href = 'login.html';
+    };
+  }
+  app.controller('AdminStudentsController', AdminStudentsController);
+
+  AdminStudentController.$inject = ['DataService', 'AuthService', '$window'];
+  function AdminStudentController(DataService, AuthService, $window) {
+    var vm = this;
+    vm.loading = true;
+    vm.error = '';
+    vm.projects = [];
+    vm.interests = [];
+    vm.student = null;
+    var match = $window.location.search.match(/[?&]id=([^&]*)/);
+    var studentId = '';
+    try {
+      studentId = match ? decodeURIComponent(match[1]) : '';
+    } catch (error) {
+      vm.error = 'Invalid student ID.';
+    }
+    authorizeAdminPage(DataService, AuthService, $window).then(function (user) {
+      if (!user) return;
+      if (!studentId) {
+        vm.error = 'A student ID is required.';
+        return;
+      }
+      return DataService.getAdminStudent(studentId).then(function (response) {
+        if (response && response.success) {
+          vm.student = response.student;
+          vm.projects = response.projects || [];
+          vm.interests = response.interests || [];
+        } else {
+          vm.error = response && response.message ? response.message : 'Unable to load student activity.';
+        }
+      });
+    }).catch(function () {
+      vm.error = 'Unable to load student activity.';
+    }).finally(function () {
+      vm.loading = false;
+    });
+    vm.logout = function () {
+      AuthService.logout();
+      $window.location.href = 'login.html';
+    };
+  }
+  app.controller('AdminStudentController', AdminStudentController);
+
+  AdminProjectsController.$inject = ['DataService', 'AuthService', '$window'];
+  function AdminProjectsController(DataService, AuthService, $window) {
+    var vm = this;
+    vm.projects = [];
+    vm.loading = true;
+    vm.error = '';
+    vm.search = '';
+    authorizeAdminPage(DataService, AuthService, $window).then(function (user) {
+      if (!user) return;
+      return DataService.getAdminProjects().then(function (response) {
+        if (response && response.success) vm.projects = response.projects || [];
+        else vm.error = response && response.message ? response.message : 'Unable to load projects.';
+      });
+    }).catch(function () {
+      vm.error = 'Unable to load projects.';
+    }).finally(function () {
+      vm.loading = false;
+    });
+    vm.removeProject = function (project) {
+      var confirmation = 'Permanently remove "' + project.title + '" and its ' + project.interestsCount + ' interest/application record(s)? Related notifications will also be removed.';
+      if (!$window.confirm(confirmation)) return;
+      DataService.deleteProject(project.id).then(function (response) {
+        if (response && response.success) {
+          vm.projects = vm.projects.filter(function (item) { return item.id !== project.id; });
+          vm.error = '';
+        } else {
+          vm.error = response && response.message ? response.message : 'Unable to remove this project.';
+        }
+      });
+    };
+    vm.logout = function () {
+      AuthService.logout();
+      $window.location.href = 'login.html';
+    };
+  }
+  app.controller('AdminProjectsController', AdminProjectsController);
+
+  AdminInterestsController.$inject = ['DataService', 'AuthService', '$window'];
+  function AdminInterestsController(DataService, AuthService, $window) {
+    var vm = this;
+    vm.interests = [];
+    vm.loading = true;
+    vm.error = '';
+    vm.search = '';
+    vm.activeFilter = 'all';
+    authorizeAdminPage(DataService, AuthService, $window).then(function (user) {
+      if (!user) return;
+      return DataService.getAdminInterests().then(function (response) {
+        if (response && response.success) vm.interests = response.interests || [];
+        else vm.error = response && response.message ? response.message : 'Unable to load interests.';
+      });
+    }).catch(function () {
+      vm.error = 'Unable to load interests.';
+    }).finally(function () {
+      vm.loading = false;
+    });
+    vm.filterInterest = function (interest) {
+      var statusMatches = vm.activeFilter === 'all' || interest.status === vm.activeFilter;
+      var query = (vm.search || '').toLowerCase();
+      var text = [
+        interest.student && interest.student.name,
+        interest.student && interest.student.email,
+        interest.project && interest.project.title,
+        interest.project && interest.project.owner && interest.project.owner.name
+      ].join(' ').toLowerCase();
+      return statusMatches && (!query || text.indexOf(query) !== -1);
+    };
+    vm.logout = function () {
+      AuthService.logout();
+      $window.location.href = 'login.html';
+    };
+  }
+  app.controller('AdminInterestsController', AdminInterestsController);
+
+  AdminModerationController.$inject = ['DataService', 'AuthService', '$window'];
+  function AdminModerationController(DataService, AuthService, $window) {
+    var vm = this;
+    vm.loading = true;
+    vm.error = '';
+    vm.discussions = [];
+    vm.notice = '';
+    authorizeAdminPage(DataService, AuthService, $window).then(function (user) {
+      if (!user) return;
+      return DataService.getAdminDiscussions().then(function (response) {
+        if (response && response.success) vm.discussions = response.discussions || [];
+        else vm.error = response && response.message ? response.message : 'Unable to load platform discussions.';
+      });
+    }).catch(function () {
+      vm.error = 'Unable to load platform discussions.';
+    }).finally(function () {
+      vm.loading = false;
+    });
+    vm.removeDiscussion = function (discussion) {
+      if (!$window.confirm('Remove this discussion and its content? This action cannot be undone.')) return;
+      DataService.deleteDiscussion(discussion._id).then(function (response) {
+        if (response && response.success) {
+          vm.discussions = vm.discussions.filter(function (item) { return item._id !== discussion._id; });
+          vm.notice = 'Discussion removed.';
+          vm.error = '';
+        } else {
+          vm.error = response && response.message ? response.message : 'Unable to remove discussion.';
+        }
+      });
+    };
+
+    vm.logout = function () {
+      AuthService.logout();
+      $window.location.href = 'login.html';
+    };
+  }
+  app.controller('AdminModerationController', AdminModerationController);
 
 })();

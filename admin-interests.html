@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Interest Monitoring</title>
+<link rel="stylesheet" href="style.css?v=admin-v1">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
+</head>
+<body class="app-page" ng-controller="AdminInterestsController as vm">
+  <tcemate-app-nav active="interests" on-logout="vm.logout()"></tcemate-app-nav>
+  <main class="page-wrap admin-wrap">
+    <header class="admin-page-heading"><div><p class="eyebrow">PLATFORM MONITORING</p><h1>Interests / applications</h1><p>View application activity. Project owners retain responsibility for decisions.</p></div><span class="admin-count" ng-if="!vm.loading">{{vm.interests.length}} records</span></header>
+    <div class="admin-filter-row">
+      <div><label class="admin-search-label" for="interestSearch">Search activity</label><input class="admin-search" id="interestSearch" type="search" ng-model="vm.search" placeholder="Search student, project, or owner"></div>
+      <div><label class="admin-search-label" for="interestStatus">Status</label><select class="admin-select" id="interestStatus" ng-model="vm.activeFilter"><option value="all">All statuses</option><option value="pending">Pending</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option></select></div>
+    </div>
+    <p class="inline-error" ng-if="vm.error" role="alert">{{vm.error}}</p>
+    <div class="page-state page-state-loading" ng-if="vm.loading" role="status"><span class="state-spinner" aria-hidden="true"></span><div><h3>Loading applications</h3><p>Retrieving interest activity from MongoDB.</p></div></div>
+    <section class="admin-data-panel" ng-if="!vm.loading && !vm.error">
+      <article class="admin-activity-row" ng-repeat="interest in vm.interests | filter:vm.filterInterest track by interest.id">
+        <div><h2>{{interest.student.name || 'Student unavailable'}}</h2><p>{{interest.student.email}}</p><p><strong>{{interest.project.title || interest.title}}</strong><span ng-if="interest.project.owner"> · Owner: {{interest.project.owner.name}}</span></p><p>{{interest.details || 'No additional details provided.'}}</p><small>Submitted {{interest.createdAt | date:'medium'}}</small></div>
+        <span class="admin-status" ng-class="interest.status">{{interest.status}}</span>
+      </article>
+      <div class="page-state" ng-if="!vm.interests.length"><div><h3>No interest records found</h3><p>Student applications will appear here.</p></div></div>
+      <div class="page-state" ng-if="vm.interests.length && !(vm.interests | filter:vm.filterInterest).length"><div><h3>No matching applications</h3><p>Try a different search or status.</p></div></div>
+    </section>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/app.js?v=admin-v1"></script>
+  <script src="js/data.js?v=admin-v1"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

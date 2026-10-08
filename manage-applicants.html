@@ -35,7 +35,7 @@
       <section class="listing-management-grid" aria-label="Your project listings">
         <button type="button" class="listing-management-card" ng-class="{selected: vm.selectedProject.id === project.id}" ng-attr-aria-pressed="{{vm.selectedProject.id === project.id}}" ng-repeat="project in vm.projects | filter:vm.projectSearchText" ng-click="vm.selectedProject = project; vm.selectProject()">
           <span class="management-card-mark">{{project.title.charAt(0)}}</span>
-          <span class="management-card-main"><strong>{{project.title}}</strong><span>{{project.department}}<span ng-if="project.year"> · {{project.year}}</span></span><small>{{project.description}}</small></span>
+          <span class="management-card-main"><strong>{{project.title}}</strong><span>{{project.department}}<span ng-if="project.year"> · {{project.year}}</span></span><small>{{project.description}}</small><small><strong>Required skills:</strong> {{project.requiredSkills.join(', ')}}</small><small><strong>Deadline:</strong> {{project.deadline | date:'mediumDate'}}</small></span>
           <span class="status" ng-class="{open: project.status === 'open', closed: project.status === 'closed'}">{{project.status | uppercase}}</span>
         </button>
       </section>
@@ -47,6 +47,8 @@
           <h3>{{vm.selectedProject.title}}</h3>
           <p>{{vm.selectedProject.department}}<span ng-if="vm.selectedProject.year"> &middot; {{vm.selectedProject.year}}</span> &middot; <span class="status" ng-class="{open: vm.selectedProject.status==='open', closed: vm.selectedProject.status==='closed'}">{{vm.selectedProject.status | uppercase}}</span></p>
           <p class="poc-description" ng-if="vm.selectedProject.description">{{vm.selectedProject.description}}</p>
+          <p class="poc-description"><strong>Required skills:</strong> {{vm.selectedProject.requiredSkills.join(', ')}}</p>
+          <p class="poc-description"><strong>Deadline:</strong> {{vm.selectedProject.deadline | date:'mediumDate'}}</p>
           <p class="poc-owner" ng-if="vm.selectedProject.owner.name">Project lead · {{vm.selectedProject.owner.name}}</p>
         </div>
         <div class="poc-stats">
@@ -70,7 +72,7 @@
     <section class="team-section" ng-if="vm.selectedProject">
       <div class="section-rule-heading"><div><p class="eyebrow">ACCEPTED APPLICANTS</p><h3>Current team</h3></div></div>
       <div class="team-avatars">
-        <div class="team-member" ng-repeat="member in vm.teamMembers"><span class="avatar-circle small">{{ vm.getInitials(member.name) }}</span><span>{{ member.name }}<small>{{ member.role }}</small></span></div>
+        <div class="team-member" ng-repeat="member in vm.teamMembers"><span class="avatar-circle small">{{ vm.getInitials(member.name) }}</span><span>{{ member.name }}<small>{{ member.role }}</small><small>Verified skills: {{member.skills.length ? member.skills.join(' · ') : 'None listed'}}</small></span></div>
         <button type="button" class="team-add-button" ng-click="vm.toggleTeamManager()" aria-label="Manage team members">+</button>
       </div>
       <p class="sub" ng-if="vm.teamMembers.length === 1">No team members yet.</p>
@@ -94,6 +96,7 @@
     <div class="rich-footer-bottom"><span><span class="brand-mark">TC</span> &copy; 2026 TCEMate</span><span>Thiagarajar College of Engineering · Madurai</span></div>
   </footer>
 
+  <script src="js/config.js"></script>
   <script src="js/app.js?v=tcemate-ux-5"></script>
   <script src="js/data.js?v=tcemate-ux-5"></script>
   <script src="js/auth.js?v=team-flow"></script>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tcemate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCEMate | Project Monitoring</title>
+<link rel="stylesheet" href="style.css?v=admin-v1">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-messages.min.js"></script>
+</head>
+<body class="app-page" ng-controller="AdminProjectsController as vm">
+  <tcemate-app-nav active="projects" on-logout="vm.logout()"></tcemate-app-nav>
+  <main class="page-wrap admin-wrap">
+    <header class="admin-page-heading"><div><p class="eyebrow">PLATFORM MONITORING</p><h1>Projects</h1><p>Monitor project owners, required skills, deadlines, and interest.</p></div><span class="admin-count" ng-if="!vm.loading">{{vm.projects.length}} projects</span></header>
+    <label class="admin-search-label" for="projectSearch">Search projects</label>
+    <input class="admin-search" id="projectSearch" type="search" ng-model="vm.search" placeholder="Search title, owner, or required skills">
+    <p class="inline-error" ng-if="vm.error" role="alert">{{vm.error}}</p>
+    <div class="page-state page-state-loading" ng-if="vm.loading" role="status"><span class="state-spinner" aria-hidden="true"></span><div><h3>Loading projects</h3><p>Retrieving existing listings and application counts.</p></div></div>
+    <section class="admin-project-grid" ng-if="!vm.loading && !vm.error">
+      <article class="admin-project-card" ng-repeat="project in vm.projects | filter:vm.search track by project.id">
+        <div class="admin-project-card-top"><span class="admin-status" ng-class="project.status">{{project.status}}</span><small>Created {{project.createdAt | date:'mediumDate'}}</small></div>
+        <h2>{{project.title}}</h2>
+        <p>{{project.description}}</p>
+        <p class="admin-project-owner">By {{project.owner.name || 'Unknown owner'}}<span ng-if="project.owner.email"> · {{project.owner.email}}</span></p>
+        <div class="admin-chip-list"><span class="admin-skill-chip" ng-repeat="skill in project.requiredSkills track by $index">{{skill}}</span><span ng-if="!project.requiredSkills.length" class="admin-muted">No required skills listed</span></div>
+        <footer><span>Deadline: {{project.deadline | date:'mediumDate'}}</span><strong>{{project.interestsCount}} interests</strong><button type="button" class="admin-danger-button" ng-click="vm.removeProject(project)">Remove project</button></footer>
+      </article>
+      <div class="page-state" ng-if="!vm.projects.length"><div><h3>No projects found</h3><p>New project listings will appear here.</p></div></div>
+      <div class="page-state" ng-if="vm.projects.length && !(vm.projects | filter:vm.search).length"><div><h3>No matching projects</h3><p>Try a different search term.</p></div></div>
+    </section>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/app.js?v=admin-v1"></script>
+  <script src="js/data.js?v=admin-v1"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

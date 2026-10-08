@@ -73,7 +73,7 @@ exports.updateDiscussion = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Discussion not found.' });
     }
 
-    if (discussion.user && req.user && discussion.user.toString() !== req.user.id.toString()) {
+    if ((!discussion.user || discussion.user.toString() !== req.user.id.toString()) && req.user.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'You can only update your own posts.' });
     }
 
@@ -96,7 +96,7 @@ exports.deleteDiscussion = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Discussion not found.' });
     }
 
-    if (discussion.user && req.user && discussion.user.toString() !== req.user.id.toString()) {
+    if ((!discussion.user || discussion.user.toString() !== req.user.id.toString()) && req.user.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'You can only delete your own posts.' });
     }
 
