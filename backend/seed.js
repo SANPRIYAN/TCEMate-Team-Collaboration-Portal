@@ -133,6 +133,7 @@ const seedDatabase = async () => {
         });
       } else {
         user.password = defaultPasswordHash;
+        user.$locals.passwordIsHashed = true;
         user.skills = userData.skills;
         user.bio = userData.bio;
         user.department = userData.department;
