@@ -35,28 +35,22 @@
       <section class="listing-management-grid" aria-label="Your project listings">
         <button type="button" class="listing-management-card" ng-class="{selected: vm.selectedProject.id === project.id}" ng-attr-aria-pressed="{{vm.selectedProject.id === project.id}}" ng-repeat="project in vm.projects | filter:vm.projectSearchText" ng-click="vm.selectedProject = project; vm.selectProject()">
           <span class="management-card-mark">{{project.title.charAt(0)}}</span>
-          <span class="management-card-main"><strong>{{project.title}}</strong><span>{{project.department}}<span ng-if="project.year"> · {{project.year}}</span></span><small>{{project.description}}</small><small><strong>Required skills:</strong> {{project.requiredSkills.join(', ')}}</small><small><strong>Deadline:</strong> {{project.deadline | date:'mediumDate'}}</small></span>
+          <span class="management-card-main">
+            <strong>{{project.title}}</strong>
+            <span>{{project.department}}<span ng-if="project.year"> · {{project.year}}</span></span>
+            <small>{{project.description}}</small>
+            <small><strong>Required skills:</strong> {{project.requiredSkills.join(', ')}}</small>
+            <small><strong>Deadline:</strong> {{project.deadline | date:'mediumDate'}}</small>
+            <span class="management-card-stats-pills" ng-if="vm.selectedProject.id === project.id" style="display:flex;gap:0.75rem;margin-top:0.75rem;padding-top:0.6rem;border-top:1px solid #cbdbe6;">
+              <span class="poc-stat" style="display:inline-flex;gap:0.35rem;align-items:center;font-size:0.78rem;color:#0f3856;background:#e2edf5;padding:0.25rem 0.6rem;border-radius:4px;font-weight:600;"><strong style="font-size:0.9rem;">{{vm.applicants.length}}</strong> Applications</span>
+              <span class="poc-stat" style="display:inline-flex;gap:0.35rem;align-items:center;font-size:0.78rem;color:#854d0e;background:#fef3c7;padding:0.25rem 0.6rem;border-radius:4px;font-weight:600;"><strong style="font-size:0.9rem;">{{(vm.applicants | filter:{status:'pending'}).length}}</strong> Pending</span>
+              <span class="poc-stat" style="display:inline-flex;gap:0.35rem;align-items:center;font-size:0.78rem;color:#065f46;background:#d1fae5;padding:0.25rem 0.6rem;border-radius:4px;font-weight:600;"><strong style="font-size:0.9rem;">{{vm.teamMembers.length}}</strong> Team</span>
+            </span>
+          </span>
           <span class="status" ng-class="{open: project.status === 'open', closed: project.status === 'closed'}">{{project.status | uppercase}}</span>
         </button>
       </section>
       <p class="management-no-results" ng-if="!(vm.projects | filter:vm.projectSearchText).length">No listings match that search.</p>
-
-      <div class="project-overview-card" ng-if="vm.selectedProject">
-        <div class="poc-icon">{{vm.selectedProject.title.charAt(0)}}</div>
-        <div class="poc-body">
-          <h3>{{vm.selectedProject.title}}</h3>
-          <p>{{vm.selectedProject.department}}<span ng-if="vm.selectedProject.year"> &middot; {{vm.selectedProject.year}}</span> &middot; <span class="status" ng-class="{open: vm.selectedProject.status==='open', closed: vm.selectedProject.status==='closed'}">{{vm.selectedProject.status | uppercase}}</span></p>
-          <p class="poc-description" ng-if="vm.selectedProject.description">{{vm.selectedProject.description}}</p>
-          <p class="poc-description"><strong>Required skills:</strong> {{vm.selectedProject.requiredSkills.join(', ')}}</p>
-          <p class="poc-description"><strong>Deadline:</strong> {{vm.selectedProject.deadline | date:'mediumDate'}}</p>
-          <p class="poc-owner" ng-if="vm.selectedProject.owner.name">Project lead · {{vm.selectedProject.owner.name}}</p>
-        </div>
-        <div class="poc-stats">
-          <div class="poc-stat"><strong>{{vm.applicants.length}}</strong><span>Applications</span></div>
-          <div class="poc-stat"><strong>{{(vm.applicants | filter:{status:'pending'}).length}}</strong><span>Pending</span></div>
-          <div class="poc-stat"><strong>{{vm.teamMembers.length}}</strong><span>Team</span></div>
-        </div>
-      </div>
     </section>
 
     <p class="inline-notice" ng-if="vm.notice" role="status">{{vm.notice}}</p>
@@ -64,7 +58,7 @@
 
     <section class="applicant-list" id="applicantList" ng-if="vm.selectedProject">
       <div class="section-rule-heading applicant-section-heading"><div><p class="eyebrow">TEAM FORMATION</p><h3>Applicants</h3></div><span>{{vm.applicants.length}} total</span></div>
-      <applicant-row-card applicant="applicant" get-initials="vm.getInitials(name)" on-accept="vm.updateApplicant(applicant, 'accepted')" on-reject="vm.updateApplicant(applicant, 'rejected')" ng-repeat="applicant in vm.applicants | orderBy:'-matchScore'"></applicant-row-card>
+      <applicant-row-card applicant="applicant" get-initials="vm.getInitials(name)" on-accept="vm.updateApplicant(applicant, 'accepted')" on-reject="vm.updateApplicant(applicant, 'rejected')" on-reconsider="vm.updateApplicant(applicant, 'pending')" ng-repeat="applicant in vm.applicants | orderBy:'-matchScore'"></applicant-row-card>
       <div class="page-state page-state-loading" ng-if="vm.loading" role="status"><span class="state-spinner" aria-hidden="true"></span><div><h3>Loading applicants</h3><p>Retrieving project applications.</p></div></div>
       <div class="page-state" ng-if="!vm.loading && !vm.error && !vm.applicants.length"><span class="state-icon" aria-hidden="true">✓</span><div><h3>No applications yet</h3><p>When students apply to this project, their applications will appear here.</p></div></div>
     </section>
@@ -72,28 +66,27 @@
     <section class="team-section" ng-if="vm.selectedProject">
       <div class="section-rule-heading"><div><p class="eyebrow">ACCEPTED APPLICANTS</p><h3>Current team</h3></div></div>
       <div class="team-avatars">
-        <div class="team-member" ng-repeat="member in vm.teamMembers"><span class="avatar-circle small">{{ vm.getInitials(member.name) }}</span><span>{{ member.name }}<small>{{ member.role }}</small><small>Verified skills: {{member.skills.length ? member.skills.join(' · ') : 'None listed'}}</small></span></div>
-        <button type="button" class="team-add-button" ng-click="vm.toggleTeamManager()" aria-label="Manage team members">+</button>
+        <a class="team-member-card" ng-repeat="member in vm.teamMembers" ng-href="profile-view.html?id={{member.userId}}" title="View profile of {{member.name}}">
+          <span class="avatar-circle small">{{ vm.getInitials(member.name) }}</span>
+          <div class="team-member-info">
+            <strong class="team-member-name">{{ member.name }}</strong>
+            <span class="team-member-role" ng-class="{'role-lead': member.role === 'Lead'}">{{ member.role }}</span>
+            <span class="team-member-skills">Verified skills: {{member.skills.length ? member.skills.join(' · ') : 'None listed'}}</span>
+          </div>
+        </a>
       </div>
-      <p class="sub" ng-if="vm.teamMembers.length === 1">No team members yet.</p>
-      <div class="team-manager" ng-if="vm.showTeamManager">
-        <h4>Pending applicants</h4>
-        <p class="sub" ng-if="!(vm.applicants | filter:{status:'pending'}).length">No pending applicants available.</p>
-        <div class="team-manager-row" ng-repeat="applicant in vm.applicants | filter:{status:'pending'}">
-          <span>{{ applicant.name }}</span>
-          <button type="button" class="btn-accept" ng-click="vm.updateApplicant(applicant, 'accepted')">Accept</button>
-        </div>
-      </div>
+      <p class="sub" ng-if="vm.teamMembers.length === 1">No accepted team members yet.</p>
     </section>
+    <a href="create-listing.html" class="floating-add-button" title="Create New Project Listing">+</a>
   </main>
 
   <footer class="rich-footer">
     <div class="rich-footer-inner">
-      <div class="rich-footer-brand"><strong>TCEMate</strong><p>Team Up. Build Together.<br>Thiagarajar College of Engineering, Madurai</p></div>
+      <div class="rich-footer-brand"><div class="rich-footer-brand-header"><img src="assets/tce-logo.png" alt="TCE Logo" /><strong>TCEMate</strong></div><p>Team Up. Build Together.<br>Thiagarajar College of Engineering, Madurai</p></div>
       <div class="rich-footer-col"><h4>Explore</h4><a href="browse.html">Browse Projects</a><a href="forum.html">Forum</a><a href="create-listing.html">Create Project</a></div>
       <div class="rich-footer-col"><h4>Your space</h4><a href="dashboard.html">Dashboard</a><a href="my-interests.html">My Interests</a><a href="notifications.html">Notifications</a></div>
     </div>
-    <div class="rich-footer-bottom"><span><span class="brand-mark">TC</span> &copy; 2026 TCEMate</span><span>Thiagarajar College of Engineering · Madurai</span></div>
+    <div class="rich-footer-bottom"><span><img src="assets/tce-logo.png" alt="TCE Logo" class="footer-logo-icon" /> &copy; 2026 TCEMate</span><span>Thiagarajar College of Engineering · Madurai</span></div>
   </footer>
 
   <script src="js/config.js"></script>

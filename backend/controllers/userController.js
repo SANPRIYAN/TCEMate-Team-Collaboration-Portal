@@ -41,6 +41,22 @@ exports.getCurrentUser = async (req, res) => {
   }
 };
 
+exports.getUserById = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID.' });
+    }
+    const user = await User.findById(userId).select('-password');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+    await persistNormalizedSkills(user);
+    return res.json({ success: true, user: sanitizeUser(user) });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Unable to fetch user profile.' });
+  }
+};
+
+
 exports.updateCurrentUser = async (req, res) => {
   try {
     const { name, department, year, section, bio, phone, preferences } = req.body;

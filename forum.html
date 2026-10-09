@@ -13,42 +13,84 @@
   <tcemate-app-nav active="forum" on-logout="vm.logout()"></tcemate-app-nav>
 
   <main class="page-wrap">
-    <div class="page-banner">
-      <div class="page-banner-img"></div>
-      <div class="page-banner-shade"></div>
-      <div class="page-banner-body">
-        <div>
-          <p class="eyebrow-light">STUDENT COMMUNITY</p>
-          <h1>Forum</h1>
-          <p>Discuss ideas, projects and opportunities with other students.</p>
-        </div>
-        <div class="page-banner-action">
-          <a href="create-post.html" class="button-light">＋ New post</a>
+    <!-- FORUM INDEX VIEW -->
+    <div ng-if="!vm.inThreadView">
+      <div class="page-banner">
+        <div class="page-banner-img"></div>
+        <div class="page-banner-shade"></div>
+        <div class="page-banner-body">
+          <div>
+            <p class="eyebrow-light">STUDENT COMMUNITY</p>
+            <h1>Forum</h1>
+            <p>Discuss ideas, projects and opportunities with other students.</p>
+          </div>
+          <div class="page-banner-action">
+            <a href="create-post.html" class="button-light">New post</a>
+          </div>
         </div>
       </div>
+
+      <div class="search-bar-wrap">
+        <span class="search-icon" aria-hidden="true">&#9906;</span>
+        <input type="text" placeholder="Search discussions..." ng-model="vm.searchText" aria-label="Search discussions">
+      </div>
+
+      <section class="thread-list" aria-live="polite">
+        <forum-thread-card post="post" on-select="vm.selectPost(post)" ng-repeat="post in vm.posts | filter:vm.searchText"></forum-thread-card>
+        <div class="page-state page-state-loading" ng-if="vm.loading" role="status"><span class="state-spinner" aria-hidden="true"></span><div><h3>Loading discussions</h3><p>Fetching the latest student conversations.</p></div></div>
+        <div class="page-state" ng-if="vm.error" role="alert"><span class="state-icon" aria-hidden="true">!</span><div><h3>Unable to load discussions</h3><p>{{vm.error}}</p><button class="state-link-button" type="button" ng-click="vm.retryLoad()">Try again <span aria-hidden="true">→</span></button></div></div>
+        <div class="page-state" ng-if="!vm.loading && !vm.error && vm.posts && !vm.posts.length"><span class="state-icon" aria-hidden="true">&#9783;</span><div><h3>No discussions yet</h3><p>Start the first conversation and invite other students to join in.</p><a class="state-link" href="create-post.html">Create a post <span aria-hidden="true">→</span></a></div></div>
+      </section>
     </div>
 
-    <div class="search-bar-wrap">
-      <span class="search-icon" aria-hidden="true">&#9906;</span>
-      <input type="text" placeholder="Search discussions..." ng-model="vm.searchText" aria-label="Search discussions">
+    <!-- REDDIT THREAD DETAIL VIEW -->
+    <div class="reddit-thread-wrap" ng-if="vm.inThreadView">
+      <a href="forum.html" class="thread-back-link">← Back to Discussions</a>
+
+      <div class="page-state page-state-loading" ng-if="vm.loading" role="status"><span class="state-spinner" aria-hidden="true"></span><div><h3>Loading discussion thread</h3><p>Retrieving post and comments...</p></div></div>
+      <div class="page-state" ng-if="vm.error" role="alert"><span class="state-icon" aria-hidden="true">!</span><div><h3>Unable to load discussion</h3><p>{{vm.error}}</p><a class="state-link" href="forum.html">Return to forum <span aria-hidden="true">→</span></a></div></div>
+
+      <article class="reddit-post-card" ng-if="!vm.loading && vm.activePost">
+        <div class="reddit-post-main">
+          <div class="reddit-post-header">
+            <span class="tag">{{vm.activePost.tag || 'Discussion'}}</span>
+            <span class="posted-meta">Posted by <strong>{{vm.activePost.author}}</strong> &middot; {{vm.activePost.createdAt | date:'mediumDate'}}</span>
+          </div>
+          <h1 class="reddit-post-title">{{vm.activePost.title}}</h1>
+          <div class="reddit-post-body">{{vm.activePost.body}}</div>
+          <div class="reddit-post-footer">
+            <span>{{vm.activePost.comments.length || 0}} Comments</span>
+          </div>
+        </div>
+      </article>
+
+      <section class="reddit-comments-section" ng-if="!vm.loading && vm.activePost">
+        <div class="add-comment-card">
+          <h4>Leave a comment</h4>
+          <form ng-submit="vm.submitComment(null, vm.newCommentText)">
+            <textarea ng-model="vm.newCommentText" placeholder="What are your thoughts?" rows="3" class="comment-textarea" required></textarea>
+            <div class="add-comment-actions">
+              <button type="submit" class="button-primary" ng-disabled="vm.submittingComment || !vm.newCommentText.trim()">{{vm.submittingComment ? 'Posting...' : 'Post Comment'}}</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="comments-list">
+          <h3 class="comments-heading">Comments ({{vm.activePost.comments.length || 0}})</h3>
+          <p class="sub" ng-if="!vm.getTopLevelComments().length">No comments yet. Be the first to join the conversation!</p>
+          <reddit-comment-item ng-repeat="comment in vm.getTopLevelComments()" comment="comment" all-comments="vm.activePost.comments" on-vote="vm.voteComment(comment, dir)" on-reply="vm.submitComment(parentId, text)" get-initials="vm.getInitials(name)"></reddit-comment-item>
+        </div>
+      </section>
     </div>
-
-    <section class="thread-list" aria-live="polite">
-      <forum-thread-card post="post" ng-repeat="post in vm.posts | filter:vm.searchText"></forum-thread-card>
-      <div class="page-state page-state-loading" ng-if="vm.loading" role="status"><span class="state-spinner" aria-hidden="true"></span><div><h3>Loading discussions</h3><p>Fetching the latest student conversations.</p></div></div>
-      <div class="page-state" ng-if="vm.error" role="alert"><span class="state-icon" aria-hidden="true">!</span><div><h3>Unable to load discussions</h3><p>{{vm.error}}</p><button class="state-link-button" type="button" ng-click="vm.retryLoad()">Try again <span aria-hidden="true">→</span></button></div></div>
-      <div class="page-state" ng-if="!vm.loading && !vm.error && vm.posts && !vm.posts.length"><span class="state-icon" aria-hidden="true">&#9783;</span><div><h3>No discussions yet</h3><p>Start the first conversation and invite other students to join in.</p><a class="state-link" href="create-post.html">Create a post <span aria-hidden="true">→</span></a></div></div>
-    </section>
-
   </main>
 
   <footer class="rich-footer">
     <div class="rich-footer-inner">
-      <div class="rich-footer-brand"><strong>TCEMate</strong><p>Team Up. Build Together.<br>Thiagarajar College of Engineering, Madurai</p></div>
+      <div class="rich-footer-brand"><div class="rich-footer-brand-header"><img src="assets/tce-logo.png" alt="TCE Logo" /><strong>TCEMate</strong></div><p>Team Up. Build Together.<br>Thiagarajar College of Engineering, Madurai</p></div>
       <div class="rich-footer-col"><h4>Navigate</h4><a href="dashboard.html">Dashboard</a><a href="browse.html">Browse Projects</a><a href="forum.html">Forum</a><a href="notifications.html">Notifications</a></div>
       <div class="rich-footer-col"><h4>Account</h4><a href="profile-view.html">My Profile</a><a href="my-interests.html">My Interests</a><a href="manage-applicants.html">My Listings</a><a href="create-listing.html">Create Project</a></div>
     </div>
-    <div class="rich-footer-bottom"><span style="display:flex;align-items:center;gap:0.5rem;"><span class="brand-mark">TC</span> &copy; 2026 TCEMate</span><span>Thiagarajar College of Engineering</span></div>
+    <div class="rich-footer-bottom"><span><img src="assets/tce-logo.png" alt="TCE Logo" class="footer-logo-icon" /> &copy; 2026 TCEMate</span><span>Thiagarajar College of Engineering</span></div>
   </footer>
 
   <script src="js/config.js"></script>

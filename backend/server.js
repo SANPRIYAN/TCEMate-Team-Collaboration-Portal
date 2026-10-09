@@ -59,7 +59,7 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
 
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    if (!origin || allowedOrigins.includes(origin) || (process.env.NODE_ENV !== 'production' && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin))) return callback(null, true);
     const error = new Error('Origin is not allowed by CORS.');
     error.status = 403;
     return callback(error);

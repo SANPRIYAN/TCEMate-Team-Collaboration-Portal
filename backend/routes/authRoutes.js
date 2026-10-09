@@ -7,6 +7,7 @@ const {
   getMe,
   requestPasswordReset,
   resetPassword,
+  resetPasswordWithPasskey,
   verifyEmail,
   adminSetupStatus,
   startAdminSetup
@@ -30,6 +31,9 @@ router.post('/verify-email', createRateLimit({ limit: 10, windowMs: 15 * 60 * 10
 router.get('/admin/setup/status', adminSetupStatus);
 router.post('/admin/setup', createRateLimit({ limit: 5, windowMs: 60 * 60 * 1000 }), startAdminSetup);
 router.post('/forgot-password', resetLimiter, requestPasswordReset);
+router.patch('/forgot-password', resetLimiter, resetPasswordWithPasskey);
+router.patch('/forgot-password-passkey', resetLimiter, resetPasswordWithPasskey);
+router.patch('/reset-password-passkey', resetLimiter, resetPasswordWithPasskey);
 router.post('/reset-password', resetLimiter, resetPassword);
 router.get('/me', protect, getMe);
 

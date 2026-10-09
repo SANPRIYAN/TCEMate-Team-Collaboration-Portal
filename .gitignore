@@ -2,6 +2,7 @@
 .agent/
 .agents/
 .impeccable/
+skills-lock.json
 
 # Dependencies
 node_modules/
@@ -9,6 +10,7 @@ backend/node_modules/
 
 # Environment secrets
 backend/.env
+.env
 
 # IDE & System Files
 .vscode/

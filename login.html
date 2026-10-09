@@ -11,31 +11,25 @@
 </head>
 <body class="app-page auth-body" ng-controller="LoginController as vm">
   <header class="topbar">
-    <a class="logo" href="index.html">TCEMate</a>
+    <a class="logo" href="index.html" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;"><img src="assets/tce-logo.png" alt="TCE Logo" style="height: 32px; width: 32px; object-fit: contain;" /><span>TCEMate</span></a>
     <nav class="main-nav" aria-label="Public navigation">
       <a href="index.html">Home</a>
       <a href="about.html">About</a>
-      <a href="#loginForm">Log in</a>
-      <a href="login.html#signup">Register</a>
+      <a href="#loginForm" class="nav-btn-outline">Log in</a>
+      <a href="login.html#signup" class="nav-btn-outline">Register</a>
     </nav>
   </header>
 
   <main class="auth-wrap">
-    <section class="auth-transition" ng-if="vm.authTransition" role="status" aria-live="polite">
-      <span class="auth-spinner" aria-hidden="true"></span>
-      <h2>Welcome to TCEMate</h2>
-      <p>Preparing your dashboard...</p>
-    </section>
-
     <form class="auth-card" id="loginForm" name="loginForm" novalidate ng-submit="vm.login()" ng-hide="vm.mode !== 'login'">
       <!-- Custom Directive: Auth Branding Header -->
       <auth-branding-header></auth-branding-header>
 
-      <h2>{{vm.loginRole === 'admin' ? 'Administrator sign in' : 'Log in to TCEMate'}}</h2>
-      <p class="sub">{{vm.loginRole === 'admin' ? 'Administrator account sign in' : 'Enter your official TCE student email and password'}}</p>
+      <h2>Log in to TCEMate</h2>
+      <p class="sub">Enter your email and password</p>
 
       <label for="loginEmail">Email</label>
-      <input type="email" id="loginEmail" name="loginEmail" ng-attr-placeholder="{{vm.loginRole === 'admin' ? 'Administrator email' : 'you@student.tce.edu'}}" required ng-model="vm.loginData.email">
+      <input type="email" id="loginEmail" name="loginEmail" placeholder="you@student.tce.edu" required ng-model="vm.loginData.email">
       <div class="error-msg" ng-messages="loginForm.loginEmail.$error" ng-show="loginForm.loginEmail.$dirty || loginForm.$submitted">
         <span ng-message="required">Please fill this field.</span>
         <span ng-message="email">Please enter a valid email address.</span>
@@ -51,11 +45,10 @@
       </div>
       <span class="error-msg" id="loginPasswordError" ng-if="vm.loginErrors.password">{{ vm.loginErrors.password }}</span>
 
-      <button type="submit" class="btn-primary">{{vm.loginRole === 'admin' ? 'Admin Log In' : 'Log In'}}</button>
+      <button type="submit" class="btn-primary">Log In</button>
       <p class="switch-link"><a href="#" ng-click="vm.showForgotPassword()">Forgot password?</a></p>
-      <p class="switch-link"><a href="#" ng-click="vm.toggleAdminLogin()">{{vm.loginRole === 'admin' ? 'Student login' : 'Administrator login'}}</a></p>
       <p class="switch-link" ng-if="vm.adminSetupAvailable"><a href="#" ng-click="vm.showAdminSetup()">Administrator setup</a></p>
-      <p class="switch-link" ng-if="vm.loginRole === 'student'">New here? <a href="#" id="showSignup" ng-click="vm.toggleSignup()">Create an account</a></p>
+      <p class="switch-link">New here? <a href="#" id="showSignup" ng-click="vm.toggleSignup()">Create an account</a></p>
     </form>
 
     <form class="auth-card" name="adminSetupForm" novalidate ng-submit="vm.startAdminSetup(adminSetupForm)" ng-if="vm.mode === 'adminSetup' && vm.adminSetupAvailable">
@@ -81,15 +74,26 @@
       <p class="switch-link"><a href="#" ng-click="vm.backToLogin()">Back to login</a></p>
     </form>
 
-    <form class="auth-card" name="forgotForm" novalidate ng-submit="vm.requestPasswordReset()" ng-hide="vm.mode !== 'forgot'">
+    <form class="auth-card" name="forgotForm" novalidate ng-submit="vm.resetPasswordWithPasskey(forgotForm)" ng-hide="vm.mode !== 'forgot'">
       <auth-branding-header></auth-branding-header>
       <h2>Reset your password</h2>
-      <p class="sub">Enter your account email and we’ll send a one-time reset link if an account exists.</p>
+      <p class="sub">Enter your TCE student email, your unique passkey, and your new password.</p>
+      
       <label for="resetEmail">Email</label>
-      <input type="email" id="resetEmail" name="resetEmail" required ng-model="vm.resetEmail" autocomplete="email">
+      <input type="email" id="resetEmail" name="resetEmail" placeholder="you@student.tce.edu" required ng-model="vm.resetData.email" autocomplete="email">
+      
+      <label for="resetPasskey">Unique Passkey</label>
+      <input type="text" id="resetPasskey" name="resetPasskey" placeholder="e.g. PK-2023IT045" required ng-model="vm.resetData.passkey" style="text-transform: uppercase;">
+      <p class="field-helper">Enter the unique passkey assigned to your account (e.g. PK-YOURREGNO).</p>
+
+      <label for="resetNewPassword">New Password</label>
+      <input type="password" id="resetNewPassword" name="resetNewPassword" placeholder="••••••••" required minlength="8" maxlength="128" ng-pattern="/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,128}$/" ng-model="vm.resetData.newPassword">
+      <p class="field-helper">Use 8+ characters with uppercase, lowercase, number, and symbol.</p>
+
       <p class="inline-notice" ng-if="vm.resetMessage" role="status">{{vm.resetMessage}}</p>
       <p class="inline-error" ng-if="vm.resetError" role="alert">{{vm.resetError}}</p>
-      <button type="submit" class="btn-primary">Send reset link</button>
+      
+      <button type="submit" class="btn-primary" ng-disabled="vm.resetLoading">{{vm.resetLoading ? 'Updating password...' : 'Update Password'}}</button>
       <p class="switch-link"><a href="#" ng-click="vm.toggleLogin()">Back to login</a></p>
     </form>
 
@@ -150,11 +154,11 @@
 
   <footer class="rich-footer auth-rich-footer">
     <div class="rich-footer-inner">
-      <div class="rich-footer-brand"><strong>TCEMate</strong><p>Student collaboration at Thiagarajar College of Engineering, Madurai.</p></div>
+      <div class="rich-footer-brand"><div class="rich-footer-brand-header"><img src="assets/tce-logo.png" alt="TCE Logo" /><strong>TCEMate</strong></div><p>Student collaboration at Thiagarajar College of Engineering, Madurai.</p></div>
       <div class="rich-footer-col"><h4>Discover</h4><a href="index.html">Home</a><a href="about.html">About TCEMate</a></div>
       <div class="rich-footer-col"><h4>Community</h4><a href="login.html">Log in</a><a href="login.html#signup">Register</a></div>
     </div>
-    <div class="rich-footer-bottom"><span><span class="brand-mark">TC</span> &copy; 2026 TCEMate</span><span>Thiagarajar College of Engineering · Madurai</span></div>
+    <div class="rich-footer-bottom"><span><img src="assets/tce-logo.png" alt="TCE Logo" class="footer-logo-icon" /> &copy; 2026 TCEMate</span><span>Thiagarajar College of Engineering · Madurai</span></div>
   </footer>
 
   <script src="js/config.js"></script>

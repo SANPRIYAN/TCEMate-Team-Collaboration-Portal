@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var app = angular.module('tcemate', ['ngAnimate', 'ngMessages']);
+  var app = angular.module('tcemate', ['ngMessages']);
   var configuredApiUrl = window.TCEMateConfig && window.TCEMateConfig.apiBaseUrl;
   var localHost = ['localhost', '127.0.0.1'].indexOf(window.location.hostname) !== -1;
   app.constant('API_BASE_URL', (configuredApiUrl || (localHost ? 'http://localhost:5000/api' : window.location.origin + '/api')).replace(/\/+$/, ''));
@@ -65,7 +65,7 @@
                 '    <span class="meta-row" style="margin-top:0;"><span>{{project.department}} · {{project.year}}</span></span>' +
                 '    <span style="display:flex;gap:0.5rem;flex-wrap:wrap;">' +
                 '      <button type="button" class="card-cta-secondary" ng-click="onOpen({project: project})">View →</button>' +
-                '      <button type="button" class="card-cta" ng-if="project.canApply" ng-disabled="project.applying || project.applied || (project.match && !project.match.eligible)" ng-click="onApply({project: project})">{{project.applied ? \'Applied\' : (project.applying ? \'Applying...\' : (project.match && !project.match.eligible ? \'Not eligible\' : \'Show Interest\'))}}</button>' +
+                '      <button type="button" class="card-cta" ng-if="project.canApply" ng-disabled="project.applying || project.applied || (project.match && !project.match.eligible)" ng-click="onApply({project: project})">{{project.applied ? \'Applied\' : (project.applying ? \'Applying...\' : (project.match && !project.match.eligible ? \'Skills Missing\' : \'Show Interest\'))}}</button>' +
                 '    </span>' +
                 '  </div>' +
                 '</article>'
@@ -76,10 +76,10 @@
   app.directive('forumThreadCard', function () {
     return {
       restrict: 'E',
-      scope: { post: '=' },
-      template: '<article class="thread-card">' +
+      scope: { post: '=', onSelect: '&' },
+      template: '<article class="thread-card" ng-click="onSelect({post: post})" style="cursor: pointer;">' +
                 '  <div class="thread-card-top">' +
-                '    <div class="thread-avatar">{{(post.author || \'?\'). charAt(0).toUpperCase()}}</div>' +
+                '    <div class="thread-avatar">{{(post.author || \'?\').charAt(0).toUpperCase()}}</div>' +
                 '    <div class="thread-body">' +
                 '      <div class="thread-meta"><span class="tag">{{post.tag || \'Discussion\'}}</span><span class="posted-by">{{post.author}}</span></div>' +
                 '      <h4>{{post.title}}</h4>' +
@@ -87,10 +87,59 @@
                 '  </div>' +
                 '  <p class="thread-preview">{{post.body}}</p>' +
                 '  <div class="thread-footer">' +
-                '    <span>{{post.replies || 0}} replies · <time>{{post.createdAt | date:"MMM d, yyyy"}}</time></span>' +
-                '    <a class="thread-view-link" href="forum.html">View discussion →</a>' +
+                '    <span>{{post.replies || 0}} comments &middot; <time>{{post.createdAt | date:"MMM d, yyyy"}}</time></span>' +
+                '    <a class="thread-view-link" ng-href="forum.html?id={{post.id}}">Read discussion →</a>' +
                 '  </div>' +
                 '</article>'
+    };
+  });
+
+  // Reddit Comment Item Directive
+  app.directive('redditCommentItem', function () {
+    return {
+      restrict: 'E',
+      scope: {
+        comment: '=',
+        allComments: '=',
+        onVote: '&',
+        onReply: '&',
+        getInitials: '&'
+      },
+      template:
+        '<div class="reddit-comment-node">' +
+        '  <div class="comment-main-content">' +
+        '    <div class="comment-header">' +
+        '      <span class="comment-avatar">{{getInitials({name: comment.author})}}</span>' +
+        '      <strong class="comment-author">{{comment.author}}</strong>' +
+        '      <span class="comment-date">{{comment.createdAt | date:"MMM d, h:mm a"}}</span>' +
+        '    </div>' +
+        '    <div class="comment-body-text">{{comment.text}}</div>' +
+        '    <div class="comment-actions">' +
+        '      <button type="button" class="comment-reply-btn" ng-click="showReplyForm = !showReplyForm">Reply</button>' +
+        '    </div>' +
+        '    <div class="comment-reply-box" ng-if="showReplyForm">' +
+        '      <textarea ng-model="replyText" placeholder="Write a nested reply..." rows="2" class="comment-textarea"></textarea>' +
+        '      <div class="reply-box-actions">' +
+        '        <button type="button" class="btn-secondary small" ng-click="showReplyForm = false">Cancel</button>' +
+        '        <button type="button" class="btn-primary small" ng-disabled="!replyText || !replyText.trim()" ng-click="onReply({parentId: comment.id, text: replyText}); replyText=\'\'; showReplyForm=false;">Post Reply</button>' +
+        '      </div>' +
+        '    </div>' +
+        '    <div class="comment-children" ng-if="hasChildren()">' +
+        '      <reddit-comment-item ng-repeat="child in getChildren()" comment="child" all-comments="allComments" on-vote="onVote({comment: comment, dir: dir})" on-reply="onReply({parentId: parentId, text: text})" get-initials="getInitials({name: name})"></reddit-comment-item>' +
+        '    </div>' +
+        '  </div>' +
+        '</div>',
+      link: function (scope) {
+        scope.getChildren = function () {
+          if (!scope.allComments || !scope.comment) return [];
+          return scope.allComments.filter(function (c) {
+            return String(c.parentId || '') === String(scope.comment.id || scope.comment._id);
+          });
+        };
+        scope.hasChildren = function () {
+          return scope.getChildren().length > 0;
+        };
+      }
     };
   });
 
@@ -141,7 +190,8 @@
         applicant: '=',
         getInitials: '&',
         onAccept: '&',
-        onReject: '&'
+        onReject: '&',
+        onReconsider: '&'
       },
       template: '<article class="applicant-row">' +
                 '  <div class="applicant-avatar">{{ getInitials({name: applicant.name}) }}</div>' +
@@ -152,9 +202,10 @@
                 '    <p class="sub">{{ applicant.matchScore | matchLabel }}</p>' +
                 '  </div>' +
                 '  <div class="applicant-actions">' +
-                '    <span class="status-pill" ng-if="applicant.status !== \'pending\'">{{applicant.status | uppercase}}</span>' +
-                '    <button class="btn-accept" ng-if="applicant.status === \'pending\'" ng-click="onAccept({applicant: applicant})">Accept</button>' +
+                '    <span class="status-pill" ng-class="applicant.status">{{applicant.status | uppercase}}</span>' +
+                '    <button class="btn-accept" ng-if="applicant.status !== \'accepted\'" ng-click="onAccept({applicant: applicant})">Accept</button>' +
                 '    <button class="btn-reject" ng-if="applicant.status === \'pending\'" ng-click="onReject({applicant: applicant})">Reject</button>' +
+                '    <button class="btn-reconsider" style="background:#edf4f9;color:#0d2d49;border:1px solid #cbd8e1;padding:0.45rem 0.8rem;border-radius:5px;font-weight:600;cursor:pointer;" ng-if="applicant.status === \'rejected\'" ng-click="onReconsider({applicant: applicant})">Reconsider</button>' +
                 '  </div>' +
                 '</article>'
     };
@@ -229,9 +280,10 @@
   app.directive('authBrandingHeader', function () {
     return {
       restrict: 'E',
-      template: '<div style="text-align: center; margin-bottom: 1rem;">' +
-                '  <h3 style="color: var(--primary); font-weight: 700;">Thiagarajar College of Engineering</h3>' +
-                '  <p style="font-size: 0.85rem; color: var(--text-muted);">Student Team Collaboration Portal</p>' +
+      template: '<div style="text-align: center; margin-bottom: 1.25rem;">' +
+                '  <img src="assets/tce-logo.png" alt="TCE Crest Logo" class="auth-brand-logo" style="width: 80px; height: 80px; object-fit: contain; margin-bottom: 0.5rem;" />' +
+                '  <h3 style="color: var(--primary); font-weight: 700; margin: 0; font-size: 1.15rem;">Thiagarajar College of Engineering</h3>' +
+                '  <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Student Team Collaboration Portal</p>' +
                 '</div>'
     };
   });
@@ -244,37 +296,44 @@
         onLogout: '&'
       },
       template: '<header class="app-nav-shell">' +
-                '  <a class="app-nav-brand" ng-href="{{user.role === \'admin\' ? \'admin.html\' : \'dashboard.html\'}}"><span class="brand-mark">TC</span><span>TCEMate</span></a>' +
+                '  <a class="app-nav-brand" ng-href="{{isLoggedIn ? (user.role === \'admin\' ? \'admin.html\' : \'dashboard.html\') : \'index.html\'}}"><img src="assets/tce-logo.png" alt="TCE Logo" class="brand-logo-img" style="width: 36px; height: 36px; object-fit: contain; vertical-align: middle; margin-right: 6px;" /><span>TCEMate</span></a>' +
                 '  <nav class="app-nav-links" aria-label="Application navigation">' +
-                '    <span ng-if="user.role !== \'admin\'" class="app-nav-student-links">' +
+                '    <span ng-if="isLoggedIn && user.role !== \'admin\'" class="app-nav-student-links">' +
                 '      <a href="dashboard.html" ng-class="{active: active === \'dashboard\'}" ng-attr-aria-current="{{active === \'dashboard\' ? \'page\' : undefined}}">Dashboard</a>' +
                 '      <a href="browse.html" ng-class="{active: active === \'browse\'}" ng-attr-aria-current="{{active === \'browse\' ? \'page\' : undefined}}">Browse</a>' +
                 '      <a href="forum.html" ng-class="{active: active === \'forum\'}" ng-attr-aria-current="{{active === \'forum\' ? \'page\' : undefined}}">Forum</a>' +
-                '      <a href="create-listing.html" ng-class="{active: active === \'post\'}" ng-attr-aria-current="{{active === \'post\' ? \'page\' : undefined}}">Post</a>' +
                 '      <a href="manage-applicants.html" ng-class="{active: active === \'listings\'}" ng-attr-aria-current="{{active === \'listings\' ? \'page\' : undefined}}">My Listings</a>' +
                 '      <a href="my-interests.html" ng-class="{active: active === \'interests\'}" ng-attr-aria-current="{{active === \'interests\' ? \'page\' : undefined}}">Interests</a>' +
                 '      <a href="notifications.html" ng-class="{active: active === \'notifications\'}" ng-attr-aria-current="{{active === \'notifications\' ? \'page\' : undefined}}">Notifications</a>' +
                 '      <a href="profile-view.html" ng-class="{active: active === \'profile\'}" ng-attr-aria-current="{{active === \'profile\' ? \'page\' : undefined}}">Profile</a>' +
                 '    </span>' +
-                '    <span ng-if="user.role === \'admin\'" class="app-nav-admin-links">' +
+                '    <span ng-if="isLoggedIn && user.role === \'admin\'" class="app-nav-admin-links">' +
                 '      <a href="admin.html" ng-class="{active: active === \'admin\'}" ng-attr-aria-current="{{active === \'admin\' ? \'page\' : undefined}}">Dashboard</a>' +
                 '      <a href="admin-students.html" ng-class="{active: active === \'students\'}" ng-attr-aria-current="{{active === \'students\' ? \'page\' : undefined}}">Students</a>' +
                 '      <a href="admin-projects.html" ng-class="{active: active === \'projects\'}" ng-attr-aria-current="{{active === \'projects\' ? \'page\' : undefined}}">Projects</a>' +
                 '      <a href="admin-interests.html" ng-class="{active: active === \'interests\'}" ng-attr-aria-current="{{active === \'interests\' ? \'page\' : undefined}}">Interests</a>' +
                 '      <a href="admin-moderation.html" ng-class="{active: active === \'moderation\'}" ng-attr-aria-current="{{active === \'moderation\' ? \'page\' : undefined}}">Moderation</a>' +
                 '    </span>' +
-                '    <button type="button" class="app-nav-logout" ng-click="onLogout()">Log out</button>' +
+                '    <span ng-if="!isLoggedIn" class="app-nav-guest-links" style="display:inline-flex;align-items:center;gap:0.65rem;">' +
+                '      <a href="index.html">Home</a>' +
+                '      <a href="browse.html" ng-class="{active: active === \'browse\'}">Browse</a>' +
+                '      <a href="forum.html" ng-class="{active: active === \'forum\'}">Forum</a>' +
+                '      <a href="login.html" class="nav-btn-outline">Log in</a>' +
+                '      <a href="login.html#signup" class="nav-btn-outline">Register</a>' +
+                '    </span>' +
+                '    <button type="button" class="app-nav-logout" ng-if="isLoggedIn" ng-click="onLogout()">Log out</button>' +
                 '  </nav>' +
                 '</header>',
       link: function (scope) {
-                scope.user = AuthService.getUser() || {};
-                var currentPage = ($window.location.pathname.split('/').pop() || '').toLowerCase();
-                var adminPage = /^admin(?:-[a-z]+)*\.html$/.test(currentPage);
-                if (scope.user.role === 'admin' && !adminPage) {
-                  $window.location.replace('admin.html');
-                } else if (scope.user.role !== 'admin' && adminPage) {
-                  $window.location.replace('login.html#admin');
-                }
+        scope.isLoggedIn = AuthService.isLoggedIn();
+        scope.user = scope.isLoggedIn ? (AuthService.getUser() || {}) : {};
+        var currentPage = ($window.location.pathname.split('/').pop() || '').toLowerCase();
+        var adminPage = /^admin(?:-[a-z]+)*\.html$/.test(currentPage);
+        if (scope.isLoggedIn && scope.user.role === 'admin' && !adminPage) {
+          $window.location.replace('admin.html');
+        } else if (scope.isLoggedIn && scope.user.role !== 'admin' && adminPage) {
+          $window.location.replace('login.html#admin');
+        }
       }
     };
   }]);
@@ -324,7 +383,6 @@
     var vm = this;
 
     vm.mode = $window.location.hash === '#signup' ? 'signup' : 'login';
-    vm.loginRole = $window.location.hash === '#admin' ? 'admin' : 'student';
     vm.loginData = { email: '', password: '' };
     vm.signupData = { fullName: '', email: '', regNo: '', phone: '', password: '' };
     vm.loginErrors = {};
@@ -344,16 +402,10 @@
 
     vm.toggleSignup = function () {
       vm.mode = 'signup';
-      vm.loginRole = 'student';
     };
 
     vm.toggleLogin = function () {
       vm.mode = 'login';
-    };
-
-    vm.toggleAdminLogin = function () {
-      vm.mode = 'login';
-      vm.loginRole = vm.loginRole === 'admin' ? 'student' : 'admin';
     };
 
     vm.showAdminSetup = function () {
@@ -362,15 +414,18 @@
       vm.adminSetupMessage = '';
     };
 
+    vm.resetData = { email: '', passkey: '', newPassword: '' };
+
     vm.showForgotPassword = function () {
       vm.mode = 'forgot';
-      vm.resetEmail = vm.loginData.email;
+      vm.resetData = { email: vm.loginData.email || '', passkey: '', newPassword: '' };
       vm.resetMessage = '';
       vm.resetError = '';
+      vm.resetLoading = false;
     };
 
     vm.requestPasswordReset = function () {
-      AuthService.requestPasswordReset(vm.resetEmail).then(function (result) {
+      AuthService.requestPasswordReset(vm.resetData.email || vm.resetEmail).then(function (result) {
         if (result && result.success) {
           vm.resetMessage = result.message;
           vm.resetError = '';
@@ -380,17 +435,44 @@
       });
     };
 
-    vm.login = function () {
-      if (vm.loginRole === 'student' && !/^[^@\s]+@student\.tce\.edu$/i.test((vm.loginData.email || '').trim())) {
-        vm.loginErrors.email = 'Please use your official TCE student email address.';
+    vm.resetPasswordWithPasskey = function (form) {
+      if (form && form.$invalid) {
+        vm.resetError = 'Please fill out all required fields correctly.';
         return;
       }
-      AuthService.login(vm.loginData.email, vm.loginData.password, vm.loginRole).then(function (result) {
+      if (!vm.resetData.email || !vm.resetData.passkey || !vm.resetData.newPassword) {
+        vm.resetError = 'Email, unique passkey, and new password are required.';
+        return;
+      }
+      vm.resetError = '';
+      vm.resetMessage = '';
+      vm.resetLoading = true;
+      AuthService.resetPasswordWithPasskey(vm.resetData.email, vm.resetData.passkey, vm.resetData.newPassword)
+        .then(function (result) {
+          vm.resetLoading = false;
+          if (result && result.success) {
+            vm.resetMessage = result.message || 'Password updated successfully!';
+            setTimeout(function () {
+              $scope.$apply(function () {
+                vm.mode = 'login';
+                vm.loginData.email = vm.resetData.email;
+              });
+            }, 1800);
+          } else {
+            vm.resetError = result && result.message ? result.message : 'Unable to reset password.';
+          }
+        });
+    };
+
+    vm.login = function () {
+      var emailTrimmed = (vm.loginData.email || '').trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+        vm.loginErrors.email = 'Please enter a valid email address.';
+        return;
+      }
+      AuthService.login(vm.loginData.email, vm.loginData.password).then(function (result) {
         if (result && result.ok) {
-          vm.authTransition = true;
-          $timeout(function () {
-            $window.location.href = result.user && result.user.role === 'admin' ? 'admin.html' : 'dashboard.html';
-          }, 800);
+          $window.location.href = result.user && result.user.role === 'admin' ? 'admin.html' : 'dashboard.html';
         } else {
           vm.loginErrors = {};
           if (result && result.message) {
@@ -409,7 +491,6 @@
       AuthService.register(vm.signupData).then(function (result) {
         if (result && result.ok) {
           vm.mode = 'login';
-          vm.loginRole = 'student';
           vm.loginData.email = result.email;
           vm.loginData.password = '';
           vm.verificationMessage = result.message;
@@ -435,7 +516,6 @@
         if (result && result.success) {
           vm.adminSetupAvailable = false;
           vm.mode = 'login';
-          vm.loginRole = 'admin';
           vm.loginData.email = vm.adminSetupData.email;
           vm.loginData.password = '';
           vm.verificationMessage = result.message;
@@ -518,18 +598,18 @@
   function ProjectsController(DataService, AuthService, $window) {
     var vm = this;
 
-    if (!AuthService.isLoggedIn() && $window.location.href.indexOf('login.html') === -1) {
-      $window.location.href = 'login.html';
-      return;
-    }
+    vm.isLoggedIn = AuthService.isLoggedIn();
+    vm.currentUser = vm.isLoggedIn ? AuthService.getUser() : null;
 
     vm.projects = [];
     vm.loading = true;
     vm.notice = '';
     vm.error = '';
-    vm.currentUser = AuthService.getUser();
+
+    var fetchAppsPromise = vm.isLoggedIn ? DataService.getMyApplications() : Promise.resolve([]);
+
     DataService.getProjects().then(function (projects) {
-      DataService.getMyApplications().then(function (applications) {
+      return fetchAppsPromise.then(function (applications) {
         var applied = {};
         (applications || []).forEach(function (application) {
           var projectId = application.projectDetails && application.projectDetails.id;
@@ -547,14 +627,12 @@
           return project;
         });
         vm.loading = false;
-      }).catch(function () {
-        vm.loading = false;
-        vm.error = 'Unable to load projects. Please try again.';
       });
     }).catch(function () {
       vm.loading = false;
       vm.error = 'Unable to load projects. Please try again.';
     });
+
     vm.searchText = '';
     vm.department = 'All Departments';
     vm.year = 'Any Year';
@@ -583,6 +661,10 @@
     };
 
     vm.applyToProject = function (project) {
+      if (!vm.isLoggedIn) {
+        $window.location.href = 'login.html';
+        return;
+      }
       if (project.applying || project.applied) return;
       project.applying = true;
       DataService.applyToProject(project, vm.currentUser).then(function (response) {
@@ -605,15 +687,11 @@
   function ProjectDetailsController(DataService, AuthService, $window) {
     var vm = this;
     vm.project = null;
-    vm.currentUser = AuthService.getUser();
+    vm.isLoggedIn = AuthService.isLoggedIn();
+    vm.currentUser = vm.isLoggedIn ? AuthService.getUser() : null;
     vm.loading = true;
     vm.error = '';
     vm.notice = '';
-
-    if (!AuthService.isLoggedIn()) {
-      $window.location.href = 'login.html';
-      return;
-    }
 
     var query = new URLSearchParams($window.location.search);
     var projectId = query.get('id');
@@ -634,7 +712,9 @@
         ? (project.createdBy.id || project.createdBy._id)
         : project.createdBy;
       vm.project.canApply = project.status === 'open' && String(ownerId || '') !== String(vm.currentUser && vm.currentUser.id || '');
-      return DataService.getMyApplications().then(function (applications) {
+
+      var fetchAppsPromise = vm.isLoggedIn ? DataService.getMyApplications() : Promise.resolve([]);
+      return fetchAppsPromise.then(function (applications) {
         vm.project.applied = (applications || []).some(function (application) {
           var appliedProject = application.projectDetails && application.projectDetails.id || application.project;
           return String(appliedProject && (appliedProject.id || appliedProject._id || appliedProject)) === String(projectId);
@@ -647,6 +727,10 @@
     });
 
     vm.applyToProject = function () {
+      if (!vm.isLoggedIn) {
+        $window.location.href = 'login.html';
+        return;
+      }
       if (!vm.project || vm.project.applying || vm.project.applied) return;
       vm.project.applying = true;
       DataService.applyToProject(vm.project, vm.currentUser).then(function (response) {
@@ -662,7 +746,6 @@
         }
       });
     };
-
     vm.backToBrowse = function () {
       $window.location.href = 'browse.html';
     };
@@ -800,10 +883,24 @@
       vm.loading = true;
       DataService.getApplicantsForProject(vm.selectedProject.id).then(function (applicants) {
         vm.applicants = applicants || [];
-        vm.teamMembers = [{ name: vm.selectedProject.owner ? vm.selectedProject.owner.name : vm.currentUser.name, role: 'Lead', department: vm.selectedProject.department, year: vm.selectedProject.year, skills: vm.selectedProject.owner && vm.selectedProject.owner.skills || [] }]
-          .concat(vm.applicants.filter(function (applicant) { return applicant.status === 'accepted'; }).map(function (applicant) {
-            return { name: applicant.name, role: 'Member', department: applicant.department, year: applicant.year, skills: applicant.skills || [] };
-          }));
+        var ownerUserId = (vm.selectedProject.owner && (vm.selectedProject.owner._id || vm.selectedProject.owner.id)) || (vm.currentUser && (vm.currentUser._id || vm.currentUser.id));
+        vm.teamMembers = [{
+          userId: ownerUserId,
+          name: vm.selectedProject.owner ? vm.selectedProject.owner.name : vm.currentUser.name,
+          role: 'Lead',
+          department: vm.selectedProject.department,
+          year: vm.selectedProject.year,
+          skills: vm.selectedProject.owner && vm.selectedProject.owner.skills || []
+        }].concat(vm.applicants.filter(function (applicant) { return applicant.status === 'accepted'; }).map(function (applicant) {
+          return {
+            userId: applicant.user || applicant.userId || applicant.id,
+            name: applicant.name,
+            role: 'Member',
+            department: applicant.department,
+            year: applicant.year,
+            skills: applicant.skills || []
+          };
+        }));
         vm.loading = false;
       });
     }
@@ -916,6 +1013,16 @@
       return;
     }
 
+    function getQueryParam(param) {
+      if (!$window.location.search) return null;
+      var match = RegExp('[?&]' + param + '=([^&]*)').exec($window.location.search);
+      return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+    }
+
+    var targetUserId = getQueryParam('id');
+    vm.currentUser = AuthService.getUser();
+    vm.isSelf = !targetUserId || (vm.currentUser && (String(vm.currentUser.id || vm.currentUser._id) === String(targetUserId)));
+
     vm.profile = { skills: [], projects: [], preferences: { hackathon: false, internship: false } };
     vm.ownedProjects = [];
     vm.loading = true;
@@ -923,21 +1030,27 @@
     vm.notice = '';
     vm.error = '';
     vm.newSkillName = '';
-    DataService.getCurrentUser().then(function (user) {
+
+    var fetchUserPromise = (!vm.isSelf && targetUserId) ? DataService.getUserById(targetUserId) : DataService.getCurrentUser();
+
+    fetchUserPromise.then(function (user) {
       vm.profile = user || { skills: [], projects: [], preferences: { hackathon: false, internship: false } };
       vm.profile.skills = vm.profile.skills || [];
       vm.profile.projects = vm.profile.projects || [];
       vm.profile.preferences = vm.profile.preferences || { hackathon: false, internship: false };
-      if (/profile-view\.html$/.test($window.location.pathname)) {
-        return DataService.getMyProjects(user || AuthService.getUser()).then(function (projects) {
-          vm.ownedProjects = projects || [];
+
+      return DataService.getProjects().then(function (allProjects) {
+        var pid = String(vm.profile.id || vm.profile._id || '');
+        vm.ownedProjects = (allProjects || []).filter(function (p) {
+          var ownerId = String(p.createdBy || (p.owner && (p.owner.id || p.owner._id)) || '');
+          return ownerId === pid;
         });
-      }
+      });
     }).then(function () {
       vm.loading = false;
     }).catch(function () {
       vm.loading = false;
-      vm.error = 'Unable to load your profile. Please try again.';
+      vm.error = 'Unable to load profile. Please try again.';
     });
 
     vm.retryLoad = function () {
@@ -1049,15 +1162,91 @@
     }
 
     vm.posts = [];
+    vm.activePost = null;
+    vm.inThreadView = false;
     vm.loading = true;
     vm.error = '';
-    DataService.getDiscussions().then(function (posts) {
-      vm.posts = posts || [];
-      vm.loading = false;
-    }).catch(function () {
-      vm.error = 'Unable to load discussions. Please try again.';
-      vm.loading = false;
-    });
+    vm.newCommentText = '';
+    vm.submittingComment = false;
+    vm.currentUser = AuthService.getUser();
+
+    function getQueryParam(param) {
+      if (!$window.location.search) return null;
+      var match = RegExp('[?&]' + param + '=([^&]*)').exec($window.location.search);
+      return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+    }
+
+    var threadId = getQueryParam('id');
+
+    if (threadId) {
+      vm.inThreadView = true;
+      DataService.getDiscussionById(threadId).then(function (discussion) {
+        vm.activePost = discussion;
+        vm.loading = false;
+      }).catch(function () {
+        vm.error = 'Unable to load discussion thread.';
+        vm.loading = false;
+      });
+    } else {
+      vm.inThreadView = false;
+      DataService.getDiscussions().then(function (posts) {
+        vm.posts = posts || [];
+        vm.loading = false;
+      }).catch(function () {
+        vm.error = 'Unable to load discussions. Please try again.';
+        vm.loading = false;
+      });
+    }
+
+    vm.selectPost = function (post) {
+      if (post && post.id) {
+        $window.location.href = 'forum.html?id=' + encodeURIComponent(post.id);
+      }
+    };
+
+    vm.votePost = function (dir) {
+      if (!vm.activePost) return;
+      DataService.voteDiscussion(vm.activePost.id, dir).then(function (updatedPost) {
+        if (updatedPost) {
+          vm.activePost = updatedPost;
+        }
+      });
+    };
+
+    vm.submitComment = function (parentId, text) {
+      var commentContent = (text || vm.newCommentText || '').trim();
+      if (!commentContent || !vm.activePost) return;
+      vm.submittingComment = true;
+      DataService.addComment(vm.activePost.id, commentContent, parentId).then(function (res) {
+        vm.submittingComment = false;
+        if (res && res.success && res.discussion) {
+          vm.activePost = res.discussion;
+          vm.newCommentText = '';
+        }
+      }).catch(function () {
+        vm.submittingComment = false;
+      });
+    };
+
+    vm.voteComment = function (comment, dir) {
+      if (!vm.activePost || !comment) return;
+      DataService.voteComment(vm.activePost.id, comment.id, dir).then(function (updatedPost) {
+        if (updatedPost) {
+          vm.activePost = updatedPost;
+        }
+      });
+    };
+
+    vm.getTopLevelComments = function () {
+      if (!vm.activePost || !vm.activePost.comments) return [];
+      return vm.activePost.comments.filter(function (c) {
+        return !c.parentId;
+      });
+    };
+
+    vm.getInitials = function (name) {
+      return (name || 'A').split(' ').map(function (p) { return p.charAt(0); }).join('').slice(0, 2).toUpperCase();
+    };
 
     vm.retryLoad = function () {
       $window.location.reload();

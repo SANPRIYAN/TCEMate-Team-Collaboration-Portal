@@ -544,3 +544,56 @@ test('first-admin setup requires the configured email and setup secret', async (
   assert.equal(secondAdmin.statusCode, 409);
   assert.equal(secondAdmin.body.success, false);
 });
+
+test('password reset using unique passkey updates user password with PATCH operation', async (t) => {
+  const User = require('../models/User');
+  const controller = require('../controllers/authController');
+
+  let updatedFilter = null;
+  let updatedDoc = null;
+  t.after(() => {
+    User.findOne = originalUserFindOne;
+    User.findOneAndUpdate = originalUserFindOneAndUpdate;
+  });
+  const originalUserFindOne = User.findOne;
+  const originalUserFindOneAndUpdate = User.findOneAndUpdate;
+
+  User.findOne = async (filter) => {
+    if (filter.email === 'student@student.tce.edu') {
+      return {
+        _id: 'user-passkey-123',
+        email: 'student@student.tce.edu',
+        regNo: '2023IT045',
+        passkey: 'PK-2023IT045'
+      };
+    }
+    return null;
+  };
+
+  User.findOneAndUpdate = async (filter, update) => {
+    updatedFilter = filter;
+    updatedDoc = update;
+    return {
+      _id: 'user-passkey-123',
+      email: 'student@student.tce.edu'
+    };
+  };
+
+  const res = { statusCode: 200, body: null };
+  await controller.resetPasswordWithPasskey({
+    body: {
+      email: 'student@student.tce.edu',
+      passkey: 'PK-2023IT045',
+      newPassword: 'New-Valid-Password123!'
+    }
+  }, {
+    status(code) { res.statusCode = code; return this; },
+    json(body) { res.body = body; return this; }
+  });
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.success, true);
+  assert.equal(updatedFilter._id, 'user-passkey-123');
+  assert.equal(typeof updatedDoc.$set.password, 'string');
+  assert.equal(updatedDoc.$set.passkey, 'PK-2023IT045');
+});

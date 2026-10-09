@@ -111,8 +111,33 @@
           return response && response.success ? (response.discussions || []) : [];
         });
       },
+      getDiscussionById: function (discussionId) {
+        return request('GET', '/discussions/' + encodeURIComponent(discussionId)).then(function (response) {
+          return response && response.success ? response.discussion : null;
+        });
+      },
+      voteDiscussion: function (discussionId, dir) {
+        return request('POST', '/discussions/' + encodeURIComponent(discussionId) + '/vote', { dir: dir }).then(function (response) {
+          return response && response.success ? response.discussion : null;
+        });
+      },
+      addComment: function (discussionId, text, parentId) {
+        return request('POST', '/discussions/' + encodeURIComponent(discussionId) + '/comments', { text: text, parentId: parentId }).then(function (response) {
+          return response;
+        });
+      },
+      voteComment: function (discussionId, commentId, dir) {
+        return request('POST', '/discussions/' + encodeURIComponent(discussionId) + '/comments/' + encodeURIComponent(commentId) + '/vote', { dir: dir }).then(function (response) {
+          return response && response.success ? response.discussion : null;
+        });
+      },
       getCurrentUser: function () {
         return request('GET', '/users/me').then(function (response) {
+          return response && response.success ? response.user : null;
+        });
+      },
+      getUserById: function (userId) {
+        return request('GET', '/users/' + encodeURIComponent(userId)).then(function (response) {
           return response && response.success ? response.user : null;
         });
       },

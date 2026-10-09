@@ -87,8 +87,8 @@ const submitApplication = async (userId, projectId, details = {}) => {
 };
 
 const decideApplication = async ({ applicantId, actor, status }) => {
-  if (!['accepted', 'rejected'].includes(status)) {
-    throw Object.assign(new Error('Status must be accepted or rejected.'), { status: 400 });
+  if (!['accepted', 'rejected', 'pending'].includes(status)) {
+    throw Object.assign(new Error('Status must be accepted, rejected, or pending.'), { status: 400 });
   }
   const session = await mongoose.startSession();
   let updated;
@@ -107,9 +107,6 @@ const decideApplication = async ({ applicantId, actor, status }) => {
       if (project.status !== 'open' || isProjectExpired(project)) {
         blocked = Object.assign(new Error('Closed projects cannot change team membership.'), { status: 409 });
         return;
-      }
-      if (applicant.status !== 'pending') {
-        throw Object.assign(new Error('Only pending applications can be decided.'), { status: 409 });
       }
       if (status === 'accepted') {
         const acceptedCount = await Applicant.countDocuments({ project: project._id, status: 'accepted' }).session(session);
@@ -130,9 +127,9 @@ const decideApplication = async ({ applicantId, actor, status }) => {
       );
       await createNotification({
         user: applicant.user,
-        title: status === 'accepted' ? 'Application accepted' : 'Application rejected',
-        message: `Your application for ${project.title} was ${status}.`,
-        type: status,
+        title: status === 'accepted' ? 'Application accepted' : (status === 'rejected' ? 'Application rejected' : 'Application reconsidered'),
+        message: `Your application for ${project.title} status was updated to ${status}.`,
+        type: status === 'pending' ? 'interest' : status,
         relatedProject: project._id,
         relatedUser: actor.id,
         session

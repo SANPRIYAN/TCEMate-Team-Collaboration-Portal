@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema(
     regNo: { type: String, required() { return this.role === 'student'; }, unique: true, sparse: true, trim: true },
     phone: { type: String, required() { return this.role === 'student'; }, trim: true },
     password: { type: String, required: true },
+    passkey: { type: String, trim: true },
     role: { type: String, enum: ['student', 'admin'], default: 'student' },
     isEmailVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
@@ -44,6 +45,10 @@ userSchema.index(
 userSchema.statics.hashPassword = (password) => bcrypt.hash(password, 10);
 
 userSchema.pre('save', async function (next) {
+  if (!this.passkey) {
+    var code = (this.regNo ? this.regNo.replace(/[^a-zA-Z0-9]/g, '') : Math.random().toString(36).substring(2, 8)).toUpperCase();
+    this.passkey = 'PK-' + code;
+  }
   if (!this.isModified('password')) return next();
   if (this.$locals.passwordIsHashed) {
     this.$locals.passwordIsHashed = false;

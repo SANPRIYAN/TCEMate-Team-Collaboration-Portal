@@ -65,8 +65,8 @@
       isLoggedIn: function () {
         return !!sessionStorage.getItem(tokenKey);
       },
-      login: function (email, password, role) {
-        var endpoint = role === 'admin' ? '/auth/admin/login' : '/auth/login';
+      login: function (email, password) {
+        var endpoint = '/auth/login';
         return callApi(endpoint, { email: email, password: password }, 'POST').then(function (result) {
           if (result && result.success && result.token) {
             setToken(result.token);
@@ -105,6 +105,9 @@
       },
       requestPasswordReset: function (email) {
         return callApi('/auth/forgot-password', { email: email }, 'POST');
+      },
+      resetPasswordWithPasskey: function (email, passkey, newPassword) {
+        return callApi('/auth/forgot-password-passkey', { email: email, passkey: passkey, newPassword: newPassword }, 'PATCH');
       },
       verifyEmail: function (token) {
         return callApi('/auth/verify-email', { token: token }, 'POST');

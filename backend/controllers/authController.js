@@ -16,6 +16,7 @@ const sanitizeUser = (user) => ({
   email: user.email,
   regNo: user.regNo,
   phone: user.phone,
+  passkey: user.passkey || ('PK-' + (user.regNo ? user.regNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : 'STUDENT')),
   role: user.role || 'student',
   department: user.department,
   year: user.year,
@@ -57,13 +58,13 @@ const login = async (req, res, requiredRole) => {
     }
 
     const user = await User.findOne({ email });
-    if (!user || !await user.comparePassword(password) || user.role !== requiredRole) {
+    if (!user || !await user.comparePassword(password) || (requiredRole && user.role !== requiredRole)) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
     if (user.isActive === false) {
       return res.status(403).json({ success: false, message: 'This account is not active. Please contact support.' });
     }
-    if (requiredRole === 'student' && !isValidTceStudentEmail(email)) {
+    if (user.role === 'student' && !isValidTceStudentEmail(email)) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
 
@@ -128,8 +129,8 @@ exports.register = async (req, res) => {
   }
 };
 
-exports.login = (req, res) => login(req, res, 'student');
-exports.adminLogin = (req, res) => login(req, res, 'admin');
+exports.login = (req, res) => login(req, res);
+exports.adminLogin = (req, res) => login(req, res);
 
 exports.verifyEmail = async (req, res) => {
   const body = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
@@ -303,6 +304,49 @@ exports.resetPassword = async (req, res) => {
     return res.json({ success: true, message: 'Password reset successful. You can now log in.' });
   } catch (error) {
     console.error('Password reset failed:', error.name || 'UnknownError');
+    return res.status(500).json({ success: false, message: 'Password reset could not be completed.' });
+  }
+};
+
+exports.resetPasswordWithPasskey = async (req, res) => {
+  try {
+    const body = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
+    const email = normalizeEmail(body.email);
+    const passkey = typeof body.passkey === 'string' ? body.passkey.trim() : '';
+    const newPassword = body.newPassword || body.password;
+
+    if (!email || !passkey || typeof newPassword !== 'string' || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Email, unique passkey, and new password are required.' });
+    }
+    if (!validPassword(newPassword)) {
+      return res.status(400).json({ success: false, message: 'Password must be 8-128 characters with uppercase, lowercase, a number, and a symbol.' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Account not found for this email address.' });
+    }
+
+    const expectedPasskey = user.passkey || ('PK-' + (user.regNo ? user.regNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : 'STUDENT'));
+    if (expectedPasskey.toUpperCase() !== passkey.toUpperCase()) {
+      return res.status(401).json({ success: false, message: 'Invalid passkey for this account.' });
+    }
+
+    const passwordHash = await User.hashPassword(newPassword);
+    
+    // Update password using PATCH operation in MongoDB
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: user._id },
+      { $set: { password: passwordHash, passkey: expectedPasskey } },
+      { new: true, runValidators: true }
+    );
+
+    return res.json({
+      success: true,
+      message: 'Password updated successfully! You can now log in with your new password.'
+    });
+  } catch (error) {
+    console.error('Passkey password reset failed:', error.name || 'UnknownError');
     return res.status(500).json({ success: false, message: 'Password reset could not be completed.' });
   }
 };
