@@ -564,7 +564,7 @@ test('password reset using unique passkey updates user password with PATCH opera
         _id: 'user-passkey-123',
         email: 'student@student.tce.edu',
         regNo: '2023IT045',
-        passkey: 'PK-2023IT045'
+        passkey: '123'
       };
     }
     return null;
@@ -583,7 +583,7 @@ test('password reset using unique passkey updates user password with PATCH opera
   await controller.resetPasswordWithPasskey({
     body: {
       email: 'student@student.tce.edu',
-      passkey: 'PK-2023IT045',
+      passkey: '123',
       newPassword: 'New-Valid-Password123!'
     }
   }, {
@@ -595,5 +595,5 @@ test('password reset using unique passkey updates user password with PATCH opera
   assert.equal(res.body.success, true);
   assert.equal(updatedFilter._id, 'user-passkey-123');
   assert.equal(typeof updatedDoc.$set.password, 'string');
-  assert.equal(updatedDoc.$set.passkey, 'PK-2023IT045');
+  assert.equal(updatedDoc.$set.passkey, '123');
 });

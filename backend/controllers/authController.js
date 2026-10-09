@@ -16,7 +16,7 @@ const sanitizeUser = (user) => ({
   email: user.email,
   regNo: user.regNo,
   phone: user.phone,
-  passkey: user.passkey || ('PK-' + (user.regNo ? user.regNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : 'STUDENT')),
+  passkey: user.passkey || '123',
   role: user.role || 'student',
   department: user.department,
   year: user.year,
@@ -327,8 +327,8 @@ exports.resetPasswordWithPasskey = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Account not found for this email address.' });
     }
 
-    const expectedPasskey = user.passkey || ('PK-' + (user.regNo ? user.regNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : 'STUDENT'));
-    if (expectedPasskey.toUpperCase() !== passkey.toUpperCase()) {
+    const expectedPasskey = user.passkey || '123';
+    if (expectedPasskey.trim().toUpperCase() !== passkey.trim().toUpperCase()) {
       return res.status(401).json({ success: false, message: 'Invalid passkey for this account.' });
     }
 

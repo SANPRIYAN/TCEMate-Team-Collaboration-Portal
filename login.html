@@ -83,8 +83,8 @@
       <input type="email" id="resetEmail" name="resetEmail" placeholder="you@student.tce.edu" required ng-model="vm.resetData.email" autocomplete="email">
       
       <label for="resetPasskey">Unique Passkey</label>
-      <input type="text" id="resetPasskey" name="resetPasskey" placeholder="e.g. PK-2023IT045" required ng-model="vm.resetData.passkey" style="text-transform: uppercase;">
-      <p class="field-helper">Enter the unique passkey assigned to your account (e.g. PK-YOURREGNO).</p>
+      <input type="text" id="resetPasskey" name="resetPasskey" placeholder="Enter your unique passkey" required ng-model="vm.resetData.passkey">
+      <p class="field-helper">Enter the unique passkey assigned to your account.</p>
 
       <label for="resetNewPassword">New Password</label>
       <input type="password" id="resetNewPassword" name="resetNewPassword" placeholder="••••••••" required minlength="8" maxlength="128" ng-pattern="/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,128}$/" ng-model="vm.resetData.newPassword">

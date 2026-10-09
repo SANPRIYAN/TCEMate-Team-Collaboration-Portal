@@ -46,8 +46,7 @@ userSchema.statics.hashPassword = (password) => bcrypt.hash(password, 10);
 
 userSchema.pre('save', async function (next) {
   if (!this.passkey) {
-    var code = (this.regNo ? this.regNo.replace(/[^a-zA-Z0-9]/g, '') : Math.random().toString(36).substring(2, 8)).toUpperCase();
-    this.passkey = 'PK-' + code;
+    this.passkey = Math.floor(100 + Math.random() * 900).toString();
   }
   if (!this.isModified('password')) return next();
   if (this.$locals.passwordIsHashed) {
