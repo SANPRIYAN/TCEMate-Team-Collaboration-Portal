@@ -26,7 +26,9 @@
       <section class="admin-data-panel">
         <div class="panel-heading"><div><p class="section-kicker">PROFILE</p><h2>Student skills</h2></div></div>
         <div class="admin-chip-list" ng-if="vm.student.skills.length">
-          <span class="admin-skill-chip" ng-repeat="skill in vm.student.skills track by skill.id">{{skill.name}}</span>
+          <span class="admin-skill-chip" ng-class="skill.status || 'verified'" ng-repeat="skill in vm.student.skills track by skill.id">
+            {{skill.name}} <small style="margin-left:0.35rem; font-weight:700;">({{skill.status === 'pending' ? 'Pending' : 'Accepted'}})</small>
+          </span>
         </div>
         <p class="admin-empty" ng-if="!vm.student.skills.length">No skills submitted.</p>
       </section>

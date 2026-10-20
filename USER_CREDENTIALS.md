@@ -29,15 +29,3 @@ This document contains the login credentials, register numbers, roles, and uniqu
 
 ---
 
-## 💡 How to Use Passkeys & Reset Password
-
-1. **Viewing Your Unique Passkey**:
-   - Log into TCEMate using any of the accounts above.
-   - Navigate to **Profile** (`profile.html`).
-   - Under **ACCOUNT INFORMATION** on the right panel, you will see your **Unique Passkey** (e.g. `123`).
-
-2. **Forgot Password Flow**:
-   - Go to the [Login Page](file:///d:/SANJAY%20BTECH%20IT%20STUDY/sem%205/web%20tech/TCEMate-Portal-Final/login.html).
-   - Click **Forgot password?**.
-   - Enter your **Email**, your **Unique Passkey**, and your **New Password**.
-   - Click **Update Password** (`PATCH` request updates MongoDB).

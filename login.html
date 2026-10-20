@@ -25,11 +25,17 @@
       <!-- Custom Directive: Auth Branding Header -->
       <auth-branding-header></auth-branding-header>
 
-      <h2>Log in to TCEMate</h2>
-      <p class="sub">Enter your email and password</p>
+      <!-- Role Switcher: Student Login & Admin Login -->
+      <div class="auth-role-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; background: #eef2f5; padding: 4px; border-radius: 8px;">
+        <button type="button" style="flex: 1; padding: 0.5rem 0.75rem; border: none; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; background: transparent; color: #475569;" ng-style="vm.loginRole !== 'admin' ? {'background':'var(--primary, #0f3856)','color':'#ffffff','box-shadow':'0 1px 3px rgba(0,0,0,0.1)'} : {}" ng-click="vm.setLoginRole('student')">Student Login</button>
+        <button type="button" style="flex: 1; padding: 0.5rem 0.75rem; border: none; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; background: transparent; color: #475569;" ng-style="vm.loginRole === 'admin' ? {'background':'var(--primary, #0f3856)','color':'#ffffff','box-shadow':'0 1px 3px rgba(0,0,0,0.1)'} : {}" ng-click="vm.setLoginRole('admin')">Admin Login</button>
+      </div>
 
-      <label for="loginEmail">Email</label>
-      <input type="email" id="loginEmail" name="loginEmail" placeholder="you@student.tce.edu" required ng-model="vm.loginData.email">
+      <h2>{{vm.loginRole === 'admin' ? 'Admin Login' : 'Log in to TCEMate'}}</h2>
+      <p class="sub">{{vm.loginRole === 'admin' ? 'Enter administrator credentials to manage platform records' : 'Enter your email and password'}}</p>
+
+      <label for="loginEmail">{{vm.loginRole === 'admin' ? 'Admin Email' : 'Email'}}</label>
+      <input type="email" id="loginEmail" name="loginEmail" placeholder="{{vm.loginRole === 'admin' ? 'admin@tce.edu' : 'you@student.tce.edu'}}" required ng-model="vm.loginData.email">
       <div class="error-msg" ng-messages="loginForm.loginEmail.$error" ng-show="loginForm.loginEmail.$dirty || loginForm.$submitted">
         <span ng-message="required">Please fill this field.</span>
         <span ng-message="email">Please enter a valid email address.</span>

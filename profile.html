@@ -47,6 +47,7 @@
             </form>
             <div class="profile-skill-actions" ng-if="vm.editingSkillId !== skill.id">
               <span>{{skill.name}}</span>
+              <span class="admin-skill-chip" ng-class="skill.status || 'verified'" style="margin-left: 0.5rem; font-size: 0.72rem; padding: 0.2rem 0.6rem; font-weight: 700; border-radius: 12px;">{{skill.status === 'pending' ? 'Pending' : 'Accepted'}}</span>
               <button type="button" ng-click="vm.startEditSkill(skill)">Edit</button>
               <button type="button" ng-click="vm.removeSkill(skill)">Remove</button>
             </div>

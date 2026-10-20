@@ -12,6 +12,36 @@ backend/node_modules/
 backend/.env
 .env
 
+# Python Files & Environments
+*.py
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+.venv/
+venv/
+env/
+
+# Documents, Reports & Records (Non-project files)
+*.docx
+*.doc
+*.pdf
+*.pptx
+*.xlsx
+*.csv
+
+# Scratch, Testing & Setup Scripts
+scratch_*
+setup_exp12_data.js
+test.*
+test_*
+
+# Screenshot Artifacts & Archives
+*.zip
+*.tar.gz
+exp12_screenshots/
+screenshots/
+
 # IDE & System Files
 .vscode/
 .idea/

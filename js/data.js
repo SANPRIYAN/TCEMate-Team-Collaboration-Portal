@@ -131,6 +131,16 @@
           return response && response.success ? response.discussion : null;
         });
       },
+      updateComment: function (discussionId, commentId, text) {
+        return request('PUT', '/discussions/' + encodeURIComponent(discussionId) + '/comments/' + encodeURIComponent(commentId), { text: text }).then(function (response) {
+          return response;
+        });
+      },
+      deleteComment: function (discussionId, commentId) {
+        return request('DELETE', '/discussions/' + encodeURIComponent(discussionId) + '/comments/' + encodeURIComponent(commentId)).then(function (response) {
+          return response;
+        });
+      },
       getCurrentUser: function () {
         return request('GET', '/users/me').then(function (response) {
           return response && response.success ? response.user : null;

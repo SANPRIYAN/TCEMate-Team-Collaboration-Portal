@@ -7,7 +7,7 @@ const commentToResponse = (comment, currentUserId) => {
   const userVote = userVoteObj ? userVoteObj.vote : 0;
   return {
     id: comment._id,
-    user: comment.user,
+    user: comment.user ? comment.user.toString() : null,
     author: comment.author || 'Anonymous',
     text: comment.text,
     parentId: comment.parentId ? comment.parentId.toString() : null,
@@ -260,6 +260,67 @@ exports.voteComment = async (req, res) => {
     return res.json({ success: true, discussion: discussionToResponse(discussion, req.user.id) });
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Unable to vote on comment.' });
+  }
+};
+
+exports.updateComment = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id) || !mongoose.Types.ObjectId.isValid(req.params.commentId)) {
+      return res.status(400).json({ success: false, message: 'Invalid discussion or comment ID.' });
+    }
+    const discussion = await Discussion.findById(req.params.id);
+    if (!discussion) return res.status(404).json({ success: false, message: 'Discussion not found.' });
+
+    const comment = discussion.comments.id(req.params.commentId);
+    if (!comment) return res.status(404).json({ success: false, message: 'Comment not found.' });
+
+    if (!comment.user || comment.user.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ success: false, message: 'You can only edit your own replies.' });
+    }
+
+    const { text } = req.body;
+    if (!text || typeof text !== 'string' || !text.trim()) {
+      return res.status(400).json({ success: false, message: 'Reply text is required.' });
+    }
+
+    comment.text = text.trim();
+    await discussion.save();
+
+    return res.json({ success: true, discussion: discussionToResponse(discussion, req.user.id), message: 'Reply updated.' });
+  } catch (error) {
+    console.error('Update comment error:', error.message);
+    return res.status(500).json({ success: false, message: 'Unable to update reply.' });
+  }
+};
+
+exports.deleteComment = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id) || !mongoose.Types.ObjectId.isValid(req.params.commentId)) {
+      return res.status(400).json({ success: false, message: 'Invalid discussion or comment ID.' });
+    }
+    const discussion = await Discussion.findById(req.params.id);
+    if (!discussion) return res.status(404).json({ success: false, message: 'Discussion not found.' });
+
+    const comment = discussion.comments.id(req.params.commentId);
+    if (!comment) return res.status(404).json({ success: false, message: 'Comment not found.' });
+
+    const isAuthor = comment.user && comment.user.toString() === req.user.id.toString();
+    const isAdmin = req.user && req.user.role === 'admin';
+    if (!isAuthor && !isAdmin) {
+      return res.status(403).json({ success: false, message: 'You can only delete your own replies or as an administrator.' });
+    }
+
+    const commentIdStr = req.params.commentId.toString();
+    discussion.comments = discussion.comments.filter((c) => (
+      c._id.toString() !== commentIdStr && String(c.parentId || '') !== commentIdStr
+    ));
+    discussion.replies = discussion.comments.length;
+    await discussion.save();
+
+    return res.json({ success: true, discussion: discussionToResponse(discussion, req.user.id), message: 'Reply deleted.' });
+  } catch (error) {
+    console.error('Delete comment error:', error.message);
+    return res.status(500).json({ success: false, message: 'Unable to delete reply.' });
   }
 };
 

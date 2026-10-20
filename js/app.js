@@ -383,10 +383,15 @@
     var vm = this;
 
     vm.mode = $window.location.hash === '#signup' ? 'signup' : 'login';
+    vm.loginRole = 'student';
     vm.loginData = { email: '', password: '' };
     vm.signupData = { fullName: '', email: '', regNo: '', phone: '', password: '' };
     vm.loginErrors = {};
     vm.signupErrors = {};
+    vm.setLoginRole = function (role) {
+      vm.loginRole = role;
+      vm.loginErrors = {};
+    };
     vm.authTransition = false;
     vm.adminSetupAvailable = false;
     vm.adminSetupData = { fullName: '', email: '', password: '', confirmPassword: '', setupSecret: '' };

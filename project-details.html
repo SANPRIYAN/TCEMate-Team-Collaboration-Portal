@@ -57,13 +57,17 @@
           <div><small>PROJECT OWNER</small><strong>{{vm.project.owner.name}}</strong></div>
         </div>
         <p class="project-summary-fact" ng-if="vm.project.department">{{vm.project.department}}<span ng-if="vm.project.year"> · {{vm.project.year}}</span></p>
-        <p class="project-summary-fact" ng-if="vm.project.match"><strong>Match:</strong> {{vm.project.match.matchPercentage}}%<span ng-if="vm.project.match.missingSkills.length"><br><strong>Missing skills:</strong> {{vm.project.match.missingSkills.join(', ')}}</span></p>
-        <p class="inline-notice" ng-if="vm.project.match && vm.project.match.eligible" role="status">Eligible to apply — your profile includes every required skill.</p>
-        <p class="inline-error" ng-if="vm.project.match && !vm.project.match.eligible" role="status">Not eligible: your profile is missing required skills.</p>
+        <p class="project-summary-fact" ng-if="vm.project.match && vm.project.status === 'open'"><strong>Match:</strong> {{vm.project.match.matchPercentage}}%<span ng-if="vm.project.match.missingSkills.length"><br><strong>Missing skills:</strong> {{vm.project.match.missingSkills.join(', ')}}</span></p>
+        <p class="inline-notice" ng-if="vm.project.status === 'open' && vm.project.match && vm.project.match.eligible" role="status">Eligible to apply — your profile includes every required skill.</p>
+        <p class="inline-error" ng-if="vm.project.status === 'open' && vm.project.match && !vm.project.match.eligible" role="status">Not eligible: your profile is missing required skills.</p>
+        <div ng-if="vm.project.status === 'closed'" style="background: #fef2f2; border: 1px solid #f87171; color: #991b1b; padding: 0.85rem; border-radius: 6px; margin: 0.75rem 0; font-size: 0.85rem; line-height: 1.4;">
+          <strong>PROJECT CLOSED</strong><br>
+          Application deadline passed on {{vm.project.deadline | date:'mediumDate'}}. No new interest or applications can be submitted.
+        </div>
         <p class="inline-notice" ng-if="vm.notice" role="status">{{vm.notice}}</p>
         <p class="inline-error" ng-if="vm.error" role="alert">{{vm.error}}</p>
         <button type="button" class="btn-primary project-detail-apply" ng-if="vm.project.canApply" ng-disabled="vm.project.applying || vm.project.applied || (vm.project.match && !vm.project.match.eligible)" ng-click="vm.applyToProject()">{{vm.project.applied ? 'Applied' : (vm.project.applying ? 'Applying...' : (vm.project.match && !vm.project.match.eligible ? 'Skills Missing' : 'Show Interest'))}}</button>
-        <p class="sub" ng-if="!vm.project.canApply && !vm.project.applied">{{vm.project.status === 'closed' ? 'PROJECT CLOSED · Deadline passed or team is full.' : 'Project owners cannot apply to their own listing.'}}</p>
+        <p class="sub" ng-if="!vm.project.canApply && !vm.project.applied && vm.project.status !== 'closed'">Project owners cannot apply to their own listing.</p>
       </aside>
     </section>
   </main>
